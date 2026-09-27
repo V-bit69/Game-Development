@@ -34,8 +34,8 @@ Entrega: **especificação de gameplay**.
 - [ ] Experiência desejada em cada trecho
 - [ ] Concept da região da demo
 
-### 3. Protótipo — desenvolvedor ⬜
-Versão feia, mas jogável. Marcos em ordem:
+### 3. Protótipo — desenvolvedor 🔄
+Versão feia, mas jogável. Um ensaio web de todos os marcos já está em [prototipo/index.html](../prototipo/index.html), com inimigos e boss provisórios. Os marcos abaixo são do protótipo oficial no Godot, em ordem:
 - [ ] **M1** Projeto Godot, resolução, câmera seguindo o personagem, movimento em 8 direções
 - [ ] **M2** Dash, stamina e ataque corpo a corpo, com feedback (hitstop, flash, tremida, sons provisórios)
 - [ ] **M3** Escudo, parry e parry perfeito (atordoar + crítico)
@@ -81,3 +81,4 @@ Personagens, cenários, inimigos, objetos, identidade visual, UI e referências 
 | Data | O que mudou |
 |---|---|
 | 27/09/2026 | Escopo da demo definido, rascunho do level design e roadmap criado |
+| 27/09/2026 | Protótipo web v0.2: a demo em miniatura com o Homem-gato, parry, arma e Sentinela |

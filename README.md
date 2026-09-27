@@ -11,13 +11,17 @@ Jogo de ação e aventura top-down em pixel art. O combate é inspirado em *Hype
 | [02 · Level design da demo](docs/02-level-design-demo.md) | Rascunho das áreas, fluxo e posicionamento |
 | [03 · Roadmap](docs/03-roadmap.md) | Etapas e status atualizado |
 
-## Conceito inicial
+## Protótipo web (ensaio)
 
-[Protótipo de conceito](docs/conceito-inicial/prototipo-conceito.html): a primeira página de ideia, feita antes do GDD. Tem uma arena jogável bem básica, desenhada em código, para sentir o ritmo do combate, além de pilares, escopo e roadmap iniciais.
+[prototipo/index.html](prototipo/index.html): a demo inteira em miniatura, jogável no navegador, para validar ideias antes do protótipo oficial no Godot.
 
-Para jogar, baixe o arquivo e abra no navegador. O GitHub mostra só o código.
+- Homem-gato com lâmina (combo de 3 golpes), dash, stamina, escudo e parry perfeito (atordoa e dá crítico)
+- Área segura com a anciã (diálogo) e a fogueira, trilha, clareira com 2 levas, arma que libera o tiro, Sentinela com minions, núcleo e volta até a NPC
+- Mapa maior que a tela, câmera seguindo, sons e efeitos provisórios em todo evento
 
-> As raças e nomes desta página (Vessa, Korr, Lume) eram exemplos de antes do GDD. O que vale agora são o GDD e os documentos da demo acima.
+Para jogar: ative o GitHub Pages (Settings → Pages → branch `main`) e abra `https://v-bit69.github.io/Game-Development/prototipo/`. Outra opção é baixar o arquivo e abrir no navegador.
+
+> Inimigos, Sentinela, falas e arte são provisórios até a especificação de gameplay chegar.
 
 ## Referências visuais
 
