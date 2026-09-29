@@ -1,6 +1,6 @@
 # Escopo da Demo
 
-**Versão:** 0.1 · **Status:** definido em conjunto (etapa 1) · **Base:** [GDD v0.1](referencias/GDD-v0.1.pdf)
+**Versão:** 0.1 · **Status:** definido em conjunto (etapa 1) · **Base:** [GDD](GDD.md)
 
 Este documento fecha o que a demo mostra e o que fica de fora. Qualquer item novo só entra se algo sair, ou depois da demo pronta.
 
