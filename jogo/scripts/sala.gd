@@ -1,9 +1,13 @@
+@tool
 class_name SalaBlockout
 extends Node2D
 ## Monta um blockout a partir de um mapa em texto, com a mesma legenda de
 ## docs/02-level-design-demo.md. Cada caractere vale 2 × 2 tiles (32 × 32 px).
 ##   T  vegetação densa (parede)     #  parede da ruína     o  obstáculo
 ##   .  chão livre                   :  trilha              @  início do jogador
+## O desenho também aparece no editor (aba 2D) e se atualiza ao mudar o mapa.
+
+const V := preload("res://scripts/valores.gd")
 
 const SOLIDOS := {
 	"T": Color(0.13, 0.27, 0.17),
@@ -14,9 +18,13 @@ const COR_CHAO := Color(0.25, 0.4, 0.26)
 const COR_TRILHA := Color(0.47, 0.42, 0.3)
 const COR_GRADE := Color(0, 0, 0, 0.08)
 
-@export_multiline var mapa := ""
+@export_multiline var mapa := "":
+	set(valor):
+		mapa = valor
+		_ler_mapa()
+		queue_redraw()
 
-var celula := Valores.TILE * 2.0
+var celula := V.TILE * 2.0
 var tamanho := Vector2.ZERO
 var _linhas: Array[String] = []
 
@@ -25,6 +33,17 @@ var _linhas: Array[String] = []
 
 
 func _ready() -> void:
+	_ler_mapa()
+	queue_redraw()
+	if Engine.is_editor_hint():
+		return
+	_criar_colisoes()
+	_posicionar_jogador()
+	_limitar_camera()
+
+
+func _ler_mapa() -> void:
+	_linhas.clear()
 	for linha in mapa.split("\n"):
 		linha = linha.strip_edges()
 		if linha != "":
@@ -33,14 +52,12 @@ func _ready() -> void:
 	for linha in _linhas:
 		colunas = maxi(colunas, linha.length())
 	tamanho = Vector2(colunas, _linhas.size()) * celula
-	_criar_colisoes()
-	_posicionar_jogador()
-	_limitar_camera()
-	queue_redraw()
 
 
 func _process(_delta: float) -> void:
-	var tile := (jogador.position / Valores.TILE).floor()
+	if Engine.is_editor_hint():
+		return
+	var tile := (jogador.position / V.TILE).floor()
 	info.text = "M1 · Setas: mover\nVelocidade: %d px/s · Tile: %d, %d" % [
 		roundi(jogador.velocity.length()), int(tile.x), int(tile.y)]
 
@@ -96,7 +113,12 @@ func _draw() -> void:
 				draw_rect(area, SOLIDOS[linha[x]])
 			elif linha[x] == ":":
 				draw_rect(area, COR_TRILHA)
-	var passo := Valores.TILE
+			elif linha[x] == "@" and Engine.is_editor_hint():
+				# No editor, marca o início com o tamanho do gato.
+				var pes := area.get_center()
+				var topo := pes.y + V.GATO_RAIO_HITBOX - V.GATO_ALTURA
+				draw_rect(Rect2(pes.x - 9.0, topo, 18.0, V.GATO_ALTURA), Color(0.93, 0.6, 0.25, 0.6))
+	var passo := V.TILE
 	var gx := 0.0
 	while gx <= tamanho.x:
 		draw_line(Vector2(gx, 0), Vector2(gx, tamanho.y), COR_GRADE)
