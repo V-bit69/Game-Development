@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/jogador.gd" id="1_jogador"]
+
+[sub_resource type="CircleShape2D" id="circulo_pes"]
+radius = 30.0
+
+[node name="Jogador" type="CharacterBody2D"]
+motion_mode = 1
+script = ExtResource("1_jogador")
+
+[node name="Colisao" type="CollisionShape2D" parent="."]
+shape = SubResource("circulo_pes")
+
+[node name="Camera" type="Camera2D" parent="."]
+offset = Vector2(0, -40)
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0

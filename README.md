@@ -12,6 +12,10 @@ Jogo de ação e aventura top-down em pixel art. O combate é inspirado em *Hype
 | [03 · Roadmap](docs/03-roadmap.md) | Etapas e status atualizado |
 | [04 · Game design da floresta](docs/04-game-design-floresta.md) | Especificação de gameplay do cenário 1. **Documento editável**, com os valores propostos e as dúvidas em aberto |
 
+## Protótipo no Godot
+
+[jogo/](jogo/): o protótipo oficial, em Godot 4. Para abrir e jogar, veja o [README da pasta](jogo/README.md). Marco atual: **M1** (movimento, colisão e câmera).
+
 ## Protótipo web (ensaio)
 
 [prototipo/index.html](prototipo/index.html): a demo inteira em miniatura, jogável no navegador, para validar ideias antes do protótipo oficial no Godot.
