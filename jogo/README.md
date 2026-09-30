@@ -37,10 +37,12 @@ O jogo roda em **640 × 360** e é ampliado 3× num monitor 1920 × 1080, com os
 | `scripts/hud.gd` | HUD provisória: vida, stamina e dash equipado |
 | `scripts/som.gd` | Sons provisórios, gerados por código |
 | `scripts/sala.gd` | Monta uma sala a partir de um mapa em texto, com a legenda do [level design](../docs/02-level-design-demo.md) |
-| `cenas/sala_teste.tscn` | Sala de teste do M1. O mapa fica no campo **Mapa** do nó `SalaTeste` |
+| `cenas/floresta.tscn` | **Blockout da floresta** (cena principal, abre no F5). O mapa fica no campo **Mapa** do nó `Floresta` |
+| `cenas/sala_teste.tscn` | Sala de teste para mecânicas, com alvos de treino. Para abrir: dois cliques nela e **F6** |
 | `testes/teste_m1.gd` a `teste_m3.gd` | Testes automáticos de cada marco |
+| `testes/teste_blockout.gd` | Confere o mapa da floresta: tamanho, contagem de sapos e se tudo é alcançável |
 
-No mapa em texto, cada caractere vale 32 × 32 px (2 × 2 tiles): `T` vegetação, `#` parede da ruína, `o` obstáculo, `.` chão, `:` trilha, `@` início do jogador, `x` alvo de treino.
+No mapa em texto, cada caractere vale 32 × 32 px (2 × 2 tiles). A legenda é a do [level design](../docs/02-level-design-demo.md): `T` vegetação, `#` parede da ruína, `o` obstáculo, `.` chão, `:` trilha, `@` início do jogador, `X` Xennar, `F` fogueira, `L` flor, `G` estátua, `t` elemento tecnológico, `K` peça da KLM-99, `s` sapo comum, `l` sapo com língua, `!` gatilho de encontro, `=` entrada da ruína, `D` trecho escalável, `v` descida e `x` alvo de treino.
 
 ## Rodar o teste automático
 

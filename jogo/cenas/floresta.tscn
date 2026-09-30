@@ -1,0 +1,109 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/sala.gd" id="1_sala"]
+[ext_resource type="PackedScene" path="res://cenas/jogador.tscn" id="2_jogador"]
+[ext_resource type="Script" path="res://scripts/hud.gd" id="3_hud"]
+
+[node name="Floresta" type="Node2D"]
+script = ExtResource("1_sala")
+mapa = "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+TT..........................TT
+TT.K.......o.........o......TT
+TT..........................TT
+TT......o.......s...........TT
+TT.................l........TT
+TT...........s...........o..TT
+TT..........................TT
+TT.....o....................TT
+TT..........................TT
+TT................v.........TT
+####D#########==##############
+####D#########==##############
+T.............::..........t..T
+T.......o.....::....o........T
+T..s......l...::.......l..s..T
+T.............::...s.........T
+T....o........::.........o...T
+T.............::.............T
+T.............!..............T
+T.............::.............T
+T...s....o....::.....s.......T
+T.......l.....::...s.........T
+T.............::.............T
+T....o........::........o....T
+T.............!..............T
+T.............::.............T
+T............................T
+TTTTTTTTTTTT......TTTTTTTTTTTT
+TTTTTTTTTTTT......TTTTTTTTTTTT
+TTTTTTT................TTTTTTT
+TTTTTTT....s......s....TTTTTTT
+TTTTTTT.......G........TTTTTTT
+TTTTTTT................TTTTTTT
+TTTTTTT................TTTTTTT
+TTTTTT..o..........o....TTTTTT
+TTTTTT..................TTTTTT
+TTTTTT.........!........TTTTTT
+TTTTTT..................TTTTTT
+TTTTTT..l..........s....TTTTTT
+TTTTTTT................TTTTTTT
+TTTTTTT................TTTTTTT
+TTTTTTT................TTTTTTT
+TTTTTTTT..............TTTTTTTT
+TTTTTTTTTTT........TTTTTTTTTTT
+TTTTTTTTTTTTT....TTTTTTTTTTTTT
+TTTTTTTTTTTTT....TTTTTTTTTTTTT
+TTTTTTTTTTTTT...TTTTTTTTTTTTTT
+TTTTTTTTTTTT...TTTTTTTTTTTTTTT
+TTTTTTTTTTT...TTTTTTTTTTTTTTTT
+TTTTTTTTTTT..TTTTTTTTTTTTTTTTT
+TTTTTTTTTTT..TTTTTTTTTTTTTTTTT
+TTTTTTTTTTT...TTTTTTTTTTTTTTTT
+TTTTTTTTTTTT...TTTTTTTTTTTTTTT
+TTTTTTTTTTTTT...TTTTTTTTTTTTTT
+TTTTTTTTTTTTTT...TTTTTTTTTTTTT
+TTTTTTTTTTTTTTT...TTTTTTTTTTTT
+TTTTTTTTTTTTTTTT..TTTTTTTTTTTT
+TTTTTTTTTTTTTTT...L.TTTTTTTTTT
+TTTTTTTTTTTTTTT...TTTTTTTTTTTT
+TTTTTTTTTTTTTT...TTTTTTTTTTTTT
+TTTTTTTTTTTTT...TTTTTTTTTTTTTT
+TTTTTTTTTTTTT...TTTTTTTTTTTTTT
+TTTTTTTTTTTTT....TTTTTTTTTTTTT
+TTTTTTTTTTTTT....TTTTTTTTTTTTT
+TTTTTTTTTTTTT....TTTTTTTTTTTTT
+TTTTTTTT.....::::.....TTTTTTTT
+TTTTTTT......::::......TTTTTTT
+TTTTTTT...F..X::.......TTTTTTT
+TTTTTTT......::........TTTTTTT
+TTTTTTT.......::.......TTTTTTT
+TTTTTTT.......::.......TTTTTTT
+TTTTTTTT......@.......TTTTTTTT
+TTTTTTTT..............TTTTTTTT
+TTTTTTTTT............TTTTTTTTT
+TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
+areas = PackedStringArray("0:Área superior", "11:Exterior da ruína", "29:Clareira", "46:Corredor", "65:Área segura")
+
+[node name="Jogador" parent="." instance=ExtResource("2_jogador")]
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Barras" type="Control" parent="HUD"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("3_hud")
+
+[node name="Info" type="Label" parent="HUD"]
+offset_left = 8.0
+offset_top = 318.0
+offset_right = 400.0
+offset_bottom = 356.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 11
+text = "Floresta"

@@ -1,6 +1,6 @@
 # Level Design da Demo — Rascunho
 
-**Versão:** 0.4 · **Status:** floresta refeita pela [especificação de gameplay](04-game-design-floresta.md). Ruína e boss aguardam a especificação deles.
+**Versão:** 0.5 · **Status:** floresta refeita pela [especificação de gameplay](04-game-design-floresta.md) e **montada no Godot** (`jogo/cenas/floresta.tscn`). Ruína e boss aguardam a especificação deles.
 
 Este é um blockout só com posições e funções. Não é arte. Cada elemento está marcado por **função**, e o concept decide o visual.
 
@@ -30,16 +30,31 @@ A floresta sobe de baixo para cima, como no diagrama do game design, com a ruín
                   └────────┘
 ```
 
-### Dimensões propostas
+### Blockout no Godot
+
+O mapa em tamanho real está na cena `jogo/cenas/floresta.tscn`, que é a cena principal do projeto (F5 no Godot). O mapa em texto fica no campo **Mapa** do nó `Floresta` e pode ser editado ali mesmo. Os desenhos das seções abaixo são a versão resumida.
+
+![Blockout da floresta](referencias/blockout-floresta.png)
+
+O que ainda é provisório no blockout:
+
+- Os sapos são só marcações de posição (`s` e `l`). Eles entram no M5 e no M6.
+- O trecho escalável (`D`) está liberado para passar andando, para dar acesso à área superior. A escalada de verdade entra no M8.
+- A entrada da ruína (`=`) está fechada, porque a ruína ainda aguarda a especificação.
+- Xennar, fogueira, estátua e elemento tecnológico bloqueiam a passagem, mas ainda não têm interação (M7).
+
+### Dimensões
 
 | Parte | Tamanho (px) | Em tiles | Telas | Pedido no game design |
 |---|---|---|---|---|
-| Área segura | 640 × 360 | 40 × 22,5 | 1 | 1 tela |
-| Corredor | 384 × 600 | 24 × 37,5 | 1 | 1 tela |
+| Área segura | 640 × 352 | 40 × 22 | 1 | 1 tela |
+| Corredor | 384 × 608 | 24 × 38 | 1 | 1 tela |
 | Clareira | 640 × 544 | 40 × 34 | 1,5 | 1,5 tela |
-| Exterior da ruína | 960 × 592 | 60 × 37 | 2,5 | 2 a 2,5 telas |
+| Exterior da ruína | 960 × 576 | 60 × 36 | 2,5 | 2 a 2,5 telas |
 | Área superior | 960 × 352 | 60 × 22 | 1,5 | 1,5 tela |
-| **Mapa inteiro** | **960 × 2448** | 60 × 153 | **7,5** | |
+| **Mapa inteiro** | **960 × 2432** | 60 × 152 | **7,5** | |
+
+As medidas foram arredondadas para células inteiras de 32 px (2 × 2 tiles) na montagem no Godot.
 
 Andando em linha reta a 130 px/s, o gato atravessa o mapa em cerca de 20 s. Com diálogo, exploração e combate, a floresta deve durar de 4 a 6 minutos.
 
@@ -216,7 +231,7 @@ TT........................vTT   v = descida de volta
 ## Próximos passos
 
 - [ ] Respostas das dúvidas 4, 10 e 11 da especificação (fragmento, descida e flor)
-- [ ] Montar o blockout da floresta no Godot com formas simples
+- [x] Montar o blockout da floresta no Godot com formas simples
 - [ ] Ajustar os tamanhos depois de testar a velocidade e o dash no protótipo
 - [ ] Receber o concept da região e trocar funções por elementos reais
 - [ ] Refazer ruína e boss quando a especificação chegar
