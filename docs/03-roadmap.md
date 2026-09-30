@@ -48,7 +48,7 @@ Versão feia, mas jogável, no Godot. A floresta já pode ser feita inteira. Mar
 
 **Floresta (liberada)**
 - [x] **M1** Projeto Godot em 640×360 (×3 na tela), movimento em 8 direções (setas), colisão e câmera seguindo
-- [ ] **M2** Dash padrão, dash de rolamento (2 grátis em 4 s), troca com S, stamina em 4 unidades e HUD
+- [x] **M2** Dash padrão, dash de rolamento (2 grátis em 4 s), troca com S, stamina em 4 unidades e HUD
 - [ ] **M3** Combo de 3 golpes (garra, garra, espada), dano do dash, knockback e feedback (hitstop, flash, tremida, sons provisórios)
 - [ ] **M4** Parry com Q: janela de 0,2 s, chute, knockback de 1 dash e atordoamento de 1 s
 - [ ] **M5** Sapo comum: ciclo com telegraph, salto, cancelamento do pulo, HP em quadradinhos e morte
@@ -106,3 +106,4 @@ Personagens, cenários, inimigos, objetos, identidade visual, UI e referências 
 | 30/09/2026 | Resolução base passa a 1920×1080, com personagens de 150 px e arte na resolução real |
 | 30/09/2026 | M1 concluído: projeto Godot em [jogo/](../jogo/), com movimento em 8 direções, colisão e câmera |
 | 30/09/2026 | Arte em pixel art com pixels visíveis: personagem padrão com 50 px, ampliado 3× (150 px na tela). Resolução base volta a 640×360 |
+| 30/09/2026 | M2 concluído: dash padrão, rolamento, troca com S, stamina e HUD provisória, com sons provisórios |

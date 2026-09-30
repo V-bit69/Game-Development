@@ -13,8 +13,8 @@ Projeto Godot 4 do protótipo da demo. Feito com formas simples, sem arte final.
 | Tecla | Ação | Marco |
 |---|---|---|
 | Setas | Mover em 8 direções | M1 ✅ |
-| D | Dash | M2 |
-| S | Trocar o tipo de dash | M2 |
+| D | Dash | M2 ✅ |
+| S | Trocar o tipo de dash | M2 ✅ |
 | A | Atacar | M3 |
 | Q | Parry | M4 |
 | E | Interagir | M7 |
@@ -30,10 +30,12 @@ O jogo roda em **640 × 360** e é ampliado 3× num monitor 1920 × 1080, com os
 | Arquivo | O que é |
 |---|---|
 | `scripts/valores.gd` | **Todos os números de calibragem** (velocidades, distâncias, tempos). É aqui que se ajusta o jogo |
-| `scripts/jogador.gd` | Homem-gato |
+| `scripts/jogador.gd` | Homem-gato: movimento, dashes e stamina |
+| `scripts/hud.gd` | HUD provisória: vida, stamina e dash equipado |
+| `scripts/som.gd` | Sons provisórios, gerados por código |
 | `scripts/sala.gd` | Monta uma sala a partir de um mapa em texto, com a legenda do [level design](../docs/02-level-design-demo.md) |
 | `cenas/sala_teste.tscn` | Sala de teste do M1. O mapa fica no campo **Mapa** do nó `SalaTeste` |
-| `testes/teste_m1.gd` | Teste automático do M1 |
+| `testes/teste_m1.gd`, `teste_m2.gd` | Testes automáticos de cada marco |
 
 No mapa em texto, cada caractere vale 32 × 32 px (2 × 2 tiles): `T` vegetação, `#` parede da ruína, `o` obstáculo, `.` chão, `:` trilha, `@` início do jogador.
 
@@ -44,3 +46,5 @@ Na pasta `jogo/`:
 ```bash
 C:\Godot\Godot_v4.7.2-stable_win64_console.exe --headless --path . -s res://testes/teste_m1.gd
 ```
+
+Troque `teste_m1` pelo marco que quiser testar.

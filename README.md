@@ -14,7 +14,7 @@ Jogo de ação e aventura top-down em pixel art. O combate é inspirado em *Hype
 
 ## Protótipo no Godot
 
-[jogo/](jogo/): o protótipo oficial, em Godot 4. Para abrir e jogar, veja o [README da pasta](jogo/README.md). Marco atual: **M1** (movimento, colisão e câmera).
+[jogo/](jogo/): o protótipo oficial, em Godot 4. Para abrir e jogar, veja o [README da pasta](jogo/README.md). Marcos prontos: **M1** (movimento, colisão e câmera) e **M2** (dashes, stamina e HUD).
 
 ## Protótipo web (ensaio)
 

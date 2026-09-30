@@ -1118,6 +1118,8 @@ Perguntas do desenvolvimento para o game design:
 10. **Descida da área superior.** Como o jogador volta para baixo: pula, desce pelo mesmo trecho ou tem outro caminho?
 11. **Posição da flor.** A flor de lírio azul fica em qual área?
 12. **Controle.** A demo terá suporte a controle (gamepad) além do teclado?
+13. **Rolamentos seguidos.** A regra diz que o terceiro rolamento dentro de 4 s custa 1 unidade. E o quarto, ainda dentro da mesma janela, também custa? No protótipo, sim: todo rolamento que acontece com 2 ou mais rolamentos nos últimos 4 s custa 1 unidade.
+14. **Dash parado.** Se o jogador aperta D sem nenhuma seta, o dash vai para onde o gato está olhando. Pode ser assim?
 
 ---
 
@@ -1132,3 +1134,4 @@ Perguntas do desenvolvimento para o game design:
 | 1.1 | 30/09/2026 | Desenvolvimento | Seção 49 recalculada para a nova escala (valores em px multiplicados por 3) |
 | 1.2 | 30/09/2026 | Game design | Arte em pixel art com pixels visíveis: tamanho 3 com 50 px na arte, ampliado 3× (150 px na tela). Resolução base volta a 640 × 360 |
 | 1.2 | 30/09/2026 | Desenvolvimento | Seção 49 recalculada em pixels da arte (valores divididos por 3) |
+| 1.2 | 30/09/2026 | Desenvolvimento | Dúvidas 13 e 14, que surgiram na implementação dos dashes (M2) |

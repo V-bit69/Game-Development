@@ -58,7 +58,7 @@ func _process(_delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
 	var tile := (jogador.position / V.TILE).floor()
-	info.text = "M1 · Setas: mover\nVelocidade: %d px/s · Tile: %d, %d" % [
+	info.text = "Setas: mover · D: dash · S: trocar dash\nVelocidade: %d px/s · Tile: %d, %d" % [
 		roundi(jogador.velocity.length()), int(tile.x), int(tile.y)]
 
 
