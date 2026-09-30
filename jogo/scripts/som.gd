@@ -18,6 +18,10 @@ func _ready() -> void:
 	_sons["dash"] = _misturar(_sopro(0.18, 0.5, 0.9), _rosnado(0.16, 0.35))
 	_sons["rolamento"] = _wav(_sopro(0.16, 0.35, 0.4))
 	_sons["troca"] = _wav(_tom(1400.0, 0.04, 0.3, false))
+	_sons["garra"] = _wav(_sopro(0.08, 0.35, 1.0))
+	_sons["espada"] = _misturar(_sopro(0.14, 0.4, 0.8), _tom(1900.0, 0.12, 0.08, false))
+	_sons["impacto"] = _misturar(_tom(70.0, 0.1, 0.6, false), _sopro(0.05, 0.4, 0.5))
+	_sons["morte"] = _juntar(_tom(300.0, 0.08, 0.25, true), _tom(120.0, 0.18, 0.25, true))
 	_sons["falha"] = _juntar(_tom(220.0, 0.08, 0.3, true), _tom(150.0, 0.12, 0.3, true))
 
 

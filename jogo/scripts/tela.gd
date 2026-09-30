@@ -1,6 +1,6 @@
 extends Node
 ## Atalhos de janela durante o desenvolvimento.
-## F11 alterna tela cheia e janela. Esc fecha o jogo.
+## F11 alterna tela cheia e janela. Esc fecha o jogo. R recomeça a sala.
 ## Em tela cheia num monitor 1920 × 1080, a arte fica exatamente 3× maior.
 
 
@@ -13,3 +13,6 @@ func _unhandled_input(evento: InputEvent) -> void:
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if cheia else DisplayServer.WINDOW_MODE_FULLSCREEN)
 		KEY_ESCAPE:
 			get_tree().quit()
+		KEY_R:
+			Engine.time_scale = 1.0
+			get_tree().reload_current_scene()

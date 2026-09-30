@@ -5,9 +5,13 @@ extends Node2D
 ## docs/02-level-design-demo.md. Cada caractere vale 2 × 2 tiles (32 × 32 px).
 ##   T  vegetação densa (parede)     #  parede da ruína     o  obstáculo
 ##   .  chão livre                   :  trilha              @  início do jogador
+##   x  alvo de treino (sala de teste)
 ## O desenho também aparece no editor (aba 2D) e se atualiza ao mudar o mapa.
 
 const V := preload("res://scripts/valores.gd")
+const ENTIDADES := {
+	"x": preload("res://cenas/alvo.tscn"),
+}
 
 const SOLIDOS := {
 	"T": Color(0.13, 0.27, 0.17),
@@ -38,8 +42,20 @@ func _ready() -> void:
 	if Engine.is_editor_hint():
 		return
 	_criar_colisoes()
+	_criar_entidades()
 	_posicionar_jogador()
 	_limitar_camera()
+
+
+func _criar_entidades() -> void:
+	for y in _linhas.size():
+		for x in _linhas[y].length():
+			var cena: PackedScene = ENTIDADES.get(_linhas[y][x])
+			if cena == null:
+				continue
+			var entidade: Node2D = cena.instantiate()
+			entidade.position = (Vector2(x, y) + Vector2(0.5, 0.5)) * celula
+			add_child(entidade)
 
 
 func _ler_mapa() -> void:
@@ -58,7 +74,7 @@ func _process(_delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
 	var tile := (jogador.position / V.TILE).floor()
-	info.text = "Setas: mover · D: dash · S: trocar dash\nVelocidade: %d px/s · Tile: %d, %d" % [
+	info.text = "Setas: mover · A: atacar · D: dash · S: trocar dash · R: recomeçar\nVelocidade: %d px/s · Tile: %d, %d" % [
 		roundi(jogador.velocity.length()), int(tile.x), int(tile.y)]
 
 
@@ -113,6 +129,8 @@ func _draw() -> void:
 				draw_rect(area, SOLIDOS[linha[x]])
 			elif linha[x] == ":":
 				draw_rect(area, COR_TRILHA)
+			elif ENTIDADES.has(linha[x]) and Engine.is_editor_hint():
+				draw_rect(Rect2(area.get_center() - Vector2(9, 7), Vector2(18, 14)), Color(0.55, 0.5, 0.35, 0.8))
 			elif linha[x] == "@" and Engine.is_editor_hint():
 				# No editor, marca o início com o tamanho do gato.
 				var pes := area.get_center()

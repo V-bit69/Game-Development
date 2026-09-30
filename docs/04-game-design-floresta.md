@@ -1120,6 +1120,11 @@ Perguntas do desenvolvimento para o game design:
 12. **Controle.** A demo terá suporte a controle (gamepad) além do teclado?
 13. **Rolamentos seguidos.** A regra diz que o terceiro rolamento dentro de 4 s custa 1 unidade. E o quarto, ainda dentro da mesma janela, também custa? No protótipo, sim: todo rolamento que acontece com 2 ou mais rolamentos nos últimos 4 s custa 1 unidade.
 14. **Dash parado.** Se o jogador aperta D sem nenhuma seta, o dash vai para onde o gato está olhando. Pode ser assim?
+15. **Combo esquecido.** Se o jogador fica 1 s sem atacar, o combo volta ao golpe 1. Sem isso, um golpe dado muito depois ainda seria o golpe 2 ou 3. Pode ser?
+16. **Passo à frente no golpe.** Cada golpe empurra o inimigo 16 px (1 tile), e o alcance do ataque é de 20 px. Sem compensação, o golpe 2 já não alcança. No protótipo, o gato dá um passo de 16 px para a frente em cada golpe. Pode ser assim, ou o combo deve mesmo afastar o inimigo?
+17. **Dash durante o combo.** O dash cancela o golpe em andamento e o combo volta ao golpe 1. Pode ser?
+18. **Knockback do dash.** O dash padrão fere o inimigo (2 de dano), mas não o empurra, porque o gato passa através dele. Pode ser?
+19. **Rolamento e inimigos.** O rolamento também atravessa inimigos (sem dano). Andando normalmente, o inimigo vivo bloqueia a passagem. Pode ser?
 
 ---
 
@@ -1135,3 +1140,4 @@ Perguntas do desenvolvimento para o game design:
 | 1.2 | 30/09/2026 | Game design | Arte em pixel art com pixels visíveis: tamanho 3 com 50 px na arte, ampliado 3× (150 px na tela). Resolução base volta a 640 × 360 |
 | 1.2 | 30/09/2026 | Desenvolvimento | Seção 49 recalculada em pixels da arte (valores divididos por 3) |
 | 1.2 | 30/09/2026 | Desenvolvimento | Dúvidas 13 e 14, que surgiram na implementação dos dashes (M2) |
+| 1.2 | 30/09/2026 | Desenvolvimento | Dúvidas 15 a 19, que surgiram na implementação do combate melee (M3) |

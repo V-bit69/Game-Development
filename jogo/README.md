@@ -15,10 +15,11 @@ Projeto Godot 4 do protótipo da demo. Feito com formas simples, sem arte final.
 | Setas | Mover em 8 direções | M1 ✅ |
 | D | Dash | M2 ✅ |
 | S | Trocar o tipo de dash | M2 ✅ |
-| A | Atacar | M3 |
+| A | Atacar (combo de 3 golpes) | M3 ✅ |
 | Q | Parry | M4 |
 | E | Interagir | M7 |
 | F11 | Alternar tela cheia e janela | — |
+| R | Recomeçar a sala | — |
 | Esc | Fechar o jogo (provisório) | — |
 
 ## Escala
@@ -30,14 +31,16 @@ O jogo roda em **640 × 360** e é ampliado 3× num monitor 1920 × 1080, com os
 | Arquivo | O que é |
 |---|---|
 | `scripts/valores.gd` | **Todos os números de calibragem** (velocidades, distâncias, tempos). É aqui que se ajusta o jogo |
-| `scripts/jogador.gd` | Homem-gato: movimento, dashes e stamina |
+| `scripts/jogador.gd` | Homem-gato: movimento, dashes, stamina e combo |
+| `scripts/inimigo.gd` | Base dos inimigos: vida, dano, knockback, morte |
+| `cenas/alvo.tscn` | Alvo de treino parado, com o tamanho do sapo |
 | `scripts/hud.gd` | HUD provisória: vida, stamina e dash equipado |
 | `scripts/som.gd` | Sons provisórios, gerados por código |
 | `scripts/sala.gd` | Monta uma sala a partir de um mapa em texto, com a legenda do [level design](../docs/02-level-design-demo.md) |
 | `cenas/sala_teste.tscn` | Sala de teste do M1. O mapa fica no campo **Mapa** do nó `SalaTeste` |
-| `testes/teste_m1.gd`, `teste_m2.gd` | Testes automáticos de cada marco |
+| `testes/teste_m1.gd` a `teste_m3.gd` | Testes automáticos de cada marco |
 
-No mapa em texto, cada caractere vale 32 × 32 px (2 × 2 tiles): `T` vegetação, `#` parede da ruína, `o` obstáculo, `.` chão, `:` trilha, `@` início do jogador.
+No mapa em texto, cada caractere vale 32 × 32 px (2 × 2 tiles): `T` vegetação, `#` parede da ruína, `o` obstáculo, `.` chão, `:` trilha, `@` início do jogador, `x` alvo de treino.
 
 ## Rodar o teste automático
 

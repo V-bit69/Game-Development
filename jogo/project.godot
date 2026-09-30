@@ -78,6 +78,12 @@ interagir={
 ]
 }
 
+[layer_names]
+
+2d_physics/layer_1="cenario"
+2d_physics/layer_2="jogador"
+2d_physics/layer_3="inimigos"
+
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0
