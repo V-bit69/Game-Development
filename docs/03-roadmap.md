@@ -37,34 +37,39 @@ Documento vivo: atualizar o status a cada entrega.
 
 ### 2. Game design — Game Director 🔄
 Entrega: **especificação de gameplay**.
-- [ ] Personagem e habilidades de raça
-- [ ] Regras de movimento (pula? atravessa parede?)
-- [ ] Combate: ataque, dash, stamina, escudo, parry, parry perfeito
-- [ ] A arma encontrada e como ela muda o combate
-- [ ] 3 inimigos comuns
-- [ ] Semi-boss + minions
-- [ ] Boss e padrões de ataque
-- [ ] Experiência desejada em cada trecho
+- [x] **Floresta** → [04-game-design-floresta.md](04-game-design-floresta.md): Homem-gato, controles, dashes, stamina, combo, parry, sapos, Xennar, interações e mapa
+- [ ] Responder as [12 dúvidas](04-game-design-floresta.md#50-dúvidas-em-aberto) da floresta e validar os [valores propostos](04-game-design-floresta.md#49-valores-propostos-pelo-desenvolvimento)
+- [ ] **Ruína:** a KLM-99 (ataque à distância), inimigos, semi-boss e minions
+- [ ] **Boss:** líder das criaturas, padrões de ataque
 - [ ] Concept da região da demo
 
 ### 3. Protótipo — Development Director 🔄
-Versão feia, mas jogável. Um ensaio web de todos os marcos já está em [prototipo/index.html](../prototipo/index.html), com inimigos e boss provisórios. Os marcos abaixo são do protótipo oficial no Godot, em ordem:
-- [ ] **M1** Projeto Godot, resolução, câmera seguindo o personagem, movimento em 8 direções
-- [ ] **M2** Dash, stamina e ataque corpo a corpo, com feedback (hitstop, flash, tremida, sons provisórios)
-- [ ] **M3** Escudo, parry e parry perfeito (atordoar + crítico)
-- [ ] **M4** Os 3 inimigos comuns com telegraph de ataque
-- [ ] **M5** NPC, caixa de diálogo e pausa
-- [ ] **M6** Pegar a arma e trocar para o ataque à distância
-- [ ] **M7** Semi-boss + minions
-- [ ] **M8** Boss
-- [ ] **M9** Item de missão, entrega ao NPC, fim da demo, checkpoints e morte
+Versão feia, mas jogável, no Godot. A floresta já pode ser feita inteira. Marcos em ordem:
+
+**Floresta (liberada)**
+- [ ] **M1** Projeto Godot em 640×360, movimento em 8 direções (setas), colisão e câmera seguindo
+- [ ] **M2** Dash padrão, dash de rolamento (2 grátis em 4 s), troca com S, stamina em 4 unidades e HUD
+- [ ] **M3** Combo de 3 golpes (garra, garra, espada), dano do dash, knockback e feedback (hitstop, flash, tremida, sons provisórios)
+- [ ] **M4** Parry com Q: janela de 0,2 s, chute, knockback de 1 dash e atordoamento de 1 s
+- [ ] **M5** Sapo comum: ciclo com telegraph, salto, cancelamento do pulo, HP em quadradinhos e morte
+- [ ] **M6** Sapo com língua: três zonas, língua que volta e parry da língua
+- [ ] **M7** Interação com E: Xennar e diálogos, flor, estátua, elemento tecnológico, interações ocultas
+- [ ] **M8** Escalada com dash, área superior e peça de upgrade
+- [ ] **M9** HP do jogador, morte com filtro e reinício da fase, pausa
+
+**Ruína e boss (aguardando especificação)**
+- [ ] **M10** KLM-99 e ataque à distância
+- [ ] **M11** Semi-boss + minions
+- [ ] **M12** Boss, cajado, entrega a Xennar e fim da demo
+
+> O [protótipo web](../prototipo/index.html) foi feito antes da especificação e ficou desatualizado: usa escudo, outra NPC e outros inimigos. Serve só como referência de sensação de combate.
 
 ### 4. Blockout da fase — Development Director (Level Designer) 🔄
-- [x] Rascunho no papel → [02-level-design-demo.md](02-level-design-demo.md)
-- [ ] Floresta no Godot com formas simples
-- [ ] Ruína
-- [ ] Sala do boss
-- [ ] Posicionar os inimigos e os gatilhos de onda
+- [x] Floresta no papel, já pela especificação → [02-level-design-demo.md](02-level-design-demo.md)
+- [ ] Floresta no Godot com formas simples: área segura, corredor, clareira, exterior e área superior
+- [ ] Posicionar os 4 encontros (11 sapos comuns e 5 com língua) e os gatilhos
+- [ ] Ruína *(aguardando especificação)*
+- [ ] Sala do boss *(aguardando especificação)*
 
 ### 5. Primeiro playtest — Game Director + Development Director ⬜
 Pergunta: *a experiência que imaginamos funciona?*
@@ -97,3 +102,4 @@ Personagens, cenários, inimigos, objetos, identidade visual, UI e referências 
 | 27/09/2026 | Escopo da demo definido, rascunho do level design e roadmap criado |
 | 27/09/2026 | Protótipo web v0.2: a demo em miniatura com o Homem-gato, parry, arma e Sentinela |
 | 28/09/2026 | Cargos e responsabilidades definidos |
+| 30/09/2026 | Especificação da floresta recebida. Marcos do protótipo e blockout refeitos por ela |

@@ -1,0 +1,1129 @@
+# Game Design — Demo · Cenário 1: Floresta
+
+> **Documento vivo.** Versão editável da especificação de gameplay da floresta. O PDF original está em [referencias/game-design-demo-floresta-v1.0.pdf](referencias/game-design-demo-floresta-v1.0.pdf).
+> As seções 1 a 48 são do game design. A seção 49 traz os valores propostos pelo desenvolvimento para o que estava "a definir", e a seção 50 lista as dúvidas em aberto. Registre mudanças no [Histórico](#histórico-de-versões).
+
+| | |
+|---|---|
+| **Versão** | 1.0 |
+| **Status** | Especificação de gameplay em desenvolvimento |
+| **Engine** | Godot 4 |
+| **Resolução base** | 640 × 360 px |
+
+---
+
+## Como ler os multiplicadores
+
+- **Comprimento:** o multiplicador aumenta a distância. Um dash de 1,3× percorre 130% da distância do dash padrão.
+- **Velocidade:** o multiplicador aumenta a velocidade e, portanto, diminui o tempo. Um dash de 2× executa duas vezes mais rápido.
+- **Os dois juntos não se somam de forma óbvia.** Um dash com 2× de velocidade e 1,3× de comprimento não dura metade do tempo do dash padrão, porque a distância também mudou. A duração é sempre consequência: `duração = comprimento ÷ velocidade`.
+- Ao alterar um valor, confira qual unidade está sendo alterada.
+
+---
+
+## 1. Objetivo do cenário
+
+A floresta é o primeiro cenário jogável da demo.
+
+Sua função é apresentar ao jogador:
+
+- movimentação do Homem-gato;
+- dash;
+- gerenciamento de stamina;
+- exploração simples;
+- interação com elementos do cenário;
+- combate melee;
+- parry;
+- primeiros inimigos;
+- primeira recompensa opcional;
+- escalada através de dash;
+- preparação para a entrada na ruína.
+
+O cenário começa em uma área segura e termina com a entrada da ruína.
+
+Não há checkpoint na floresta.
+
+---
+
+## 2. Personagem jogável
+
+### 2.1 Homem-gato
+
+O personagem jogável da demo é o Homem-gato.
+
+**Características**
+
+- Raça: homem-gato.
+- Altura relativa: **2**, considerando a escala de personagens:
+  - 1 = baixo;
+  - 2 = médio;
+  - 3 = padrão;
+  - 4 = alto.
+- Possui movimentação naturalmente mais ágil que outros personagens.
+- Possui gameplay híbrida entre combate melee e tecnologia à distância.
+- Na floresta, entretanto, a arma tecnológica ainda não foi encontrada.
+
+**Personalidade**
+
+O Homem-gato:
+
+- é ágil e agitado;
+- é bondoso e gentil;
+- fala rapidamente;
+- mia ao final de algumas frases;
+- pode ficar bravo;
+- luta de maneira feroz e agressiva.
+
+---
+
+## 3. Controles
+
+| Ação | Comando |
+|---|---|
+| Movimento | Setas direcionais |
+| Dash | D |
+| Alternar tipo de dash | S |
+| Interagir | E |
+| Ataque | A |
+| Parry | Q |
+
+---
+
+## 4. Movimentação
+
+### 4.1 Movimento básico
+
+O Homem-gato pode se movimentar em **8 direções**.
+
+A velocidade diagonal é igual à velocidade das direções cardeais.
+
+**Velocidade**
+
+A velocidade de caminhada do Homem-gato é **1,3 × velocidade normal do jogo**.
+
+O valor absoluto em px/s pertence aos parâmetros gerais do jogo e deverá ser definido no desenvolvimento.
+
+**Colisão**
+
+Existe colisão padrão com:
+
+- paredes;
+- objetos;
+- obstáculos.
+
+---
+
+## 5. Dash
+
+O Homem-gato possui um dash padrão.
+
+**Parâmetros**
+
+- Comprimento: **1,3 × dash padrão do jogo**.
+- Velocidade: **2 × velocidade padrão do dash**.
+- Não possui cooldown.
+- É controlado exclusivamente pela stamina.
+- Não possui invulnerabilidade.
+
+O multiplicador de comprimento representa aumento da distância percorrida.
+
+O multiplicador de velocidade representa aumento da velocidade de deslocamento.
+
+A duração do dash será consequência desses dois valores e não constitui parâmetro independente.
+
+**Direção**
+
+O dash ocorre na direção escolhida pelo jogador.
+
+**Colisão**
+
+Qualquer dash que atingir uma parede ou obstáculo é interrompido no contato.
+
+---
+
+## 6. Dash contra inimigos
+
+O Homem-gato pode atravessar inimigos utilizando o dash.
+
+Ao atravessar um inimigo:
+
+- o inimigo recebe dano;
+- o dano equivale ao **terceiro golpe do combo**;
+- o ataque visual é realizado com as duas garras.
+
+Alguns inimigos possuem dano de contato.
+
+Nesse caso, o inimigo causa dano ao Homem-gato mesmo durante a passagem pelo dash.
+
+O dash não concede invulnerabilidade.
+
+---
+
+## 7. Escalada
+
+Algumas paredes da ruína possuem trechos especialmente preparados para escalada.
+
+Quando o jogador utiliza o dash próximo e na direção de uma dessas paredes, **o Homem-gato realiza a escalada**.
+
+A escalada utiliza a mesma duração resultante do dash.
+
+A altura alcançada corresponde ao trecho preparado da estrutura, permitindo chegar à parte superior como em um jogo de plataforma.
+
+A ação é sinalizada ao jogador por uma indicação de interação: **D**
+
+---
+
+## 8. Stamina
+
+A stamina é utilizada pelos dashes.
+
+O sistema é baseado em **unidades de uso**.
+
+**Homem-gato**
+
+- Capacidade: **4 unidades**.
+- Recuperação padrão: **1 unidade a cada 3 s**.
+- Recuperação do Homem-gato: **1,5 × a recuperação padrão**.
+
+Somente os dashes consomem stamina.
+
+Ataques melee e parry **não consomem stamina**.
+
+**HUD**
+
+A stamina aparece no canto superior esquerdo.
+
+Cada unidade é representada visualmente como um elemento individual na cor **laranja**.
+
+---
+
+## 9. Dash de rolamento
+
+O Homem-gato possui um segundo tipo de dash.
+
+O jogador alterna entre os tipos utilizando **S**.
+
+O comando de execução continua sendo **D**.
+
+**Características**
+
+- Movimento em forma de rolamento.
+- O personagem se transforma visualmente em uma espécie de bola durante o movimento.
+- Comprimento: **0,8 × dash padrão**.
+- Velocidade: **velocidade padrão do dash**.
+- Não causa dano.
+- Não pode atravessar paredes ou obstáculos para fins de escalada.
+- Não realiza escalada.
+
+**Regra especial de stamina**
+
+O rolamento utiliza um sistema de contagem própria.
+
+O jogador pode utilizar o rolamento **duas vezes consecutivamente sem gastar stamina**.
+
+O terceiro uso dentro da janela estabelecida consome uma unidade.
+
+A janela é de **4 segundos**.
+
+A contagem funciona continuamente:
+
+- usa rolamento → primeiro uso;
+- usa novamente dentro de 4 s → segundo uso;
+- usa novamente dentro de 4 s do primeiro → terceiro uso → consome stamina.
+
+Se o primeiro uso deixar de estar dentro da janela, o segundo passa a ser considerado o primeiro.
+
+Em outras palavras, sempre que ocorrerem **3 rolamentos dentro de uma janela de 4 s**, uma unidade de stamina é consumida.
+
+---
+
+## 10. Troca de dash
+
+O jogador utiliza **S** para alternar entre:
+
+- dash padrão;
+- dash de rolamento.
+
+A HUD apresenta qual tipo está atualmente equipado.
+
+---
+
+## 11. Interação com o ambiente
+
+A interação ocorre através do comando **E**.
+
+Quando o jogador se aproxima de um elemento importante e interagível, **aparece uma pequena indicação contendo a letra E**.
+
+O jogador pressiona E para executar a interação.
+
+**Distância de interação**
+
+A distância mínima de ativação corresponde a **½ da altura de um personagem de tamanho 3**.
+
+> **Correção do game design (30/09):** o PDF usava 16 px como altura de referência, o que dava 8 px de distância. Esse valor estava errado: 16 px é o tamanho de um tile. Um personagem de tamanho 3 é bem maior. A regra que vale é "½ da altura do tamanho 3". O valor em pixels depende da escala, que está na [dúvida 1](#50-dúvidas-em-aberto).
+
+---
+
+## 12. Interações ocultas
+
+Nem todos os elementos interagíveis são sinalizados antecipadamente.
+
+Alguns elementos possuem interação deliberadamente misteriosa.
+
+O jogador precisa:
+
+1. perceber que determinado elemento pode ser interessante;
+2. aproximar-se;
+3. tentar utilizar E.
+
+---
+
+## 13. Flor de lírio azul
+
+Existe uma flor de lírio azul interagível na floresta.
+
+Ao interagir, o Homem-gato coleta a flor.
+
+Em seguida, ocorre uma pequena fala:
+
+> **GATO:** Uma flor de lírio azul, miau!
+
+Ele comenta uma curiosidade sobre a flor relacionada à sua irmã.
+
+A flor funciona também como elemento de exploração opcional.
+
+**Continuidade futura**
+
+Na história da demo, o Homem-gato poderá levar a flor para sua terra natal e entregá-la à irmã.
+
+Isso poderá posteriormente resultar em um upgrade de habilidade.
+
+Essa consequência não precisa ser implementada nesta demo.
+
+---
+
+## 14. Elemento tecnológico na floresta
+
+Existe um elemento tecnológico próximo à ruína.
+
+O objeto parece fazer parte da própria estrutura da ruína.
+
+Ao encontrá-lo, o Homem-gato comenta:
+
+> **GATO:** Interessante... parece fazer parte da ruína...
+> **GATO:** Como isso veio parar aqui?
+
+A intenção é estabelecer sua familiaridade com tecnologia e criar curiosidade sobre a ruína.
+
+---
+
+## 15. Fragmento / peça de upgrade
+
+Em uma área elevada da floresta existe uma peça tecnológica que pode melhorar a arma que o Homem-gato encontrará posteriormente.
+
+Ao coletá-la:
+
+> **GATO:** Isso é especial! Com uma dessas eu posso melhorar uma KLM-99.
+
+A fala continua fazendo sentido caso o jogador já tenha encontrado a peça anteriormente e posteriormente retorne à área.
+
+---
+
+## 16. Escalada e área superior
+
+Um trecho da parede da ruína permite que o Homem-gato utilize seu dash padrão para subir.
+
+Ao alcançar a parte superior:
+
+- existem inimigos adicionais;
+- existe acesso a uma área elevada;
+- o jogador encontra a peça de upgrade da KLM-99.
+
+Essa área funciona como uma pequena recompensa para quem explora verticalmente o cenário.
+
+---
+
+## 17. Estátua da Guardiã
+
+Na clareira existe uma estátua representando uma figura feminina associada à floresta.
+
+Ela é conhecida como **A Guardiã**.
+
+Ao interagir, está escrito:
+
+> **Aos olhos da Guardiã, nenhuma criatura da floresta está sozinha.**
+
+Depois de ler, o Homem-gato comenta:
+
+> **GATO:** A Guardiã... quem será que ela foi, miau?
+
+---
+
+## 18. Combate melee
+
+O comando **A** executa o ataque básico.
+
+O combo possui três golpes.
+
+**Golpe 1:** ataque rápido utilizando uma das garras.
+
+**Golpe 2:** ataque rápido utilizando a outra garra.
+
+Os dois primeiros golpes são ligeiramente mais rápidos.
+
+**Golpe 3:** o Homem-gato retira uma espada média da capa e executa um corte vertical. Depois, guarda a espada.
+
+O combo reinicia.
+
+Não existe janela alternativa para alterar a sequência:
+
+**1 → 2 → 3 → 1 → 2 → 3...**
+
+---
+
+## 19. Tempo dos ataques
+
+A duração de cada golpe é **1,3 × duração padrão do golpe**.
+
+**Intervalos**
+
+- Entre os golpes 1 e 2: **½ da duração do próprio golpe**.
+- Entre os golpes 2 e 3: **1 duração completa do golpe**.
+
+---
+
+## 20. Dano do combo
+
+O sistema de dano é baseado em unidades.
+
+| Golpe | Dano |
+|---|---|
+| Golpe 1 | 1 |
+| Golpe 2 | 1 |
+| Golpe 3 | 2 |
+
+O dash padrão também causa **2 unidades de dano**.
+
+---
+
+## 21. Knockback dos ataques
+
+Os ataques básicos produzem knockback padrão.
+
+A função principal desse knockback é:
+
+- impedir que inimigos avancem continuamente sobre o jogador;
+- criar espaço durante o combate melee;
+- compensar a aproximação dos inimigos.
+
+O knockback ocorre enquanto o inimigo está em sua movimentação normal.
+
+Se o inimigo estiver executando uma animação de avanço/dash, essa regra não se aplica.
+
+---
+
+## 22. Parry
+
+O comando **Q** executa o parry.
+
+Não existe postura de defesa contínua.
+
+O jogador precisa executar o comando no momento correto.
+
+**Janela:** 0,2 s.
+
+Se o jogador errar o timing, **ele recebe o ataque**.
+
+Se acertar:
+
+- o ataque é defendido;
+- o Homem-gato imediatamente executa um chute;
+- o inimigo é lançado para trás.
+
+**Knockback:** o knockback do parry corresponde à **distância de um dash padrão**.
+
+**Stun:** depois que o inimigo chega ao final do knockback, **fica atordoado por 1 s**.
+
+---
+
+## 23. Parry da língua
+
+A língua do sapo também pode ser defendida com parry.
+
+Quando o Homem-gato executa um parry contra a língua:
+
+- a língua é interrompida;
+- o Homem-gato chuta a língua de volta na direção do sapo;
+- o sapo é atingido;
+- o sapo fica atordoado onde está.
+
+---
+
+## 24. Regras de hitbox
+
+A hitbox do Homem-gato é menor que sua área de ataque.
+
+A área de ataque do personagem possui aproximadamente **2 × o raio da hitbox do personagem**.
+
+As hitboxes dos inimigos são retangulares.
+
+A largura atualmente estabelecida é de aproximadamente **6 px**.
+
+---
+
+## 25. Cancelamento de pulos dos sapos
+
+Se um sapo estiver realizando um pulo e for atingido por um ataque do Homem-gato antes de alcançar a hitbox do jogador:
+
+- o pulo é interrompido;
+- o sapo recebe o knockback correspondente;
+- ele não causa dano ao jogador.
+
+Isso vale tanto para o sapo comum quanto para o sapo com língua.
+
+Existe uma exceção importante para a língua.
+
+Se o Homem-gato atingir **somente a língua**, mas não o corpo do sapo:
+
+- o corpo não sofre cancelamento;
+- o pulo continua normalmente, caso esteja pulando;
+- a língua ainda pode causar seu dano caso atinja o jogador.
+
+---
+
+## 26. Inimigos da floresta
+
+Os inimigos da floresta pertencem principalmente à raça dos sapos.
+
+Existem dois tipos comuns:
+
+1. Sapo comum;
+2. Sapo com língua.
+
+A quantidade de cada tipo fica a critério do desenvolvimento.
+
+A única regra de composição é: **sapos comuns > sapos com língua**.
+
+---
+
+## 27. Regras gerais dos inimigos
+
+### Colisão
+
+Os inimigos:
+
+- não colidem entre si;
+- podem atravessar uns aos outros.
+
+### Percepção
+
+O aggro ocorre quando o jogador entra na zona de percepção do inimigo.
+
+O tamanho dessa zona será definido posteriormente.
+
+Árvores e obstáculos:
+
+- não bloqueiam a percepção;
+- bloqueiam ataques físicos;
+- bloqueiam projéteis.
+
+Os inimigos devem ser capazes de reconhecer que um obstáculo está bloqueando seu ataque e procurar uma forma de contorná-lo quando apropriado.
+
+### Perseguição
+
+Um inimigo pode seguir o jogador por todo o espaço acessível do mapa que estiver atrás de sua posição, permanecendo sempre dentro do mesmo cenário.
+
+---
+
+## 28. Telegraph
+
+Os inimigos possuem um período de preparação antes de executar determinadas ações.
+
+No protótipo, o telegraph pode ser representado por:
+
+- squash do sprite;
+- pequena vibração;
+- outra alteração visual equivalente.
+
+A implementação visual exata fica a critério do desenvolvedor.
+
+---
+
+## 29. Sapo comum
+
+O sapo comum utiliza seu próprio salto como ataque.
+
+**Ciclo**
+
+decisão → telegraph → salto → possível contato → aterrissagem → espera → nova decisão
+
+**Parâmetros**
+
+- HP: **3**
+- Comprimento do salto: **0,5 dash padrão**
+- Velocidade: **velocidade padrão do dash**
+- Telegraph: **0,5 s**
+- Intervalo entre ciclos: **1 s**
+- Dano: **1**
+
+Se atingir a hitbox do Homem-gato durante o salto, **causa 1 dano**.
+
+Se não atingir, **continua tentando nos ciclos seguintes**.
+
+---
+
+## 30. Sapo com língua
+
+O sapo com língua mantém a mesma movimentação básica do sapo comum.
+
+**Parâmetros**
+
+- HP: **3**
+- Pulo: **0,5 dash**
+- Velocidade: **velocidade padrão do dash**
+- Intervalo entre ciclos: **1 s**
+- Dano da língua: **1**
+- Alcance da língua: **0,5 dash**
+- Velocidade da língua: **velocidade padrão do dash**
+- Telegraph antes da ação: **0,5 s**
+
+A língua pode ser utilizada:
+
+- parado;
+- durante um salto.
+
+A decisão da ação ocorre no início do ciclo.
+
+O sapo não altera sua ação no meio de um salto.
+
+---
+
+## 31. Zonas do sapo com língua
+
+O comportamento é dividido em três zonas.
+
+| Zona | Comportamento |
+|---|---|
+| **Próxima** | permanece parado → telegraph → usa a língua |
+| **Intermediária** | telegraph → pula + usa a língua |
+| **Externa** | telegraph → realiza um salto de perseguição |
+| **Fora da área de atuação** | permanece aguardando |
+
+A prioridade é: **zona próxima > zona intermediária > zona externa**.
+
+Os tamanhos exatos dessas zonas ainda serão definidos.
+
+---
+
+## 32. Língua
+
+A língua possui uma trajetória simples.
+
+Quando erra, **retorna pelo mesmo caminho de onde saiu**.
+
+Quando o jogador atinge a língua com parry, **ela é interrompida e rebatida em direção ao sapo**.
+
+---
+
+## 33. Morte dos inimigos
+
+O HP dos inimigos é representado em unidades.
+
+Abaixo do sprite existe uma indicação formada por pequenos quadrados.
+
+Cada quadrado representa uma unidade de HP.
+
+Quando o HP chega a **0, o inimigo morre**.
+
+Após a morte:
+
+- executa sua animação de morte;
+- seu sprite permanece no chão.
+
+Exceção: se o inimigo morrer sobre uma área de interesse do cenário, **o sprite desaparece**.
+
+Ainda não foi definido se os inimigos deixam itens ou recompensas.
+
+---
+
+## 34. Composição dos encontros
+
+A quantidade de inimigos é definida pelo desenvolvedor durante o blockout e implementação.
+
+O design estabelece apenas a proporção: **maior quantidade de sapos comuns do que sapos com língua**.
+
+Os inimigos entram em cena:
+
+- pulando;
+- aproximadamente ao mesmo tempo;
+- espalhados pela área;
+- a uma distância segura do jogador.
+
+As posições exatas são definidas no blockout.
+
+---
+
+## 35. Estrutura do mapa
+
+A floresta é propositalmente pequena.
+
+A resolução base é **640 × 360 px**.
+
+As áreas são pensadas em relação ao tamanho da tela.
+
+### 35.1 Área segura — 1 tela
+
+Função:
+
+- apresentação do cenário;
+- encontro com Xennar;
+- diálogo;
+- fogueira;
+- ausência de combate.
+
+### 35.2 Corredor da floresta — 1 tela
+
+Características:
+
+- vegetação mais densa;
+- passagem relativamente definida;
+- árvores nas laterais;
+- nenhuma árvore isolada bloqueando as passagens principais.
+
+### 35.3 Clareira — 1,5 tela
+
+Características:
+
+- espaço mais aberto;
+- estátua da Guardiã;
+- fragmento/peça tecnológica;
+- primeiros encontros de combate;
+- vegetação continua densa ao redor, mas se abre na região percorrida.
+
+### 35.4 Exterior da ruína — 2 a 2,5 telas
+
+Área mais aberta.
+
+Serve para:
+
+- permitir movimentação ampla;
+- combate contra grupos;
+- exploração;
+- acesso à escalada;
+- preparação para entrar na ruína.
+
+### 35.5 Área superior/lateral — 1,5 tela
+
+Área acessada através da escalada.
+
+Contém:
+
+- inimigos;
+- trecho superior da ruína;
+- peça especial para upgrade da KLM-99.
+
+---
+
+## 36. Distribuição espacial
+
+A progressão visual é aproximadamente:
+
+```
+┌──────────────────────────────┐
+│        ÁREA SUPERIOR         │
+│     inimigos + upgrade       │
+└──────────────┬───────────────┘
+               │
+     FLORESTA  │  RUÍNA
+               │
+        ┌──────┴──────┐
+        │             │
+        │  EXTERIOR   │
+        │             │
+        └──────┬──────┘
+               │
+           CLAREIRA
+       estátua + fragmento
+               │
+           CORREDOR
+               │
+          ÁREA SEGURA
+        Xennar + fogueira
+```
+
+A ruína está posicionada à direita, mas provavelmente a melhor opção seria posicioná-la em cima, deixando a área superior acima da própria ruína. O espaço à direita poderia então ser preenchido com outros elementos da floresta, por exemplo. A representação serve apenas como referência estrutural; o layout final será definido durante o blockout.
+
+---
+
+## 37. Xennar
+
+Xennar é o NPC encontrado no início da floresta.
+
+Ele é:
+
+- humano;
+- velho;
+- responsável pelo farol da região;
+- cansado;
+- fisicamente debilitado.
+
+Possui uma fogueira próxima.
+
+---
+
+## 38. Diálogo inicial
+
+Ao aproximar-se de Xennar, o personagem para e a caixa de diálogo aparece.
+
+Cada frase exige um comando do jogador para avançar.
+
+**Diálogo**
+
+> **VELHO:** Ei... espere um momento...
+>
+> **VELHO:** Você parece jovem e ágil... o suficiente. Poderia me ajudar?
+>
+> **GATO:** Ajudo sim! Quer dizer... depende do que o senhor precisa. O que seria, miau?
+>
+> **VELHO:** Meu nome é Xennar. Sou o responsável pelo farol da região... aquele lá no alto da Costa das Pedras.
+>
+> **XENNAR:** Há alguns dias... meu cajado foi tomado pelos invasores. Sem ele, não consigo mais acender a luz guia.
+>
+> **GATO:** Tomado? Por quem?
+>
+> **XENNAR:** Por essas criaturas saltitantes que estão por todo lugar... Elas tomaram a região e estão acabando com a nossa paz.
+>
+> **XENNAR:** Agora o líder deles se instalou na ruína do monte mais adiante... e levou meu cajado consigo.
+>
+> **XENNAR:** Temos poucos por aqui capazes de enfrentá-los...
+>
+> **XENNAR:** Por favor, jovem... poderia recuperá-lo para mim?
+
+---
+
+## 39. Segunda interação com Xennar
+
+As duas falas abaixo **não fazem parte do diálogo inicial**.
+
+Elas são exibidas somente caso o jogador volte a interagir com Xennar depois que o primeiro diálogo foi concluído.
+
+> **XENNAR:** Jovem felino... conseguiu encontrá-lo? Se aceita uma dica... talvez consiga roubá-lo de volta sem chamar muita atenção.
+>
+> **XENNAR:** Minhas costas doem só de pensar...
+
+---
+
+## 40. Objetivo da floresta
+
+O objetivo apresentado ao jogador é **recuperar o cajado de Xennar**.
+
+O cajado foi tomado pelos invasores e levado para a ruína.
+
+O líder das criaturas está instalado na ruína.
+
+A recuperação do cajado é o objetivo que conduz o jogador ao próximo cenário.
+
+---
+
+## 41. Fogueira
+
+Existe uma fogueira próxima de Xennar.
+
+Ela possui função visual e ambiental.
+
+**Não é checkpoint.**
+
+Se o jogador morrer, não retorna para a fogueira.
+
+---
+
+## 42. Morte do jogador
+
+O Homem-gato possui **10 HP**.
+
+O HP é contabilizado em unidades.
+
+Quando chega a zero:
+
+1. o estado de morte é acionado;
+2. a tela recebe um filtro visual;
+3. aparece uma indicação de que o personagem morreu;
+4. o jogador pressiona **E**;
+5. a demo reinicia desde o início da fase.
+
+Não há sistema de respawn intermediário.
+
+---
+
+## 43. HUD
+
+Durante a floresta, a HUD deve apresentar pelo menos:
+
+**HP**
+
+- HP atual do Homem-gato;
+- **10 unidades máximas**.
+
+**Stamina**
+
+- 4 unidades;
+- representadas no canto superior esquerdo;
+- cor laranja.
+
+**Dash equipado**
+
+Indicação visual de qual dash está atualmente selecionado.
+
+A HUD de munição/energia da arma será necessária posteriormente, quando a KLM-99 for introduzida.
+
+---
+
+## 44. Feedback de ações
+
+Todo evento relevante deve possuir feedback visual e sonoro.
+
+| Evento | Feedback visual | Feedback sonoro |
+|---|---|---|
+| Acerto | Piscar branco, empurrão, hitstop | Impacto curto |
+| Dano recebido | Piscar, tela tremer, borda vermelha | Impacto |
+| Parry | Faísca | Clang |
+| Dash | Afterimage/rastro | Whoosh + rosnado |
+| Sem stamina | Barra pisca | Som de falha |
+| Inimigo atacando | Telegraph visual | — |
+| Morte inimigo | Partículas | Som de morte |
+| Interação | Indicador E | Som de interação |
+| Coleta | Destaque/pausa/texto | Jingle |
+| Escalada | Indicador D | Feedback de movimento |
+
+---
+
+## 45. Tom do ambiente
+
+A floresta deve apresentar contraste entre:
+
+**Área segura**
+
+- atmosfera tranquila;
+- Xennar;
+- fogueira;
+- ausência de inimigos;
+- diálogo.
+
+**Áreas de combate**
+
+- presença de inimigos;
+- maior tensão;
+- movimentação;
+- feedback de combate.
+
+A vegetação é densa, mas as áreas efetivamente percorridas pelo jogador permanecem abertas.
+
+---
+
+## 46. Parâmetros numéricos consolidados
+
+| Parâmetro | Valor |
+|---|---|
+| Resolução base | 640 × 360 px |
+| Altura do Homem-gato | Tamanho 2 |
+| Velocidade de caminhada | 1,3 × padrão |
+| Dash do Homem-gato — comprimento | 1,3 × padrão |
+| Dash do Homem-gato — velocidade | 2 × padrão |
+| Dash de rolamento — comprimento | 0,8 × padrão |
+| Dash de rolamento — velocidade | 1 × padrão |
+| Stamina máxima | 4 unidades |
+| Recuperação padrão | 1 unidade / 3 s |
+| Recuperação do Homem-gato | 1,5 × padrão |
+| Janela do rolamento | 4 s |
+| Interação | ½ da altura do tamanho 3 *(o PDF dizia 8 px; ver correção na seção 11)* |
+| HP do Homem-gato | 10 |
+| Dano golpe 1 | 1 |
+| Dano golpe 2 | 1 |
+| Dano golpe 3 | 2 |
+| Dano do dash | 2 |
+| Duração do golpe | 1,3 × padrão |
+| Intervalo golpe 1→2 | 0,5 × duração do golpe |
+| Intervalo golpe 2→3 | 1 × duração do golpe |
+| Janela de parry | 0,2 s |
+| Knockback do parry | 1 dash |
+| Stun após parry | 1 s |
+| Largura aproximada da hitbox | 6 px |
+| Sapo comum — HP | 3 |
+| Sapo comum — salto | 0,5 dash |
+| Sapo comum — velocidade | 1 × dash padrão |
+| Sapo comum — ciclo | 1 s |
+| Sapo comum — telegraph | 0,5 s |
+| Sapo comum — dano | 1 |
+| Sapo língua — HP | 3 |
+| Sapo língua — pulo | 0,5 dash |
+| Sapo língua — língua | 0,5 dash |
+| Sapo língua — velocidade | 1 × dash padrão |
+| Sapo língua — ciclo | 1 s |
+| Sapo língua — telegraph | 0,5 s |
+| Sapo língua — dano | 1 |
+| Área segura | 1 tela |
+| Corredor | 1 tela |
+| Clareira | 1,5 tela |
+| Exterior da ruína | 2–2,5 telas |
+| Área superior | 1,5 tela |
+
+---
+
+## 47. Parâmetros ainda não definidos
+
+Estes pontos permanecem deliberadamente abertos. Os que já têm proposta do desenvolvimento estão na [seção 49](#49-valores-propostos-pelo-desenvolvimento).
+
+**Homem-gato**
+
+- Valor absoluto da velocidade de caminhada em px/s.
+- Valor absoluto do dash em px/s.
+- Valor absoluto do comprimento do dash em px.
+- Valores absolutos derivados da escala geral do jogo.
+
+**Inimigos**
+
+- Raio das zonas de percepção.
+- Tamanho das três zonas do sapo com língua.
+- Quantidade exata de inimigos por encontro.
+- Posicionamento exato dos inimigos.
+- Itens/recompensas deixados pelos inimigos.
+- Telegraphs específicos do semiboss.
+- Comportamentos completos do semiboss na área posterior.
+
+**Cenário**
+
+- Dimensões exatas em pixels das áreas.
+- Layout final do blockout.
+- Obstáculos específicos.
+- Forma exata da parede escalável.
+- Posição definitiva dos inimigos.
+- Posição definitiva da flor.
+- Posição definitiva da estátua.
+- Posição definitiva do fragmento.
+- Posição definitiva da peça de upgrade.
+
+**Trilha sonora**
+
+---
+
+## 48. Princípio de implementação
+
+Os valores definidos neste documento são **parâmetros atuais de protótipo**.
+
+O fluxo esperado é:
+
+**Game Design → Blockout → Implementação → Playtest → Calibração**
+
+Os valores não devem ser alterados arbitrariamente durante o desenvolvimento.
+
+Caso um parâmetro precise ser alterado por questões de jogabilidade, a alteração deve ser feita conscientemente no Game Design e então refletida na implementação.
+
+---
+
+## 49. Valores propostos pelo desenvolvimento
+
+> Seção do desenvolvimento. São chutes iniciais para o que estava "a definir", para o protótipo ter com o que começar. Todos serão calibrados no playtest. Os valores consideram a resolução base de 640 × 360 px.
+
+### 49.1 Escala dos personagens
+
+Proposta, pendente da [dúvida 1](#50-dúvidas-em-aberto):
+
+| Tamanho | Altura na base 640×360 | Em 1080p (3×) |
+|---|---|---|
+| 1 · baixo | 32 px | 96 px |
+| 2 · médio (Homem-gato) | 40 px | 120 px |
+| 3 · padrão | 48 px | 144 px |
+| 4 · alto | 56 px | 168 px |
+
+- Tile: **16 × 16 px**. Um personagem de tamanho 3 tem 3 tiles de altura.
+- A escala bate com a [imagem de referência de câmera](referencias/referencia-camera-escala.jpg), em que o personagem tem cerca de 48 px na base.
+
+### 49.2 Parâmetros gerais do jogo ("padrão")
+
+| Parâmetro padrão | Valor proposto |
+|---|---|
+| Velocidade normal de caminhada | 100 px/s |
+| Dash padrão — comprimento | 80 px |
+| Dash padrão — velocidade | 400 px/s |
+| Dash padrão — duração resultante | 0,20 s |
+| Duração padrão do golpe | 0,20 s |
+| Knockback padrão dos ataques | 16 px (1 tile) |
+| Recuperação padrão de stamina | 1 unidade / 3 s |
+
+### 49.3 Homem-gato (valores resultantes)
+
+| Parâmetro | Regra | Valor resultante |
+|---|---|---|
+| Caminhada | 1,3 × 100 | **130 px/s** |
+| Dash padrão — comprimento | 1,3 × 80 | **104 px** |
+| Dash padrão — velocidade | 2 × 400 | **800 px/s** |
+| Dash padrão — duração | 104 ÷ 800 | **0,13 s** |
+| Rolamento — comprimento | 0,8 × 80 | **64 px** |
+| Rolamento — velocidade | 1 × 400 | **400 px/s** |
+| Rolamento — duração | 64 ÷ 400 | **0,16 s** |
+| Recuperação de stamina | 3 s ÷ 1,5 | **1 unidade / 2 s** |
+| Duração do golpe | 1,3 × 0,20 | **0,26 s** *(ver dúvida 2)* |
+| Intervalo golpe 1→2 | 0,5 × 0,26 | **0,13 s** |
+| Intervalo golpe 2→3 | 1 × 0,26 | **0,26 s** |
+| Combo completo (3 golpes) | soma | **≈ 1,17 s** |
+| Knockback do parry | 1 dash padrão | **80 px** |
+| Distância de interação | ½ × 48 | **24 px** |
+| Hitbox do corpo | — | círculo de **raio 10 px**, nos pés |
+| Área de ataque | 2 × raio | **20 px** de alcance, em arco à frente |
+| Recuperação do parry errado | — | **0,4 s** sem poder repetir *(ver dúvida 7)* |
+
+### 49.4 Sapos
+
+| Parâmetro | Regra | Valor resultante |
+|---|---|---|
+| Salto — comprimento | 0,5 × 80 | **40 px** |
+| Salto — velocidade | 1 × 400 | **400 px/s** |
+| Salto — duração | 40 ÷ 400 | **0,10 s** |
+| Língua — alcance | 0,5 × 80 | **40 px** |
+| Língua — velocidade | 1 × 400 | **400 px/s** (0,10 s para sair e 0,10 s para voltar) |
+| Hitbox | proporcional à escala | retângulo de **18 × 14 px** *(ver dúvida 3)* |
+| Zona de percepção | — | raio de **200 px** |
+| Zona próxima (língua) | alcance da língua | até **40 px** |
+| Zona intermediária | pulo + língua | de **40 a 80 px** |
+| Zona externa | até a percepção | de **80 a 200 px** |
+
+### 49.5 Encontros
+
+| Local | Sapos comuns | Sapos com língua |
+|---|---|---|
+| Clareira (primeiro combate) | 3 | 1 |
+| Exterior da ruína — grupo 1 | 3 | 1 |
+| Exterior da ruína — grupo 2 | 3 | 2 |
+| Área superior | 2 | 1 |
+| **Total** | **11** | **5** |
+
+As dimensões das áreas e o posicionamento estão em [02-level-design-demo.md](02-level-design-demo.md).
+
+---
+
+## 50. Dúvidas em aberto
+
+Perguntas do desenvolvimento para o game design:
+
+1. **Escala.** O personagem de tamanho 3 com "algo como 150 px" é em qual resolução? Na base de 640 × 360, 150 px ocuparia quase metade da altura da tela. A proposta é 48 px na base, o que dá 144 px em 1080p. É isso?
+2. **Duração do golpe.** "1,3 × a duração padrão" deixa o golpe do gato mais lento que o padrão. Era essa a intenção, ou a ideia era 1,3 × mais rápido, como no dash?
+3. **Hitbox dos inimigos.** Os 6 px vieram da referência antiga de 16 px de altura. Na escala nova, a proposta é 18 × 14 px. Pode ser?
+4. **Fragmento da clareira.** A seção 35.3 e o diagrama colocam um "fragmento/peça tecnológica" na clareira. A seção 14 coloca o elemento tecnológico "próximo à ruína", e a peça de upgrade da KLM-99 fica na área superior. O fragmento da clareira é o elemento da seção 14 ou um terceiro objeto?
+5. **Perseguição.** O que significa "todo o espaço acessível do mapa que estiver atrás de sua posição"? O inimigo só persegue voltando em direção ao início do mapa, ou em qualquer direção dentro do cenário?
+6. **Dano de contato.** O sapo causa dano só durante o salto, ou também se o jogador encostar nele parado?
+7. **Parry errado.** Existe algum tempo de recuperação quando o jogador erra o parry? Sem isso, apertar Q sem parar defende tudo. A proposta é 0,4 s.
+8. **Inimigo atordoado.** Ele toma dano normal ou dano extra (crítico)?
+9. **Dash por vários inimigos.** O dash causa dano em todos os inimigos atravessados?
+10. **Descida da área superior.** Como o jogador volta para baixo: pula, desce pelo mesmo trecho ou tem outro caminho?
+11. **Posição da flor.** A flor de lírio azul fica em qual área?
+12. **Controle.** A demo terá suporte a controle (gamepad) além do teclado?
+
+---
+
+## Histórico de versões
+
+| Versão | Data | Quem | O que mudou |
+|---|---|---|---|
+| 1.0 | 30/09/2026 | Game design | Versão inicial (PDF original) |
+| 1.0 | 30/09/2026 | Game design | Explicação dos multiplicadores e correção da referência de altura (16 px era o tile, não o personagem) |
+| 1.0 | 30/09/2026 | Desenvolvimento | Transcrição para Markdown, seção 49 com valores propostos e seção 50 com dúvidas |

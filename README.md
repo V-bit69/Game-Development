@@ -10,6 +10,7 @@ Jogo de ação e aventura top-down em pixel art. O combate é inspirado em *Hype
 | [01 · Escopo da demo](docs/01-escopo-demo.md) | O que a demo mostra e o que fica de fora |
 | [02 · Level design da demo](docs/02-level-design-demo.md) | Rascunho das áreas, fluxo e posicionamento |
 | [03 · Roadmap](docs/03-roadmap.md) | Etapas e status atualizado |
+| [04 · Game design da floresta](docs/04-game-design-floresta.md) | Especificação de gameplay do cenário 1. **Documento editável**, com os valores propostos e as dúvidas em aberto |
 
 ## Protótipo web (ensaio)
 
@@ -21,7 +22,7 @@ Jogo de ação e aventura top-down em pixel art. O combate é inspirado em *Hype
 
 Para jogar: ative o GitHub Pages (Settings → Pages → branch `main`) e abra `https://v-bit69.github.io/Game-Development/prototipo/`. Outra opção é baixar o arquivo e abrir no navegador.
 
-> Inimigos, Sentinela, falas e arte são provisórios até a especificação de gameplay chegar.
+> **Desatualizado.** Este ensaio foi feito antes da especificação da floresta. Ele usa escudo, outra NPC e outros inimigos. Vale só como referência de sensação de combate. O que manda agora é o [game design da floresta](docs/04-game-design-floresta.md).
 
 ## Como editar os documentos
 
