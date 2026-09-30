@@ -3,7 +3,7 @@
 .import/
 export/
 *.translation
-export_presets.cfg
+# export_presets.cfg vai para o repositório: só tem a exportação web, sem senhas
 
 # SO
 .DS_Store

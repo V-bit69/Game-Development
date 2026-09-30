@@ -49,6 +49,16 @@ O jogo roda em **640 × 360** e é ampliado 3× num monitor 1920 × 1080, com os
 
 No mapa em texto, cada caractere vale 32 × 32 px (2 × 2 tiles). A legenda é a do [level design](../docs/02-level-design-demo.md): `T` vegetação, `#` parede da ruína, `o` obstáculo, `.` chão, `:` trilha, `@` início do jogador, `X` Xennar, `F` fogueira, `L` flor, `G` estátua, `t` elemento tecnológico, `K` peça da KLM-99, `s` sapo comum, `l` sapo com língua, `!` gatilho de encontro, `=` entrada da ruína, `D` trecho escalável, `v` descida e `x` alvo de treino e `a` alvo de treino que ataca.
 
+## Atualizar a versão do navegador
+
+A versão que roda no navegador fica na pasta `jogar/` do repositório. Para gerar de novo depois de mudar o jogo, na pasta `jogo/`:
+
+```bash
+C:\Godot\Godot_v4.7.2-stable_win64_console.exe --headless --path . --export-release "Web" ../jogar/index.html
+```
+
+Depois é só salvar no GitHub, e o link atualiza em cerca de 1 minuto. No navegador, o jogo abre em janela e com ampliação livre (não só 2× ou 3×), para caber em qualquer tela.
+
 ## Rodar o teste automático
 
 Na pasta `jogo/`:

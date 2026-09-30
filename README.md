@@ -12,6 +12,10 @@ Jogo de ação e aventura top-down em pixel art. O combate é inspirado em *Hype
 | [03 · Roadmap](docs/03-roadmap.md) | Etapas e status atualizado |
 | [04 · Game design da floresta](docs/04-game-design-floresta.md) | Especificação de gameplay do cenário 1. **Documento editável**, com os valores propostos e as dúvidas em aberto |
 
+## Jogar no navegador
+
+**https://v-bit69.github.io/Game-Development/jogar/** — a floresta inteira, sem instalar nada. Funciona no computador, com teclado (setas, A, S, D, Q, E e Esc). Clique no jogo antes de jogar.
+
 ## Protótipo no Godot
 
 [jogo/](jogo/): o protótipo oficial, em Godot 4. Para abrir e jogar, veja o [README da pasta](jogo/README.md). Marcos prontos: do **M1** ao **M9**. A floresta está jogável do início até a entrada da ruína, com blockout, sapos, parry, diálogos, escalada, morte e pausa.
