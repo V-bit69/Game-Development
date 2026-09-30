@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/alvo_atacante.gd" id="1_atacante"]
+
+[sub_resource type="RectangleShape2D" id="hitbox_sapo"]
+size = Vector2(18, 14)
+
+[node name="AlvoAtacante" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 1
+motion_mode = 1
+script = ExtResource("1_atacante")
+cor = Color(0.5, 0.42, 0.55, 1)
+
+[node name="Colisao" type="CollisionShape2D" parent="."]
+shape = SubResource("hitbox_sapo")

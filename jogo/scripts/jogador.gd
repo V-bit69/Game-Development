@@ -3,12 +3,15 @@ extends CharacterBody2D
 ## M1: movimento em 8 direções e colisão.
 ## M2: dash padrão e dash de rolamento (troca com S), stamina.
 ## M3: combo de 3 golpes (A), dano do dash padrão, knockback e hitstop.
+## M4: parry (Q) com janela de 0,2 s, chute, e dano recebido quando erra.
 ## A origem do nó fica nos pés, no centro do círculo de colisão.
 
 signal stamina_mudou(atual: int)
 signal sem_stamina
 signal dash_trocado(tipo: Dash)
 signal golpe_iniciado(numero: int)
+signal vida_mudou(atual: int)
+signal parry_acertado
 
 enum Dash { PADRAO, ROLAMENTO }
 
@@ -19,7 +22,12 @@ const COR_CORPO := Color(0.93, 0.6, 0.25)
 const COR_HITBOX := Color(1, 1, 1, 0.35)
 const LARGURA := 18.0
 const RASTRO_DURACAO := 0.15
+const CHUTE_DURACAO := 0.18
+const DANO_PISCAR := 0.3
+const TREMOR_DURACAO := 0.2
+const TREMOR_FORCA := 3.0
 
+var vida := Valores.GATO_VIDA
 var direcao_olhar := Vector2.DOWN
 var dash_equipado := Dash.PADRAO
 var stamina := Valores.STAMINA_MAXIMA
@@ -43,8 +51,17 @@ var _intervalo := 0.0
 var _ataque_guardado := false  # A apertado durante um golpe: sai assim que puder
 var _fim_do_ultimo_golpe := -INF
 
+# Parry: janela aberta, recuperação depois de errar, e efeitos visuais.
+var parry_janela := 0.0
+var parry_recuperacao := 0.0
+var _chute := 0.0
+var _chute_direcao := Vector2.RIGHT
+var _dano_piscar := 0.0
+var _tremor := 0.0
+
 @onready var colisao: CollisionShape2D = $Colisao
 @onready var camera: Camera2D = $Camera
+@onready var _camera_offset := camera.offset
 
 
 func _ready() -> void:
@@ -59,13 +76,18 @@ func _unhandled_input(evento: InputEvent) -> void:
 		trocar_dash()
 	elif evento.is_action_pressed("atacar"):
 		pedir_ataque()
+	elif evento.is_action_pressed("parry"):
+		pedir_parry()
 
 
 func _physics_process(delta: float) -> void:
 	_tempo += delta
 	_recuperar_stamina(delta)
+	_atualizar_parry(delta)
 	if em_dash:
 		_mover_dash(delta)
+	elif parry_janela > 0.0:
+		velocity = Vector2.ZERO  # com a janela aberta, o gato fica no lugar
 	else:
 		_atualizar_combo(delta)
 		if golpe_atual == 0:
@@ -74,6 +96,13 @@ func _physics_process(delta: float) -> void:
 			_avancar_no_golpe()
 	_atualizar_rastro()
 	queue_redraw()
+
+
+func _process(delta: float) -> void:
+	# Tremor de tela ao tomar dano.
+	_tremor = maxf(_tremor - delta, 0.0)
+	var forca := TREMOR_FORCA * (_tremor / TREMOR_DURACAO)
+	camera.offset = _camera_offset + Vector2(randf_range(-forca, forca), randf_range(-forca, forca))
 
 
 func _andar() -> void:
@@ -102,7 +131,7 @@ func trocar_dash() -> void:
 
 ## Começa o dash equipado, se houver stamina. Sem direção apertada, vai para onde o gato olha.
 func pedir_dash() -> bool:
-	if em_dash:
+	if em_dash or parry_janela > 0.0:
 		return false
 	var custo := _custo_do_dash(dash_equipado)
 	if golpe_atual != 0 or _intervalo > 0.0:
@@ -166,7 +195,7 @@ func _dano_do_dash() -> void:
 
 ## A começa o próximo golpe. Se um golpe ou intervalo estiver em andamento, fica guardado.
 func pedir_ataque() -> void:
-	if em_dash:
+	if em_dash or parry_janela > 0.0:
 		return
 	if golpe_atual != 0 or _intervalo > 0.0:
 		_ataque_guardado = true
@@ -287,6 +316,57 @@ func _hitstop() -> void:
 func _atualizar_rastro() -> void:
 	while not _rastro.is_empty() and _tempo - _rastro[0].t > RASTRO_DURACAO:
 		_rastro.pop_front()
+
+
+# --- Parry --------------------------------------------------------------
+
+## Q abre a janela de parry. Não abre durante o dash, nem na recuperação de um parry errado.
+## Abrir o parry cancela o golpe em andamento.
+func pedir_parry() -> bool:
+	if em_dash or parry_janela > 0.0 or parry_recuperacao > 0.0:
+		return false
+	if golpe_atual != 0 or _intervalo > 0.0:
+		_cancelar_combo()
+	parry_janela = Valores.GATO_PARRY_JANELA
+	Som.tocar("parry")
+	return true
+
+
+func _atualizar_parry(delta: float) -> void:
+	_chute = maxf(_chute - delta, 0.0)
+	_dano_piscar = maxf(_dano_piscar - delta, 0.0)
+	if parry_recuperacao > 0.0:
+		parry_recuperacao = maxf(parry_recuperacao - delta, 0.0)
+	if parry_janela > 0.0:
+		parry_janela -= delta
+		if parry_janela <= 0.0:
+			# A janela fechou sem defender nada: parry errado.
+			parry_janela = 0.0
+			parry_recuperacao = Valores.GATO_PARRY_RECUPERACAO
+
+
+## Todo ataque inimigo passa por aqui. Com a janela aberta, é defendido: o gato
+## chuta e o atacante é lançado e atordoado. Sem a janela, o gato toma o dano.
+## Devolve true se o ataque foi defendido.
+func receber_ataque(atacante: Node2D, dano: int) -> bool:
+	var direcao := (atacante.global_position - global_position).normalized()
+	if parry_janela > 0.0:
+		parry_janela = 0.0
+		_chute = CHUTE_DURACAO
+		_chute_direcao = direcao
+		direcao_olhar = Vector2.from_angle(snappedf(direcao.angle(), PI / 4.0))
+		if atacante.has_method("receber_parry"):
+			atacante.receber_parry(direcao)
+		Som.tocar("clang")
+		_hitstop()
+		parry_acertado.emit()
+		return true
+	vida = maxi(vida - dano, 0)
+	_dano_piscar = DANO_PISCAR
+	_tremor = TREMOR_DURACAO
+	Som.tocar("dano")
+	vida_mudou.emit(vida)
+	return false
 
 
 # --- Stamina ------------------------------------------------------------

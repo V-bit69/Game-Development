@@ -56,6 +56,14 @@ const GATO_GOLPE_DURACAO := GOLPE_DURACAO_PADRAO * GATO_MULT_GOLPE_DURACAO  # 0,
 const GATO_INTERVALO_GOLPE_1_2 := GATO_GOLPE_DURACAO * 0.5  # 0,13
 const GATO_INTERVALO_GOLPE_2_3 := GATO_GOLPE_DURACAO * 1.0  # 0,26
 const GATO_PARRY_KNOCKBACK := DASH_COMPRIMENTO_PADRAO  # 80
+const PARRY_KNOCKBACK_VELOCIDADE := DASH_VELOCIDADE_PADRAO  # 400 -> 0,2 s de empurrão
+
+# --- Alvo de treino que ataca (sala de teste, só para treinar o parry) ---
+const TREINO_PERCEPCAO := 60.0
+const TREINO_ALCANCE := 32.0
+const TREINO_TELEGRAPH := 0.5
+const TREINO_INTERVALO := 1.0
+const TREINO_DANO := 1
 
 # --- Sapos ---
 const SAPO_VIDA := 3
