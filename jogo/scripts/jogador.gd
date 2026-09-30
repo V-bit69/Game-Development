@@ -3,12 +3,20 @@ extends CharacterBody2D
 ## M1: movimento em 8 direções e colisão.
 ## M2: dash padrão e dash de rolamento (troca com S), stamina.
 ## M3: combo de 3 golpes (A), dano do dash padrão, knockback e hitstop.
+## M4: parry (Q) com janela de 0,2 s, chute, e dano recebido quando erra.
+## M7: pede interação com E (a sala decide com o quê) e mostra o indicador E/D.
+## M8: escalada com o dash padrão nos trechos D da ruína.
+## M9: vida, morte.
 ## A origem do nó fica nos pés, no centro do círculo de colisão.
 
 signal stamina_mudou(atual: int)
 signal sem_stamina
 signal dash_trocado(tipo: Dash)
 signal golpe_iniciado(numero: int)
+signal vida_mudou(atual: int)
+signal parry_acertado
+signal morreu
+signal interagir_pedido
 
 enum Dash { PADRAO, ROLAMENTO }
 
@@ -19,7 +27,19 @@ const COR_CORPO := Color(0.93, 0.6, 0.25)
 const COR_HITBOX := Color(1, 1, 1, 0.35)
 const LARGURA := 18.0
 const RASTRO_DURACAO := 0.15
+const CHUTE_DURACAO := 0.18
+const DANO_PISCAR := 0.3
+const TREMOR_DURACAO := 0.2
+const TREMOR_FORCA := 3.0
 
+var vida := Valores.GATO_VIDA
+var morto := false
+## Letra do balãozinho em cima da cabeça ("E" ou "D"); vazio = sem balão. A sala define.
+var indicador := ""
+var em_escalada := false
+var _escalada_de := Vector2.ZERO
+var _escalada_para := Vector2.ZERO
+var _escalada_t := 0.0
 var direcao_olhar := Vector2.DOWN
 var dash_equipado := Dash.PADRAO
 var stamina := Valores.STAMINA_MAXIMA
@@ -43,8 +63,17 @@ var _intervalo := 0.0
 var _ataque_guardado := false  # A apertado durante um golpe: sai assim que puder
 var _fim_do_ultimo_golpe := -INF
 
+# Parry: janela aberta, recuperação depois de errar, e efeitos visuais.
+var parry_janela := 0.0
+var parry_recuperacao := 0.0
+var _chute := 0.0
+var _chute_direcao := Vector2.RIGHT
+var _dano_piscar := 0.0
+var _tremor := 0.0
+
 @onready var colisao: CollisionShape2D = $Colisao
 @onready var camera: Camera2D = $Camera
+@onready var _camera_offset := camera.offset
 
 
 func _ready() -> void:
@@ -53,19 +82,33 @@ func _ready() -> void:
 
 
 func _unhandled_input(evento: InputEvent) -> void:
-	if evento.is_action_pressed("dash"):
+	if morto:
+		return
+	if evento.is_action_pressed("interagir"):
+		interagir_pedido.emit()
+	elif evento.is_action_pressed("dash"):
 		pedir_dash()
 	elif evento.is_action_pressed("trocar_dash"):
 		trocar_dash()
 	elif evento.is_action_pressed("atacar"):
 		pedir_ataque()
+	elif evento.is_action_pressed("parry"):
+		pedir_parry()
 
 
 func _physics_process(delta: float) -> void:
 	_tempo += delta
+	if morto:
+		queue_redraw()
+		return
 	_recuperar_stamina(delta)
-	if em_dash:
+	_atualizar_parry(delta)
+	if em_escalada:
+		_mover_escalada(delta)
+	elif em_dash:
 		_mover_dash(delta)
+	elif parry_janela > 0.0:
+		velocity = Vector2.ZERO  # com a janela aberta, o gato fica no lugar
 	else:
 		_atualizar_combo(delta)
 		if golpe_atual == 0:
@@ -74,6 +117,13 @@ func _physics_process(delta: float) -> void:
 			_avancar_no_golpe()
 	_atualizar_rastro()
 	queue_redraw()
+
+
+func _process(delta: float) -> void:
+	# Tremor de tela ao tomar dano.
+	_tremor = maxf(_tremor - delta, 0.0)
+	var forca := TREMOR_FORCA * (_tremor / TREMOR_DURACAO)
+	camera.offset = _camera_offset + Vector2(randf_range(-forca, forca), randf_range(-forca, forca))
 
 
 func _andar() -> void:
@@ -102,21 +152,24 @@ func trocar_dash() -> void:
 
 ## Começa o dash equipado, se houver stamina. Sem direção apertada, vai para onde o gato olha.
 func pedir_dash() -> bool:
-	if em_dash:
+	if em_dash or em_escalada or parry_janela > 0.0:
 		return false
 	var custo := _custo_do_dash(dash_equipado)
-	if golpe_atual != 0 or _intervalo > 0.0:
-		_cancelar_combo()  # o dash cancela o ataque
 	if custo > stamina:
 		Som.tocar("falha")
 		sem_stamina.emit()
 		return false
-	if dash_equipado == Dash.ROLAMENTO:
-		_rolamentos.append(_tempo)
-	_gastar_stamina(custo)
+	if golpe_atual != 0 or _intervalo > 0.0:
+		_cancelar_combo()  # o dash cancela o ataque
 	var direcao := _ler_direcao()
 	if direcao != Vector2.ZERO:
 		direcao_olhar = direcao
+	if dash_equipado == Dash.PADRAO and _tentar_escalada():
+		_gastar_stamina(custo)
+		return true
+	if dash_equipado == Dash.ROLAMENTO:
+		_rolamentos.append(_tempo)
+	_gastar_stamina(custo)
 	_dash_direcao = direcao_olhar
 	_dash_tipo = dash_equipado
 	_dash_restante = Valores.GATO_DASH_COMPRIMENTO if _dash_tipo == Dash.PADRAO else Valores.GATO_ROLAMENTO_COMPRIMENTO
@@ -162,11 +215,47 @@ func _dano_do_dash() -> void:
 		_acertar(inimigo, Valores.GATO_DANO_DASH, 0.0)
 
 
+# --- Escalada -----------------------------------------------------------
+
+## Dash padrão perto de um trecho escalável (D) e na direção dele: sobe (ou desce)
+## a parede da ruína, com a mesma duração do dash. A sala diz para onde.
+func _tentar_escalada() -> bool:
+	var sala := get_tree().get_first_node_in_group("sala")
+	if sala == null or not sala.has_method("destino_escalada"):
+		return false
+	var destino: Variant = sala.destino_escalada(global_position, direcao_olhar)
+	if destino == null:
+		return false
+	atravessar_para(destino)
+	return true
+
+
+## Passa por cima da parede até o destino, com a duração do dash (escalada e descida).
+func atravessar_para(destino: Vector2) -> void:
+	em_escalada = true
+	_escalada_de = global_position
+	_escalada_para = destino
+	_escalada_t = 0.0
+	collision_mask = 0  # atravessa a parede durante a subida
+	Som.tocar("escalada")
+
+
+func _mover_escalada(delta: float) -> void:
+	var duracao := Valores.GATO_DASH_COMPRIMENTO / Valores.GATO_DASH_VELOCIDADE
+	_escalada_t = minf(_escalada_t + delta / duracao, 1.0)
+	_rastro.append({"pos": global_position, "t": _tempo})
+	global_position = _escalada_de.lerp(_escalada_para, _escalada_t)
+	velocity = Vector2.ZERO
+	if _escalada_t >= 1.0:
+		em_escalada = false
+		collision_mask = CAMADA_CENARIO | CAMADA_INIMIGOS
+
+
 # --- Combo --------------------------------------------------------------
 
 ## A começa o próximo golpe. Se um golpe ou intervalo estiver em andamento, fica guardado.
 func pedir_ataque() -> void:
-	if em_dash:
+	if em_dash or parry_janela > 0.0:
 		return
 	if golpe_atual != 0 or _intervalo > 0.0:
 		_ataque_guardado = true
@@ -289,6 +378,77 @@ func _atualizar_rastro() -> void:
 		_rastro.pop_front()
 
 
+# --- Parry --------------------------------------------------------------
+
+## Q abre a janela de parry. Não abre durante o dash, nem na recuperação de um parry errado.
+## Abrir o parry cancela o golpe em andamento.
+func pedir_parry() -> bool:
+	if em_dash or parry_janela > 0.0 or parry_recuperacao > 0.0:
+		return false
+	if golpe_atual != 0 or _intervalo > 0.0:
+		_cancelar_combo()
+	parry_janela = Valores.GATO_PARRY_JANELA
+	Som.tocar("parry")
+	return true
+
+
+func _atualizar_parry(delta: float) -> void:
+	_chute = maxf(_chute - delta, 0.0)
+	_dano_piscar = maxf(_dano_piscar - delta, 0.0)
+	if parry_recuperacao > 0.0:
+		parry_recuperacao = maxf(parry_recuperacao - delta, 0.0)
+	if parry_janela > 0.0:
+		parry_janela -= delta
+		if parry_janela <= 0.0:
+			# A janela fechou sem defender nada: parry errado.
+			parry_janela = 0.0
+			parry_recuperacao = Valores.GATO_PARRY_RECUPERACAO
+
+
+## Todo ataque inimigo passa por aqui. Com a janela aberta, é defendido: o gato
+## chuta e o atacante é lançado e atordoado. Sem a janela, o gato toma o dano.
+## Devolve true se o ataque foi defendido.
+func receber_ataque(atacante: Node2D, dano: int) -> bool:
+	if morto or em_escalada:
+		return false
+	var direcao := (atacante.global_position - global_position).normalized()
+	if parry_janela > 0.0:
+		parry_janela = 0.0
+		_chute = CHUTE_DURACAO
+		_chute_direcao = direcao
+		direcao_olhar = Vector2.from_angle(snappedf(direcao.angle(), PI / 4.0))
+		if atacante.has_method("receber_parry"):
+			atacante.receber_parry(direcao)
+		Som.tocar("clang")
+		_hitstop()
+		parry_acertado.emit()
+		return true
+	vida = maxi(vida - dano, 0)
+	_dano_piscar = DANO_PISCAR
+	_tremor = TREMOR_DURACAO
+	Som.tocar("dano")
+	vida_mudou.emit(vida)
+	if vida == 0:
+		_morrer()
+	return false
+
+
+## Tempo que ainda resta do piscar de dano (a HUD usa para a borda vermelha).
+func piscar_de_dano() -> float:
+	return _dano_piscar / DANO_PISCAR
+
+
+func _morrer() -> void:
+	morto = true
+	em_dash = false
+	em_escalada = false
+	parry_janela = 0.0
+	_cancelar_combo()
+	velocity = Vector2.ZERO
+	Som.tocar("morte_gato")
+	morreu.emit()
+
+
 # --- Stamina ------------------------------------------------------------
 
 func _gastar_stamina(quanto: int) -> void:
@@ -319,6 +479,27 @@ func progresso_recarga() -> float:
 
 # --- Desenho provisório -------------------------------------------------
 
+## Chute do parry: perna esticada na direção do atacante e uma faísca no contato.
+func _desenhar_chute(raio: float) -> void:
+	var p := 1.0 - _chute / CHUTE_DURACAO
+	var quadril := Vector2(0, -raio * 0.6)
+	var pe := quadril + _chute_direcao * (raio + 12.0)
+	draw_line(quadril, pe, COR_CORPO.darkened(0.2), 4.0)
+	var brilho := Color(1, 1, 0.7, 1.0 - p)
+	for i in 6:
+		var a := i * TAU / 6.0 + p
+		draw_line(pe + Vector2.from_angle(a) * 2.0, pe + Vector2.from_angle(a) * (4.0 + 8.0 * p), brilho, 1.0)
+
+
+## Balãozinho com a tecla da ação disponível (E para interagir, D para escalar).
+func _desenhar_indicador(topo: float) -> void:
+	var centro := Vector2(0, topo - 10.0 + sin(_tempo * 6.0) * 1.0)
+	var caixa := Rect2(centro - Vector2(6, 6), Vector2(12, 12))
+	draw_rect(caixa.grow(1.0), Color.BLACK)
+	draw_rect(caixa, Color.WHITE)
+	var fonte := ThemeDB.fallback_font
+	draw_string(fonte, centro + Vector2(-3.5, 4), indicador, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color.BLACK)
+
 ## Golpes 1 e 2: três riscos de garra, um de cada lado. Golpe 3: corte largo da espada.
 func _desenhar_golpe(raio: float) -> void:
 	var p := clampf(_golpe_tempo / Valores.GATO_GOLPE_DURACAO, 0.0, 1.0)
@@ -346,22 +527,40 @@ func _draw() -> void:
 	var corpo := Rect2(-LARGURA / 2.0, topo, LARGURA, Valores.GATO_ALTURA)
 	# Rastro do dash: cópias do corpo que somem.
 	for fantasma in _rastro:
-		var vida: float = 1.0 - (_tempo - fantasma.t) / RASTRO_DURACAO
-		var cor := Color(1, 0.85, 0.6, 0.35 * vida)
+		var resto: float = 1.0 - (_tempo - fantasma.t) / RASTRO_DURACAO
+		var cor := Color(1, 0.85, 0.6, 0.35 * resto)
 		var local := to_local(fantasma.pos)
 		if _dash_tipo == Dash.ROLAMENTO:
 			draw_circle(local + Vector2(0, -raio), raio + 2.0, cor)
 		else:
 			draw_rect(Rect2(corpo.position + local, corpo.size), cor)
-	if em_dash and _dash_tipo == Dash.ROLAMENTO:
+	if morto:
+		# Caído de lado.
+		draw_rect(Rect2(-Valores.GATO_ALTURA / 2.0, -8.0, Valores.GATO_ALTURA, 14.0), COR_CORPO.darkened(0.35))
+		return
+	var cor_corpo := COR_CORPO
+	if _dano_piscar > 0.0 and int(_dano_piscar * 20.0) % 2 == 0:
+		cor_corpo = Color(1, 0.3, 0.3)
+	elif parry_janela > 0.0:
+		cor_corpo = COR_CORPO.lerp(Color(0.6, 0.9, 1.0), 0.6)
+	if em_escalada:
+		# Subindo: o corpo estica um pouco na direção da parede.
+		draw_rect(Rect2(corpo.position + Vector2(2, -4), corpo.size + Vector2(-4, 8)), cor_corpo)
+	elif em_dash and _dash_tipo == Dash.ROLAMENTO:
 		# Rolamento: o gato vira uma bola, com uma faixa girando.
 		var centro := Vector2(0, -raio)
 		draw_circle(centro, raio + 2.0, COR_CORPO)
 		var giro := Vector2.from_angle(_tempo * 40.0) * (raio + 1.0)
 		draw_line(centro - giro, centro + giro, COR_CORPO.darkened(0.4), 2.0)
 	else:
-		draw_rect(corpo, COR_CORPO)
+		draw_rect(corpo, cor_corpo)
 	draw_arc(Vector2.ZERO, raio, 0.0, TAU, 24, COR_HITBOX, 1.0)
+	if parry_janela > 0.0:
+		draw_arc(Vector2(0, -raio), raio + 6.0, 0.0, TAU, 24, Color(0.6, 0.9, 1.0, 0.9), 1.0)
+	if _chute > 0.0:
+		_desenhar_chute(raio)
+	if indicador != "":
+		_desenhar_indicador(topo)
 	if golpe_atual != 0:
 		_desenhar_golpe(raio)
 	var ponta := direcao_olhar * (raio + 7.0)

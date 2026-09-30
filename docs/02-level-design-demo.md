@@ -38,10 +38,10 @@ O mapa em tamanho real está na cena `jogo/cenas/floresta.tscn`, que é a cena p
 
 O que ainda é provisório no blockout:
 
-- Os sapos são só marcações de posição (`s` e `l`). Eles entram no M5 e no M6.
-- O trecho escalável (`D`) está liberado para passar andando, para dar acesso à área superior. A escalada de verdade entra no M8.
 - A entrada da ruína (`=`) está fechada, porque a ruína ainda aguarda a especificação.
-- Xennar, fogueira, estátua e elemento tecnológico bloqueiam a passagem, mas ainda não têm interação (M7).
+- A descida da área superior (`v`) é provisória: E perto dela leva o gato para a frente da ruína (dúvida 10).
+
+Desde o M9, as marcações viraram jogo: os sapos são inimigos de verdade e dormem até o gatilho (`!`) da área, o trecho `D` só se passa escalando com o dash padrão, e Xennar, estátua, elemento, flor e peça têm interação com E.
 
 ### Dimensões
 

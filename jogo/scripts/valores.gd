@@ -56,6 +56,14 @@ const GATO_GOLPE_DURACAO := GOLPE_DURACAO_PADRAO * GATO_MULT_GOLPE_DURACAO  # 0,
 const GATO_INTERVALO_GOLPE_1_2 := GATO_GOLPE_DURACAO * 0.5  # 0,13
 const GATO_INTERVALO_GOLPE_2_3 := GATO_GOLPE_DURACAO * 1.0  # 0,26
 const GATO_PARRY_KNOCKBACK := DASH_COMPRIMENTO_PADRAO  # 80
+const PARRY_KNOCKBACK_VELOCIDADE := DASH_VELOCIDADE_PADRAO  # 400 -> 0,2 s de empurrão
+
+# --- Alvo de treino que ataca (sala de teste, só para treinar o parry) ---
+const TREINO_PERCEPCAO := 60.0
+const TREINO_ALCANCE := 32.0
+const TREINO_TELEGRAPH := 0.5
+const TREINO_INTERVALO := 1.0
+const TREINO_DANO := 1
 
 # --- Sapos ---
 const SAPO_VIDA := 3
@@ -67,3 +75,12 @@ const SAPO_LINGUA_VELOCIDADE := DASH_VELOCIDADE_PADRAO  # 400
 const SAPO_PERCEPCAO := 200.0
 const SAPO_ZONA_PROXIMA := 40.0
 const SAPO_ZONA_INTERMEDIARIA := 80.0
+const SAPO_TELEGRAPH := 0.5
+const SAPO_INTERVALO := 1.0  # espera entre um ciclo e outro
+const SAPO_DANO := 1
+const SAPO_LINGUA_DANO := 1
+const SAPO_LINGUA_PARRY_DANO := 1  # dano no sapo quando a língua é rebatida (dúvida 20)
+const ENCONTRO_ATRASO_MAXIMO := 0.25  # os sapos do encontro entram quase juntos
+
+# --- Interação ---
+const XENNAR_DISTANCIA_AUTO := 40.0  # o primeiro diálogo começa sozinho a essa distância

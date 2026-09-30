@@ -44,7 +44,7 @@ Entrega: **especificação de gameplay**.
 - [ ] Concept da região da demo
 
 ### 3. Protótipo — Development Director 🔄
-> **Ordem definida pelo Game Director (30/09):** o blockout de cada área vem antes do resto do protótipo. Por isso o M4 ficou pausado (guardado no branch `wip/m4-parry`) enquanto a floresta era montada no Godot.
+> **Ordem definida pelo Game Director (30/09):** o blockout de cada área vem antes do resto do protótipo. Por isso o M4 ficou pausado enquanto a floresta era montada no Godot, e foi retomado depois.
 
 Versão feia, mas jogável, no Godot. A floresta já pode ser feita inteira. Marcos em ordem:
 
@@ -52,12 +52,12 @@ Versão feia, mas jogável, no Godot. A floresta já pode ser feita inteira. Mar
 - [x] **M1** Projeto Godot em 640×360 (×3 na tela), movimento em 8 direções (setas), colisão e câmera seguindo
 - [x] **M2** Dash padrão, dash de rolamento (2 grátis em 4 s), troca com S, stamina em 4 unidades e HUD
 - [x] **M3** Combo de 3 golpes (garra, garra, espada), dano do dash, knockback e feedback (hitstop, flash, tremida, sons provisórios)
-- [ ] **M4** *(pausado, retomar depois do blockout)* Parry com Q: janela de 0,2 s, chute, knockback de 1 dash e atordoamento de 1 s
-- [ ] **M5** Sapo comum: ciclo com telegraph, salto, cancelamento do pulo, HP em quadradinhos e morte
-- [ ] **M6** Sapo com língua: três zonas, língua que volta e parry da língua
-- [ ] **M7** Interação com E: Xennar e diálogos, flor, estátua, elemento tecnológico, interações ocultas
-- [ ] **M8** Escalada com dash, área superior e peça de upgrade
-- [ ] **M9** HP do jogador, morte com filtro e reinício da fase, pausa
+- [x] **M4** Parry com Q: janela de 0,2 s, chute, knockback de 1 dash e atordoamento de 1 s
+- [x] **M5** Sapo comum: ciclo com telegraph, salto, cancelamento do pulo, HP em quadradinhos e morte
+- [x] **M6** Sapo com língua: três zonas, língua que volta e parry da língua
+- [x] **M7** Interação com E: Xennar e diálogos, flor, estátua, elemento tecnológico, interações ocultas
+- [x] **M8** Escalada com dash, área superior e peça de upgrade
+- [x] **M9** HP do jogador, morte com filtro e reinício da fase, pausa
 
 **Ruína e boss (aguardando especificação)**
 - [ ] **M10** KLM-99 e ataque à distância
@@ -111,3 +111,4 @@ Personagens, cenários, inimigos, objetos, identidade visual, UI e referências 
 | 30/09/2026 | M2 concluído: dash padrão, rolamento, troca com S, stamina e HUD provisória, com sons provisórios |
 | 30/09/2026 | M3 concluído: combo de 3 golpes, dano do dash, knockback, hitstop e alvos de treino na sala de teste |
 | 30/09/2026 | Game Director pede o blockout antes do protótipo. M4 pausado. Blockout da floresta montado no Godot, com as 5 áreas e os 4 encontros marcados |
+| 30/09/2026 | M4 a M9 concluídos: parry, sapos comum e com língua, encontros com gatilho, interações e diálogos, escalada, morte e pausa. A floresta está jogável do início à entrada da ruína |

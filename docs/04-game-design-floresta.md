@@ -1125,6 +1125,17 @@ Perguntas do desenvolvimento para o game design:
 17. **Dash durante o combo.** O dash cancela o golpe em andamento e o combo volta ao golpe 1. Pode ser?
 18. **Knockback do dash.** O dash padrão fere o inimigo (2 de dano), mas não o empurra, porque o gato passa através dele. Pode ser?
 19. **Rolamento e inimigos.** O rolamento também atravessa inimigos (sem dano). Andando normalmente, o inimigo vivo bloqueia a passagem. Pode ser?
+20. **Parry na língua.** A seção 23 diz que "o sapo é atingido". No protótipo, ele leva 1 de dano e fica atordoado por 1 s, sem ser lançado. Esse dano está certo?
+21. **Distância de interação.** Com 25 px contados da borda do objeto, é preciso quase encostar na flor ou na peça para pegar. Aumentar?
+22. **Diálogo automático de Xennar.** O primeiro diálogo começa sozinho quando o gato chega a 40 px dele. As outras conversas são com E. Pode ser?
+23. **Elemento tecnológico.** A seção 14 diz "ao encontrá-lo, o gato comenta". No protótipo, o comentário é com E, com indicador. Deveria ser automático, ao chegar perto?
+24. **Fala da flor.** A curiosidade sobre a irmã não está escrita. O protótipo usa um texto provisório, marcado em `jogo/scripts/textos.gd`. Falta o texto final.
+25. **Invulnerabilidade depois do dano.** Não existe: dois sapos podem acertar quase juntos. Quer um tempo curto de invulnerabilidade (por exemplo, 0,5 s) depois de tomar dano?
+26. **Direção do salto do sapo.** É decidida no começo do telegraph e não muda depois, então o jogador consegue desviar. Pode ser, ou o sapo deve mirar no fim do telegraph?
+27. **Direção do parry.** O parry defende ataques vindos de qualquer lado, sem precisar estar virado para o inimigo. Pode ser?
+28. **Entrada dos sapos.** Nos encontros, os sapos aparecem caindo do alto no lugar marcado, quase juntos. A ideia era saírem pulando da vegetação?
+29. **Tela de morte.** O texto é provisório ("O Homem-gato caiu" e "Pressione E para recomeçar"), com filtro cinza avermelhado. Algum texto específico?
+30. **Pausa.** Esc abre o menu com Continuar, Recomeçar a fase e Sair do jogo. Pode ser?
 
 ---
 
@@ -1141,3 +1152,4 @@ Perguntas do desenvolvimento para o game design:
 | 1.2 | 30/09/2026 | Desenvolvimento | Seção 49 recalculada em pixels da arte (valores divididos por 3) |
 | 1.2 | 30/09/2026 | Desenvolvimento | Dúvidas 13 e 14, que surgiram na implementação dos dashes (M2) |
 | 1.2 | 30/09/2026 | Desenvolvimento | Dúvidas 15 a 19, que surgiram na implementação do combate melee (M3) |
+| 1.2 | 30/09/2026 | Desenvolvimento | Dúvidas 20 a 30, que surgiram na implementação do M4 ao M9 |

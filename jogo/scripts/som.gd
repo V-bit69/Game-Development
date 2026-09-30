@@ -22,6 +22,16 @@ func _ready() -> void:
 	_sons["espada"] = _misturar(_sopro(0.14, 0.4, 0.8), _tom(1900.0, 0.12, 0.08, false))
 	_sons["impacto"] = _misturar(_tom(70.0, 0.1, 0.6, false), _sopro(0.05, 0.4, 0.5))
 	_sons["morte"] = _juntar(_tom(300.0, 0.08, 0.25, true), _tom(120.0, 0.18, 0.25, true))
+	_sons["parry"] = _wav(_sopro(0.06, 0.25, 1.0))
+	_sons["clang"] = _misturar(_tom(1250.0, 0.25, 0.3, false), _tom(1870.0, 0.2, 0.2, false))
+	_sons["dano"] = _misturar(_tom(55.0, 0.16, 0.7, true), _sopro(0.08, 0.5, 0.6))
+	_sons["morte_gato"] = _juntar(_tom(330.0, 0.15, 0.3, true), _tom(247.0, 0.15, 0.3, true), _tom(165.0, 0.4, 0.3, true))
+	_sons["escalada"] = _misturar(_sopro(0.13, 0.45, 0.7), _tom(600.0, 0.1, 0.1, false))
+	_sons["interacao"] = _juntar(_tom(880.0, 0.05, 0.25, false), _tom(1320.0, 0.07, 0.25, false))
+	_sons["jingle"] = _juntar(_tom(784.0, 0.1, 0.3, false), _tom(988.0, 0.1, 0.3, false), _tom(1319.0, 0.25, 0.3, false))
+	_sons["alerta"] = _juntar(_tom(500.0, 0.06, 0.3, true), _tom(700.0, 0.1, 0.3, true))
+	_sons["salto"] = _wav(_tom(260.0, 0.08, 0.2, false))
+	_sons["lingua"] = _misturar(_sopro(0.1, 0.3, 0.9), _tom(420.0, 0.1, 0.12, false))
 	_sons["falha"] = _juntar(_tom(220.0, 0.08, 0.3, true), _tom(150.0, 0.12, 0.3, true))
 
 
@@ -89,9 +99,11 @@ func _misturar(a: PackedFloat32Array, b: PackedFloat32Array) -> AudioStreamWAV:
 	return _wav(soma)
 
 
-func _juntar(a: PackedFloat32Array, b: PackedFloat32Array) -> AudioStreamWAV:
+## Toca os trechos um depois do outro.
+func _juntar(a: PackedFloat32Array, b: PackedFloat32Array, c := PackedFloat32Array()) -> AudioStreamWAV:
 	var tudo := a.duplicate()
 	tudo.append_array(b)
+	tudo.append_array(c)
 	return _wav(tudo)
 
 

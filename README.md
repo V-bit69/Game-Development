@@ -14,7 +14,7 @@ Jogo de ação e aventura top-down em pixel art. O combate é inspirado em *Hype
 
 ## Protótipo no Godot
 
-[jogo/](jogo/): o protótipo oficial, em Godot 4. Para abrir e jogar, veja o [README da pasta](jogo/README.md). Marcos prontos: **M1** (movimento, colisão e câmera) , **M2** (dashes, stamina e HUD) e **M3** (combo, dano e knockback).
+[jogo/](jogo/): o protótipo oficial, em Godot 4. Para abrir e jogar, veja o [README da pasta](jogo/README.md). Marcos prontos: do **M1** ao **M9**. A floresta está jogável do início até a entrada da ruína, com blockout, sapos, parry, diálogos, escalada, morte e pausa.
 
 ## Protótipo web (ensaio)
 
