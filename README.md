@@ -35,4 +35,4 @@ Pelo site do GitHub: abra o arquivo, clique no ícone de lápis (**Edit this fil
 
 ## Tecnologia (proposta)
 
-Godot 4 · GDScript · resolução base 640×360 · tiles de 16 px
+Godot 4 · GDScript · resolução base 1920×1080 · tiles de 48 px · personagem padrão com 150 px
