@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/jogador.gd" id="1_jogador"]
 
 [sub_resource type="CircleShape2D" id="circulo_pes"]
-radius = 30.0
+radius = 10.0
 
 [node name="Jogador" type="CharacterBody2D"]
 motion_mode = 1
@@ -13,6 +13,6 @@ script = ExtResource("1_jogador")
 shape = SubResource("circulo_pes")
 
 [node name="Camera" type="Camera2D" parent="."]
-offset = Vector2(0, -40)
+offset = Vector2(0, -13)
 position_smoothing_enabled = true
 position_smoothing_speed = 8.0

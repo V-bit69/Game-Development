@@ -1,10 +1,10 @@
 # Level Design da Demo — Rascunho
 
-**Versão:** 0.3 · **Status:** floresta refeita pela [especificação de gameplay](04-game-design-floresta.md). Ruína e boss aguardam a especificação deles.
+**Versão:** 0.4 · **Status:** floresta refeita pela [especificação de gameplay](04-game-design-floresta.md). Ruína e boss aguardam a especificação deles.
 
 Este é um blockout só com posições e funções. Não é arte. Cada elemento está marcado por **função**, e o concept decide o visual.
 
-Os tamanhos consideram a resolução base de 1920 × 1080 px e tiles de 48 px. **Uma tela = 40 × 22,5 tiles.**
+Os tamanhos estão em pixels da arte, na resolução base de 640 × 360 px, com tiles de 16 px. Na tela Full HD tudo aparece 3× maior. **Uma tela = 40 × 22,5 tiles.**
 
 ---
 
@@ -34,14 +34,14 @@ A floresta sobe de baixo para cima, como no diagrama do game design, com a ruín
 
 | Parte | Tamanho (px) | Em tiles | Telas | Pedido no game design |
 |---|---|---|---|---|
-| Área segura | 1920 × 1080 | 40 × 22,5 | 1 | 1 tela |
-| Corredor | 1152 × 1800 | 24 × 37,5 | 1 | 1 tela |
-| Clareira | 1920 × 1632 | 40 × 34 | 1,5 | 1,5 tela |
-| Exterior da ruína | 2880 × 1776 | 60 × 37 | 2,5 | 2 a 2,5 telas |
-| Área superior | 2880 × 1056 | 60 × 22 | 1,5 | 1,5 tela |
-| **Mapa inteiro** | **2880 × 7344** | 60 × 153 | **7,5** | |
+| Área segura | 640 × 360 | 40 × 22,5 | 1 | 1 tela |
+| Corredor | 384 × 600 | 24 × 37,5 | 1 | 1 tela |
+| Clareira | 640 × 544 | 40 × 34 | 1,5 | 1,5 tela |
+| Exterior da ruína | 960 × 592 | 60 × 37 | 2,5 | 2 a 2,5 telas |
+| Área superior | 960 × 352 | 60 × 22 | 1,5 | 1,5 tela |
+| **Mapa inteiro** | **960 × 2448** | 60 × 153 | **7,5** | |
 
-Andando em linha reta a 390 px/s, o gato atravessa o mapa em cerca de 20 s. Com diálogo, exploração e combate, a floresta deve durar de 4 a 6 minutos.
+Andando em linha reta a 130 px/s, o gato atravessa o mapa em cerca de 20 s. Com diálogo, exploração e combate, a floresta deve durar de 4 a 6 minutos.
 
 ### Legenda
 
@@ -55,7 +55,7 @@ o  obstáculo (bloqueia ataque e língua, não bloqueia a percepção)
 K  peça de upgrade da KLM-99       v  descida de volta
 ```
 
-Nos desenhos abaixo, cada caractere vale 96 × 96 px (2 tiles). As proporções verticais estão comprimidas.
+Nos desenhos abaixo, cada caractere vale 32 × 32 px (2 tiles). As proporções verticais estão comprimidas.
 
 ### 1. Área segura (1 tela)
 
@@ -105,7 +105,7 @@ TTT......::......TTT
 TTTTTTTT::::TTTTTTTT   <- vem do corredor
 ```
 
-- **Primeiro combate:** 3 sapos comuns + 1 com língua. Eles entram pulando da vegetação, espalhados e a pelo menos 360 px do jogador.
+- **Primeiro combate:** 3 sapos comuns + 1 com língua. Eles entram pulando da vegetação, espalhados e a pelo menos 120 px do jogador.
 - Dois obstáculos baixos dão cobertura contra a língua, e ensinam que obstáculo bloqueia ataque.
 - A **estátua da Guardiã** fica no caminho, mais perto da saída. O jogador lê depois do combate, no momento de calma.
 - O "fragmento" que o game design cita na clareira ainda depende da dúvida 4.

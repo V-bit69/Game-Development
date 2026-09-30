@@ -1,7 +1,7 @@
 class_name SalaBlockout
 extends Node2D
 ## Monta um blockout a partir de um mapa em texto, com a mesma legenda de
-## docs/02-level-design-demo.md. Cada caractere vale 2 × 2 tiles (96 × 96 px).
+## docs/02-level-design-demo.md. Cada caractere vale 2 × 2 tiles (32 × 32 px).
 ##   T  vegetação densa (parede)     #  parede da ruína     o  obstáculo
 ##   .  chão livre                   :  trilha              @  início do jogador
 

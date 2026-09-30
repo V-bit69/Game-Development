@@ -4,7 +4,7 @@ extends CharacterBody2D
 
 const COR_CORPO := Color(0.93, 0.6, 0.25)
 const COR_HITBOX := Color(1, 1, 1, 0.35)
-const LARGURA := 56.0
+const LARGURA := 18.0
 
 var direcao_olhar := Vector2.DOWN
 
@@ -38,8 +38,8 @@ func _draw() -> void:
 	var raio := Valores.GATO_RAIO_HITBOX
 	var topo := raio - Valores.GATO_ALTURA
 	draw_rect(Rect2(-LARGURA / 2.0, topo, LARGURA, Valores.GATO_ALTURA), COR_CORPO)
-	draw_arc(Vector2.ZERO, raio, 0.0, TAU, 32, COR_HITBOX, 2.0)
-	var ponta := direcao_olhar * (raio + 22.0)
-	var lado := direcao_olhar.orthogonal() * 10.0
-	var base := direcao_olhar * (raio + 6.0)
+	draw_arc(Vector2.ZERO, raio, 0.0, TAU, 24, COR_HITBOX, 1.0)
+	var ponta := direcao_olhar * (raio + 7.0)
+	var lado := direcao_olhar.orthogonal() * 3.0
+	var base := direcao_olhar * (raio + 2.0)
 	draw_colored_polygon(PackedVector2Array([ponta, base + lado, base - lado]), Color.WHITE)

@@ -28,11 +28,11 @@ TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
 [node name="HUD" type="CanvasLayer" parent="."]
 
 [node name="Info" type="Label" parent="HUD"]
-offset_left = 24.0
-offset_top = 16.0
-offset_right = 800.0
-offset_bottom = 110.0
+offset_left = 8.0
+offset_top = 5.0
+offset_right = 300.0
+offset_bottom = 40.0
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 8
-theme_override_font_sizes/font_size = 28
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 11
 text = "M1"

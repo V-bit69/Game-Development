@@ -135,9 +135,9 @@ Tudo o que acontece precisa de um sinal visual **e** sonoro, mesmo que provisór
 | Tema | Proposta | Motivo |
 |---|---|---|
 | Engine | **Godot 4** (GDScript) | Grátis, forte em 2D e pixel art, cenas em texto (fácil de versionar) |
-| Resolução base | **1920×1080**, com a arte feita na resolução real | Definido pelo game design em 30/09. Outras resoluções são ajustadas pela engine |
-| Tile | **48×48 px** | A tela continua com 40 × 22,5 tiles |
-| Personagem | Tamanho 3 (padrão) = **150 px** de altura. Homem-gato, tamanho 2 = 125 px | 150 px definido pelo game design. Os 125 px são proposta |
+| Resolução base | **640×360**, ampliada 3× (1920×1080) com escala inteira | Pixel art com os pixels visíveis, definido pelo game design em 30/09 |
+| Tile | **16×16 px** na arte (48 px na tela) | A tela tem 40 × 22,5 tiles |
+| Personagem | Tamanho 3 (padrão) = **50 px** na arte, 150 px na tela. Homem-gato, tamanho 2 = 42 px | 50 px definido pelo game design. Os 42 px são proposta |
 | Controle | Teclado: setas, A, S, D, Q e E | Definido na especificação. Suporte a gamepad a confirmar |
 | Versionamento | Git + GitHub | |
 

@@ -17,14 +17,18 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 [autoload]
 
 Valores="*res://scripts/valores.gd"
+Tela="*res://scripts/tela.gd"
 
 [display]
 
-window/size/viewport_width=1920
-window/size/viewport_height=1080
-window/size/mode=2
-window/stretch/mode="canvas_items"
+window/size/viewport_width=640
+window/size/viewport_height=360
+window/size/mode=3
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/stretch/mode="viewport"
 window/stretch/aspect="keep"
+window/stretch/scale_mode="integer"
 
 [input]
 
@@ -76,6 +80,7 @@ interagir={
 
 [rendering]
 
+textures/canvas_textures/default_texture_filter=0
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 environment/defaults/default_clear_color=Color(0.05, 0.07, 0.06, 1)

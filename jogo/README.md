@@ -18,6 +18,12 @@ Projeto Godot 4 do protótipo da demo. Feito com formas simples, sem arte final.
 | A | Atacar | M3 |
 | Q | Parry | M4 |
 | E | Interagir | M7 |
+| F11 | Alternar tela cheia e janela | — |
+| Esc | Fechar o jogo (provisório) | — |
+
+## Escala
+
+O jogo roda em **640 × 360** e é ampliado 3× num monitor 1920 × 1080, com os pixels visíveis. Todos os números do projeto estão em pixels da arte: o personagem padrão tem 50 px e aparece com 150 px na tela. A ampliação é sempre inteira, por isso o jogo abre em tela cheia. Em janela, ele fica 2× e sobra borda preta.
 
 ## Onde fica cada coisa
 
@@ -29,7 +35,7 @@ Projeto Godot 4 do protótipo da demo. Feito com formas simples, sem arte final.
 | `cenas/sala_teste.tscn` | Sala de teste do M1. O mapa fica no campo **Mapa** do nó `SalaTeste` |
 | `testes/teste_m1.gd` | Teste automático do M1 |
 
-No mapa em texto, cada caractere vale 96 × 96 px (2 × 2 tiles): `T` vegetação, `#` parede da ruína, `o` obstáculo, `.` chão, `:` trilha, `@` início do jogador.
+No mapa em texto, cada caractere vale 32 × 32 px (2 × 2 tiles): `T` vegetação, `#` parede da ruína, `o` obstáculo, `.` chão, `:` trilha, `@` início do jogador.
 
 ## Rodar o teste automático
 

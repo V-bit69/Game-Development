@@ -5,10 +5,10 @@
 
 | | |
 |---|---|
-| **Versão** | 1.1 |
+| **Versão** | 1.2 |
 | **Status** | Especificação de gameplay em desenvolvimento |
 | **Engine** | Godot 4 |
-| **Resolução base** | 1920 × 1080 px *(o PDF dizia 640 × 360; alterado pelo game design em 30/09)* |
+| **Resolução base** | 640 × 360 px, ampliada 3× na tela Full HD |
 
 ---
 
@@ -260,7 +260,7 @@ O jogador pressiona E para executar a interação.
 
 A distância mínima de ativação corresponde a **½ da altura de um personagem de tamanho 3**.
 
-> **Correção do game design (30/09):** o PDF usava 16 px como altura de referência, o que dava 8 px de distância. Esse valor estava errado: 16 px é o tamanho de um tile. Um personagem de tamanho 3 é bem maior. A regra que vale é "½ da altura do tamanho 3". Com o tamanho 3 em 150 px, a distância é de 75 px.
+> **Correção do game design (30/09):** o PDF usava 16 px como altura de referência, o que dava 8 px de distância. Esse valor estava errado: 16 px é o tamanho de um tile. Um personagem de tamanho 3 é bem maior. A regra que vale é "½ da altura do tamanho 3". Com o tamanho 3 em 50 px, a distância é de 25 px.
 
 ---
 
@@ -667,7 +667,7 @@ As posições exatas são definidas no blockout.
 
 A floresta é propositalmente pequena.
 
-A resolução base é **1920 × 1080 px**. *(O PDF dizia 640 × 360 px. O game design mudou em 30/09 para a arte ser feita na resolução real.)*
+A resolução base é **640 × 360 px**. A arte é desenhada nessa resolução e ampliada 3× num monitor 1920 × 1080.
 
 As áreas são pensadas em relação ao tamanho da tela.
 
@@ -924,7 +924,7 @@ A vegetação é densa, mas as áreas efetivamente percorridas pelo jogador perm
 
 | Parâmetro | Valor |
 |---|---|
-| Resolução base | 1920 × 1080 px |
+| Resolução base | 640 × 360 px (×3 na tela) |
 | Altura do Homem-gato | Tamanho 2 |
 | Velocidade de caminhada | 1,3 × padrão |
 | Dash do Homem-gato — comprimento | 1,3 × padrão |
@@ -935,7 +935,7 @@ A vegetação é densa, mas as áreas efetivamente percorridas pelo jogador perm
 | Recuperação padrão | 1 unidade / 3 s |
 | Recuperação do Homem-gato | 1,5 × padrão |
 | Janela do rolamento | 4 s |
-| Interação | ½ da altura do tamanho 3 = 75 px *(o PDF dizia 8 px; ver correção na seção 11)* |
+| Interação | ½ da altura do tamanho 3 = 25 px *(o PDF dizia 8 px; ver correção na seção 11)* |
 | HP do Homem-gato | 10 |
 | Dano golpe 1 | 1 |
 | Dano golpe 2 | 1 |
@@ -1022,71 +1022,71 @@ Caso um parâmetro precise ser alterado por questões de jogabilidade, a altera�
 
 ## 49. Valores propostos pelo desenvolvimento
 
-> Seção do desenvolvimento. São chutes iniciais para o que estava "a definir", para o protótipo ter com o que começar. Todos serão calibrados no playtest. Os valores consideram a resolução base de **1920 × 1080 px**, com a arte feita na resolução real.
+> Seção do desenvolvimento. São chutes iniciais para o que estava "a definir", para o protótipo ter com o que começar. Todos serão calibrados no playtest. Os valores estão em **pixels da arte**, na resolução base de **640 × 360 px**. Na tela Full HD tudo aparece 3× maior.
 
 ### 49.1 Escala dos personagens
 
-Definido pelo game design em 30/09: o personagem de tamanho 3 tem **150 px** de altura, com a arte desenhada na resolução real.
+Definido pelo game design em 30/09: o personagem de tamanho 3 tem **50 px** de altura na arte. A arte é ampliada 3× na tela, então ele aparece com **150 px** num monitor 1920 × 1080, com os pixels visíveis, como em Hyper Light Drifter e Eastward.
 
-| Tamanho | Altura (1920 × 1080) |
-|---|---|
-| 1 · baixo | 100 px |
-| 2 · médio (Homem-gato) | 125 px |
-| 3 · padrão | **150 px** |
-| 4 · alto | 175 px |
+| Tamanho | Altura na arte | Na tela Full HD (×3) |
+|---|---|---|
+| 1 · baixo | 34 px | 102 px |
+| 2 · médio (Homem-gato) | 42 px | 126 px |
+| 3 · padrão | **50 px** | **150 px** |
+| 4 · alto | 58 px | 174 px |
 
-- Os tamanhos 1, 2 e 4 são proposta do desenvolvimento, em degraus de 25 px.
-- Tile: **48 × 48 px**. A tela tem 40 × 22,5 tiles, e um personagem de tamanho 3 tem pouco mais de 3 tiles de altura.
-- Na tela, a proporção é a mesma da [imagem de referência de câmera](referencias/referencia-camera-escala.jpg): o personagem ocupa cerca de 14% da altura.
+- Os tamanhos 1, 2 e 4 são proposta do desenvolvimento, em degraus de 8 px.
+- Tile: **16 × 16 px** na arte (48 × 48 px na tela). A tela tem 40 × 22,5 tiles, e um personagem de tamanho 3 tem pouco mais de 3 tiles de altura.
+- A proporção na tela é a da [imagem de referência de câmera](referencias/referencia-camera-escala.jpg): o personagem ocupa cerca de 14% da altura.
 
 ### 49.2 Parâmetros gerais do jogo ("padrão")
 
 | Parâmetro padrão | Valor proposto |
 |---|---|
-| Velocidade normal de caminhada | 300 px/s |
-| Dash padrão — comprimento | 240 px |
-| Dash padrão — velocidade | 1200 px/s |
+| Velocidade normal de caminhada | 100 px/s |
+| Dash padrão — comprimento | 80 px |
+| Dash padrão — velocidade | 400 px/s |
 | Dash padrão — duração resultante | 0,20 s |
 | Duração padrão do golpe | 0,20 s |
-| Knockback padrão dos ataques | 48 px (1 tile) |
+| Knockback padrão dos ataques | 16 px (1 tile) |
 | Recuperação padrão de stamina | 1 unidade / 3 s |
 
 ### 49.3 Homem-gato (valores resultantes)
 
 | Parâmetro | Regra | Valor resultante |
 |---|---|---|
-| Caminhada | 1,3 × 300 | **390 px/s** |
-| Dash padrão — comprimento | 1,3 × 240 | **312 px** |
-| Dash padrão — velocidade | 2 × 1200 | **2400 px/s** |
-| Dash padrão — duração | 312 ÷ 2400 | **0,13 s** |
-| Rolamento — comprimento | 0,8 × 240 | **192 px** |
-| Rolamento — velocidade | 1 × 1200 | **1200 px/s** |
-| Rolamento — duração | 192 ÷ 1200 | **0,16 s** |
+| Caminhada | 1,3 × 100 | **130 px/s** |
+| Dash padrão — comprimento | 1,3 × 80 | **104 px** |
+| Dash padrão — velocidade | 2 × 400 | **800 px/s** |
+| Dash padrão — duração | 104 ÷ 800 | **0,13 s** |
+| Rolamento — comprimento | 0,8 × 80 | **64 px** |
+| Rolamento — velocidade | 1 × 400 | **400 px/s** |
+| Rolamento — duração | 64 ÷ 400 | **0,16 s** |
 | Recuperação de stamina | 3 s ÷ 1,5 | **1 unidade / 2 s** |
 | Duração do golpe | 1,3 × 0,20 | **0,26 s** *(ver dúvida 2)* |
 | Intervalo golpe 1→2 | 0,5 × 0,26 | **0,13 s** |
 | Intervalo golpe 2→3 | 1 × 0,26 | **0,26 s** |
 | Combo completo (3 golpes) | soma | **≈ 1,17 s** |
-| Knockback do parry | 1 dash padrão | **240 px** |
-| Distância de interação | ½ × 150 | **75 px** |
-| Hitbox do corpo | — | círculo de **raio 30 px**, nos pés |
-| Área de ataque | 2 × raio | **60 px** de alcance, em arco à frente |
+| Knockback do parry | 1 dash padrão | **80 px** |
+| Distância de interação | ½ × 50 | **25 px** |
+| Hitbox do corpo | — | círculo de **raio 10 px**, nos pés |
+| Área de ataque | 2 × raio | **20 px** de alcance, em arco à frente |
 | Recuperação do parry errado | — | **0,4 s** sem poder repetir *(ver dúvida 7)* |
 
 ### 49.4 Sapos
 
 | Parâmetro | Regra | Valor resultante |
 |---|---|---|
-| Salto — comprimento | 0,5 × 240 | **120 px** |
-| Salto — velocidade | 1 × 1200 | **1200 px/s** |
-| Salto — duração | 120 ÷ 1200 | **0,10 s** |
-| Língua — alcance | 0,5 × 240 | **120 px** |
-| Língua — velocidade | 1 × 1200 | **1200 px/s** (0,10 s para sair e 0,10 s para voltar) |
-| Hitbox | proporcional à escala | retângulo de **54 × 42 px** *(ver dúvida 3)* |
-| Zona de percepção | — | raio de **600 px** |
-| Zona próxima (língua) | alcance da língua | até **120 px** |
-| Zona intermediária | pulo + língua | de **120 a 240 px** |
-| Zona externa | até a percepção | de **240 a 600 px** |
+| Salto — comprimento | 0,5 × 80 | **40 px** |
+| Salto — velocidade | 1 × 400 | **400 px/s** |
+| Salto — duração | 40 ÷ 400 | **0,10 s** |
+| Língua — alcance | 0,5 × 80 | **40 px** |
+| Língua — velocidade | 1 × 400 | **400 px/s** (0,10 s para sair e 0,10 s para voltar) |
+| Hitbox | proporcional à escala | retângulo de **18 × 14 px** *(ver dúvida 3)* |
+| Zona de percepção | — | raio de **200 px** |
+| Zona próxima (língua) | alcance da língua | até **40 px** |
+| Zona intermediária | pulo + língua | de **40 a 80 px** |
+| Zona externa | até a percepção | de **80 a 200 px** |
 
 ### 49.5 Encontros
 
@@ -1106,9 +1106,9 @@ As dimensões das áreas e o posicionamento estão em [02-level-design-demo.md](
 
 Perguntas do desenvolvimento para o game design:
 
-1. **Estilo da arte.** *(A escala foi respondida em 30/09: 150 px para o tamanho 3, em 1920 × 1080.)* Falta confirmar o estilo: com a arte na resolução real, cada pixel do desenho é um pixel da tela, e o resultado fica mais próximo de ilustração em alta definição do que do pixel art de blocos visíveis de Hyper Light Drifter e Eastward. É essa a intenção?
+1. ~~**Estilo da arte.**~~ *Respondida em 30/09: pixel art com os pixels visíveis. O tamanho 3 tem 50 px na arte e aparece com 150 px na tela (×3).*
 2. **Duração do golpe.** "1,3 × a duração padrão" deixa o golpe do gato mais lento que o padrão. Era essa a intenção, ou a ideia era 1,3 × mais rápido, como no dash?
-3. **Hitbox dos inimigos.** Os 6 px vieram da referência antiga de 16 px de altura. Na escala nova, a proposta é 54 × 42 px. Pode ser?
+3. **Hitbox dos inimigos.** Os 6 px vieram da referência antiga de 16 px de altura. Na escala nova, a proposta é 18 × 14 px. Pode ser?
 4. **Fragmento da clareira.** A seção 35.3 e o diagrama colocam um "fragmento/peça tecnológica" na clareira. A seção 14 coloca o elemento tecnológico "próximo à ruína", e a peça de upgrade da KLM-99 fica na área superior. O fragmento da clareira é o elemento da seção 14 ou um terceiro objeto?
 5. **Perseguição.** O que significa "todo o espaço acessível do mapa que estiver atrás de sua posição"? O inimigo só persegue voltando em direção ao início do mapa, ou em qualquer direção dentro do cenário?
 6. **Dano de contato.** O sapo causa dano só durante o salto, ou também se o jogador encostar nele parado?
@@ -1130,3 +1130,5 @@ Perguntas do desenvolvimento para o game design:
 | 1.0 | 30/09/2026 | Desenvolvimento | Transcrição para Markdown, seção 49 com valores propostos e seção 50 com dúvidas |
 | 1.1 | 30/09/2026 | Game design | Resolução base passa a 1920 × 1080, com a arte na resolução real. Personagem de tamanho 3 com 150 px |
 | 1.1 | 30/09/2026 | Desenvolvimento | Seção 49 recalculada para a nova escala (valores em px multiplicados por 3) |
+| 1.2 | 30/09/2026 | Game design | Arte em pixel art com pixels visíveis: tamanho 3 com 50 px na arte, ampliado 3× (150 px na tela). Resolução base volta a 640 × 360 |
+| 1.2 | 30/09/2026 | Desenvolvimento | Seção 49 recalculada em pixels da arte (valores divididos por 3) |
