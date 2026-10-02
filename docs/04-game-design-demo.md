@@ -5,7 +5,7 @@
 
 | | |
 |---|---|
-| **Versão** | 1.0 |
+| **Versão** | 1.3 |
 | **Status** | Especificação de gameplay em desenvolvimento |
 | **Engine** | Godot 4 |
 | **Resolução base** | 640 × 360 px, ampliada 3× na tela Full HD |
@@ -71,7 +71,6 @@ O Homem-gato:
 - é bondoso e gentil;
 - fala rapidamente;
 - mia ao final de algumas frases;
-- pode ficar bravo;
 - luta de maneira feroz e agressiva.
 
 ---
@@ -113,16 +112,16 @@ Existe colisão padrão com:
 
 ---
 
-## 5. Dash
+## 5. Dash Ofensivo
 
-O Homem-gato possui um dash padrão.
+O Homem-gato possui uma variação do dash padrão, chamado Dash Ofensivo Isso é uma característica conferido como um traço racial, assim como sua agilidade natural de movimentação.
 
 **Parâmetros**
 
 - Comprimento: **1,3 × dash padrão do jogo**.
 - Velocidade: **2 × velocidade padrão do dash**.
 - Não possui cooldown.
-- É controlado exclusivamente pela stamina.
+- É controlado exclusivamente pela stamina e consome 2 unidades.
 - Não possui invulnerabilidade.
 
 O multiplicador de comprimento representa aumento da distância percorrida.
@@ -133,7 +132,7 @@ A duração do dash será consequência desses dois valores e não constitui par
 
 **Direção**
 
-O dash ocorre na direção escolhida pelo jogador.
+O dash ocorre na direção escolhida pelo jogador. Caso não haja uma direção, o dash é efetuado na direção que o personagem olha.
 
 **Colisão**
 
@@ -141,14 +140,14 @@ Qualquer dash que atingir uma parede ou obstáculo é interrompido no contato.
 
 ---
 
-## 6. Dash contra inimigos
+## 6. Dash Ofensivo contra inimigos
 
-O Homem-gato pode atravessar inimigos utilizando o dash.
+O Homem-gato pode atravessar e dar dano a inimigos utilizando o dash ofensivo.
 
 Ao atravessar um inimigo:
 
 - o inimigo recebe dano;
-- o dano equivale ao **terceiro golpe do combo**;
+- o dano equivale a 1 unidade;
 - o ataque visual é realizado com as duas garras.
 
 Alguns inimigos possuem dano de contato.
@@ -163,7 +162,7 @@ O dash não concede invulnerabilidade.
 
 Algumas paredes da ruína possuem trechos especialmente preparados para escalada.
 
-Quando o jogador utiliza o dash próximo e na direção de uma dessas paredes, **o Homem-gato realiza a escalada**.
+Quando o jogador utiliza o dash ofensivo próximo e na direção de uma dessas paredes, **o Homem-gato realiza a escalada**.
 
 A escalada utiliza a mesma duração resultante do dash.
 
@@ -214,8 +213,10 @@ O comando de execução continua sendo **D**.
 - Não causa dano.
 - Não pode atravessar paredes ou obstáculos para fins de escalada.
 - Não realiza escalada.
+- Esse rolamento é capaz de desviar de ataques que possuem a tag de "projétil".
+- Ao desviar de um ataque projétil, esse ataque se torna incapaz de conferir dano mesmo que o rolamento acabe e a hitbox do ataque ainda esteja por cima da hitbox do gato.
 
-**Regra especial de stamina**
+**Regra especial de consumo de stamina no rolamento**
 
 O rolamento utiliza um sistema de contagem própria.
 
@@ -223,17 +224,22 @@ O jogador pode utilizar o rolamento **duas vezes consecutivamente sem gastar sta
 
 O terceiro uso dentro da janela estabelecida consome uma unidade.
 
-A janela é de **4 segundos**.
+A cada vez que há o consumo de stamina, a contagem é resetada até que o rolamento seja usado novamente.
 
-A contagem funciona continuamente:
+A janela é de **5 segundos**.
+
+A contagem funciona continuamente e de forma deslizante:
 
 - usa rolamento → primeiro uso;
-- usa novamente dentro de 4 s → segundo uso;
-- usa novamente dentro de 4 s do primeiro → terceiro uso → consome stamina.
+- usa novamente dentro de 5 s → segundo uso;
+- usa novamente dentro de 5 s do primeiro → terceiro uso → consome stamina;
+- reseta a contagem.
 
 Se o primeiro uso deixar de estar dentro da janela, o segundo passa a ser considerado o primeiro.
 
-Em outras palavras, sempre que ocorrerem **3 rolamentos dentro de uma janela de 4 s**, uma unidade de stamina é consumida.
+Em outras palavras, sempre que ocorrerem **3 rolamentos dentro de uma janela de 5 s**, uma unidade de stamina é consumida.
+
+Não deve haver consumo no rolamento seguinte a um consumo, é importante que haja o reset.
 
 ---
 
@@ -287,8 +293,7 @@ Ao interagir, o Homem-gato coleta a flor.
 Em seguida, ocorre uma pequena fala:
 
 > **GATO:** Uma flor de lírio azul, miau!
-
-Ele comenta uma curiosidade sobre a flor relacionada à sua irmã.
+> **GATO:** Minha irmã sempre diz que essa flor nasce onde a água é limpa. Acho que ela vai gostar!
 
 A flor funciona também como elemento de exploração opcional.
 
@@ -351,11 +356,12 @@ Ela é conhecida como **A Guardiã**.
 
 Ao interagir, está escrito:
 
-> **Aos olhos da Guardiã, nenhuma criatura da floresta está sozinha.**
+> **Uma antiga estátua. Há algo escrito na base:**
+> **"Aos olhos da Guardiã, nenhuma criatura da floresta está sozinha."**
 
 Depois de ler, o Homem-gato comenta:
 
-> **GATO:** A Guardiã... quem será que ela foi, miau?
+> **GATO:** A Guardiã... quem será que ela foi?
 
 ---
 
@@ -363,7 +369,7 @@ Depois de ler, o Homem-gato comenta:
 
 O comando **A** executa o ataque básico.
 
-O combo possui três golpes.
+O gato possui três golpes.
 
 **Golpe 1:** ataque rápido utilizando uma das garras.
 
@@ -373,9 +379,7 @@ Os dois primeiros golpes são ligeiramente mais rápidos.
 
 **Golpe 3:** o Homem-gato retira uma espada média da capa e executa um corte vertical. Depois, guarda a espada.
 
-O combo reinicia.
-
-Não existe janela alternativa para alterar a sequência:
+Esses ataques rodam de forma cíclica e não resetam. Não há cancelamento de combo.
 
 **1 → 2 → 3 → 1 → 2 → 3...**
 
@@ -383,7 +387,9 @@ Não existe janela alternativa para alterar a sequência:
 
 ## 19. Tempo dos ataques
 
-A duração de cada golpe é **1,3 × duração padrão do golpe**.
+A velocidade de cada golpe é **1,3 × velocidade padrão do golpe**.
+
+Ou seja, o gato ataca mais rápido que o normal. Isso também é uma característica racial devido a sua agilidade natural.
 
 **Intervalos**
 
@@ -392,7 +398,7 @@ A duração de cada golpe é **1,3 × duração padrão do golpe**.
 
 ---
 
-## 20. Dano do combo
+## 20. Dano
 
 O sistema de dano é baseado em unidades.
 
@@ -402,7 +408,9 @@ O sistema de dano é baseado em unidades.
 | Golpe 2 | 1 |
 | Golpe 3 | 2 |
 
-O dash padrão também causa **2 unidades de dano**.
+O dash padrão também causa **1 unidade de dano**.
+
+Após sofrer dano, o gato entra em um estado de recuperação de 1,5 segundos. Durante esse tempo ele permanece invulnerável.
 
 ---
 
@@ -420,6 +428,8 @@ O knockback ocorre enquanto o inimigo está em sua movimentação normal.
 
 Se o inimigo estiver executando uma animação de avanço/dash, essa regra não se aplica.
 
+Os ataques do gato também possuem uma avanço natural (attack lunge) que compensam o knockback e ajudam no game feel. 
+
 ---
 
 ## 22. Parry
@@ -436,13 +446,15 @@ Se o jogador errar o timing, **ele recebe o ataque**.
 
 Se acertar:
 
-- o ataque é defendido;
-- o Homem-gato imediatamente executa um chute;
+- o ataque é defendido com a espada do gato e o inimigo sofre stun por 0,5 segundos até a segunda ação do parry;
+- na segunda ação, o homem-gato executa um chute no inimigo após esses 0,5 segundos;
 - o inimigo é lançado para trás.
 
 **Knockback:** o knockback do parry corresponde à **distância de um dash padrão**.
 
-**Stun:** depois que o inimigo chega ao final do knockback, **fica atordoado por 1 s**.
+**Stun:** depois que o inimigo chega ao final do knockback, **permanece atordoado por mais 1,5 s**.
+
+Assim, o tempo total de stun é de 2 segundos. O chute do parry pode ter sua animação e execução cancelada com um dash, mas não com a movimentação base do gato. Nesse caso o stun é de apenas 0,5 segundos.
 
 ---
 
@@ -453,9 +465,9 @@ A língua do sapo também pode ser defendida com parry.
 Quando o Homem-gato executa um parry contra a língua:
 
 - a língua é interrompida;
-- o Homem-gato chuta a língua de volta na direção do sapo;
+- o Homem-gato chuta a língua de volta na direção do sapo (aqui o chute é imediato ao bloqueio);
 - o sapo é atingido;
-- o sapo fica atordoado onde está.
+- o sapo fica atordoado onde está por 2 segundos.
 
 ---
 
@@ -463,7 +475,7 @@ Quando o Homem-gato executa um parry contra a língua:
 
 A hitbox do Homem-gato é menor que sua área de ataque.
 
-A área de ataque do personagem possui aproximadamente **2 × o raio da hitbox do personagem**.
+A área de ataque do personagem possui **2 × o raio da hitbox do personagem**.
 
 As hitboxes dos inimigos são retangulares.
 
@@ -471,13 +483,14 @@ A largura atualmente estabelecida é de aproximadamente **6 px**.
 
 ---
 
-## 25. Cancelamento de pulos dos sapos
+## 25. Área e ângulo de ataque
+
+Os ataques do gato possuem um ângulo de acerto em sua frente. Esse ângulo é de **120° para os ataques 1 e 2 e de 60° para o ataque 3**, já que esse último é pensado como um ataque vertical. Porém, o ataque 3 possui maior alcance em distância, chegando a **2,5 x o raio da hitbox do personagem**.
 
 Se um sapo estiver realizando um pulo e for atingido por um ataque do Homem-gato antes de alcançar a hitbox do jogador:
 
-- o pulo é interrompido;
 - o sapo recebe o knockback correspondente;
-- ele não causa dano ao jogador.
+- o sapo ainda pode causar dano normalmente se atingir o jogador antes ou ao mesmo tempo que for atingido.
 
 Isso vale tanto para o sapo comum quanto para o sapo com língua.
 
@@ -485,7 +498,7 @@ Existe uma exceção importante para a língua.
 
 Se o Homem-gato atingir **somente a língua**, mas não o corpo do sapo:
 
-- o corpo não sofre cancelamento;
+- o corpo não sofre knockback;
 - o pulo continua normalmente, caso esteja pulando;
 - a língua ainda pode causar seu dano caso atinja o jogador.
 
@@ -503,6 +516,8 @@ Existem dois tipos comuns:
 A quantidade de cada tipo fica a critério do desenvolvimento.
 
 A única regra de composição é: **sapos comuns > sapos com língua**.
+
+Nenhum dos sapos tem dano de contato.
 
 ---
 
@@ -559,7 +574,7 @@ decisão → telegraph → salto → possível contato → aterrissagem → espe
 
 **Parâmetros**
 
-- HP: **3**
+- HP: **4**
 - Comprimento do salto: **0,5 dash padrão**
 - Velocidade: **velocidade padrão do dash**
 - Telegraph: **0,5 s**
@@ -596,6 +611,8 @@ A decisão da ação ocorre no início do ciclo.
 
 O sapo não altera sua ação no meio de um salto.
 
+O ataque com língua desse sapo possui a tag de projétil e, portanto, pode ser desviada com o rolamento.
+
 ---
 
 ## 31. Zonas do sapo com língua
@@ -619,7 +636,7 @@ Os tamanhos exatos dessas zonas ainda serão definidos.
 
 A língua possui uma trajetória simples.
 
-Quando erra, **retorna pelo mesmo caminho de onde saiu**.
+Quando erra, **retorna até o sapo normalmente da forma como saiu**.
 
 Quando o jogador atinge a língua com parry, **ela é interrompida e rebatida em direção ao sapo**.
 
@@ -777,27 +794,29 @@ Ao aproximar-se de Xennar, o personagem para e a caixa de diálogo aparece.
 
 Cada frase exige um comando do jogador para avançar.
 
+É importante que o nome do velho só seja identificado na caixa de diálogo após ser revelado.
+
 **Diálogo**
 
 > **VELHO:** Ei... espere um momento...
 >
 > **VELHO:** Você parece jovem e ágil... o suficiente. Poderia me ajudar?
 >
-> **GATO:** Ajudo sim! Quer dizer... depende do que o senhor precisa. O que seria, miau?
+> **GATO:** Ajudo sim! Quer dizer, depende do que o senhor precisa. O que seria, miau?
 >
-> **VELHO:** Meu nome é Xennar. Sou o responsável pelo farol da região... aquele lá no alto da Costa das Pedras.
+> **VELHO:** Meu nome é Xennar. Sou o responsável pelo farol da região... que fica no alto da Costa das Pedras.
 >
-> **XENNAR:** Há alguns dias... meu cajado foi tomado pelos invasores. Sem ele, não consigo mais acender a luz guia.
+> **XENNAR:** Há alguns dias... meu cajado foi tomado pelos malditos invasores. Sem ele, não consigo mais acender sua luz guia.
 >
 > **GATO:** Tomado? Por quem?
 >
-> **XENNAR:** Por essas criaturas saltitantes que estão por todo lugar... Elas tomaram a região e estão acabando com a nossa paz.
+> **XENNAR:** Por essas criaturas saltitantes... Estão espalhadas por toda a região e saqueando tudo aquilo que há de valor.
 >
-> **XENNAR:** Agora o líder deles se instalou na ruína do monte mais adiante... e levou meu cajado consigo.
+> **XENNAR:** Agora o líder deles se instalou na ruína do monte adiante... e levou meu cajado para lá.
 >
-> **XENNAR:** Temos poucos por aqui capazes de enfrentá-los...
+> **XENNAR:** Por favor, temos poucos por aqui capazes de enfrentá-los...
 >
-> **XENNAR:** Por favor, jovem... poderia recuperá-lo para mim?
+> **XENNAR:** Poderia recuperá-lo para mim?
 
 ---
 
@@ -934,21 +953,21 @@ A vegetação é densa, mas as áreas efetivamente percorridas pelo jogador perm
 | Stamina máxima | 4 unidades |
 | Recuperação padrão | 1 unidade / 3 s |
 | Recuperação do Homem-gato | 1,5 × padrão |
-| Janela do rolamento | 4 s |
+| Janela do rolamento | 5 s |
 | Interação | ½ da altura do tamanho 3 = 25 px *(o PDF dizia 8 px; ver correção na seção 11)* |
 | HP do Homem-gato | 10 |
 | Dano golpe 1 | 1 |
 | Dano golpe 2 | 1 |
 | Dano golpe 3 | 2 |
-| Dano do dash | 2 |
-| Duração do golpe | 1,3 × padrão |
+| Dano do dash ofensivo | 1 |
+| Velocidade do golpe | 1,3 × padrão |
 | Intervalo golpe 1→2 | 0,5 × duração do golpe |
 | Intervalo golpe 2→3 | 1 × duração do golpe |
 | Janela de parry | 0,2 s |
 | Knockback do parry | 1 dash |
-| Stun após parry | 1 s |
+| Stun após parry | 0,5 s + 1,5 s |
 | Largura aproximada da hitbox | 6 px |
-| Sapo comum — HP | 3 |
+| Sapo comum — HP | 4 |
 | Sapo comum — salto | 0,5 dash |
 | Sapo comum — velocidade | 1 × dash padrão |
 | Sapo comum — ciclo | 1 s |
@@ -1047,7 +1066,7 @@ Definido pelo game design em 30/09: o personagem de tamanho 3 tem **50 px** de a
 | Dash padrão — comprimento | 80 px |
 | Dash padrão — velocidade | 400 px/s |
 | Dash padrão — duração resultante | 0,20 s |
-| Duração padrão do golpe | 0,20 s |
+| Duração padrão do golpe | 0,40 s |
 | Knockback padrão dos ataques | 16 px (1 tile) |
 | Recuperação padrão de stamina | 1 unidade / 3 s |
 
@@ -1063,14 +1082,14 @@ Definido pelo game design em 30/09: o personagem de tamanho 3 tem **50 px** de a
 | Rolamento — velocidade | 1 × 400 | **400 px/s** |
 | Rolamento — duração | 64 ÷ 400 | **0,16 s** |
 | Recuperação de stamina | 3 s ÷ 1,5 | **1 unidade / 2 s** |
-| Duração do golpe | 1,3 × 0,20 | **0,26 s** *(ver dúvida 2)* |
-| Intervalo golpe 1→2 | 0,5 × 0,26 | **0,13 s** |
-| Intervalo golpe 2→3 | 1 × 0,26 | **0,26 s** |
-| Combo completo (3 golpes) | soma | **≈ 1,17 s** |
+| Duração do golpe | 0,40 ÷ 1,3 | **0,308 s**|
+| Intervalo golpe 1→2 | 0,5 × 0,308 | **0,154 s** |
+| Intervalo golpe 2→3 | 1 × 0,308 | **0,308 s** |
 | Knockback do parry | 1 dash padrão | **80 px** |
 | Distância de interação | ½ × 50 | **25 px** |
 | Hitbox do corpo | — | círculo de **raio 10 px**, nos pés |
-| Área de ataque | 2 × raio | **20 px** de alcance, em arco à frente |
+| Área de ataque | 2 × raio | **20 px** de alcance, em arco à frente com 120° |
+| Área de ataque golpe 3 | 2,5 × raio | **25 px** de alcance, em arco à frente com 60° |
 | Recuperação do parry errado | — | **0,4 s** sem poder repetir *(ver dúvida 7)* |
 
 ### 49.4 Sapos
@@ -1093,10 +1112,10 @@ Definido pelo game design em 30/09: o personagem de tamanho 3 tem **50 px** de a
 | Local | Sapos comuns | Sapos com língua |
 |---|---|---|
 | Clareira (primeiro combate) | 3 | 1 |
-| Exterior da ruína — grupo 1 | 3 | 1 |
-| Exterior da ruína — grupo 2 | 3 | 2 |
-| Área superior | 2 | 1 |
-| **Total** | **11** | **5** |
+| Exterior da ruína — grupo 1 | 4 | 2 |
+| Exterior da ruína — grupo 2 | 5 | 2 |
+| Área superior | 2 | 2 |
+| **Total** | **14** | **7** |
 
 As dimensões das áreas e o posicionamento estão em [02-level-design-demo.md](02-level-design-demo.md).
 
@@ -1153,3 +1172,4 @@ Perguntas do desenvolvimento para o game design:
 | 1.2 | 30/09/2026 | Desenvolvimento | Dúvidas 13 e 14, que surgiram na implementação dos dashes (M2) |
 | 1.2 | 30/09/2026 | Desenvolvimento | Dúvidas 15 a 19, que surgiram na implementação do combate melee (M3) |
 | 1.2 | 30/09/2026 | Desenvolvimento | Dúvidas 20 a 30, que surgiram na implementação do M4 ao M9 |
+| 1.3 | 02/10/2026 | Game design | Alterações em algumas regras e mecânicas |
