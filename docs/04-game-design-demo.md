@@ -1,6 +1,6 @@
 # Game Design — Demo · Cenário 1: Floresta
 
-> **Documento vivo.** Versão editável da especificação de gameplay da floresta. O PDF original está em [referencias/game-design-demo-floresta-v1.0.pdf](referencias/game-design-demo-floresta-v1.0.pdf).
+> **Documento vivo.** Versão editável da especificação de gameplay da floresta. O PDF original está em [referencias/game-design-demo-v1.0.pdf](referencias/game-design-demo-v1.0.pdf).
 > As seções 1 a 48 são do game design. A seção 49 traz os valores propostos pelo desenvolvimento para o que estava "a definir", e a seção 50 lista as dúvidas em aberto. Registre mudanças no [Histórico](#histórico-de-versões).
 
 | | |
