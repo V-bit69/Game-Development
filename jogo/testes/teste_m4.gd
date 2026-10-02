@@ -1,5 +1,5 @@
 extends "res://testes/base_teste.gd"
-## Teste automático do M4 (parry). Rodar na pasta jogo/:
+## Teste automático do M4 (parry em dois tempos e invulnerabilidade, v1.3). Rodar na pasta jogo/:
 ##   godot --headless --path . -s res://testes/teste_m4.gd
 
 const ATACANTE := "res://cenas/alvo_atacante.tscn"
@@ -18,13 +18,39 @@ func _rodar() -> void:
 	var x_antes: float = alvo.position.x
 	await ate(func(): return alvo.estado != 1)
 	conferir("parry defende o golpe (vida %d)" % jogador.vida, jogador.vida == 10)
-	await ate(func(): return alvo._empurrao_restante <= 0.0)
-	conferir("inimigo é lançado 80 px (andou %.1f)" % (alvo.position.x - x_antes), absf(alvo.position.x - x_antes - 80.0) < 1.5)
-	conferir("inimigo fica atordoado por 1 s", absf(alvo.atordoado - v.GATO_PARRY_ATORDOAMENTO) < 0.05)
+	conferir("defesa: inimigo atordoado 0,5 s, ainda no lugar", absf(alvo.atordoado - v.GATO_PARRY_ESPERA_CHUTE) < 0.05 and alvo.position.x == x_antes)
 	conferir("parry certo não tem recuperação", jogador.parry_recuperacao == 0.0)
+	Input.action_press("mover_cima")
+	await esperar(10)
+	conferir("esperando o chute, o gato não anda", jogador.velocity == Vector2.ZERO)
+	Input.action_release("mover_cima")
+	await ate(func(): return alvo._empurrao_restante > 0.0, 40)
+	conferir("chute sai depois de 0,5 s", jogador._chute > 0.0)
+	await ate(func(): return alvo._empurrao_restante <= 0.0)
+	await esperar(1)
+	conferir("inimigo é lançado 80 px (andou %.1f)" % (alvo.position.x - x_antes), absf(alvo.position.x - x_antes - 80.0) < 1.5)
+	conferir("depois do empurrão, mais 1,5 s atordoado", absf(alvo.atordoado - v.GATO_PARRY_ATORDOAMENTO) < 0.05)
 	await esperar(30)
 	conferir("atordoado, não age", alvo.estado == 0 and alvo.atordoado > 0.0)
 	await ate(func(): return alvo.atordoado == 0.0)
+
+	# Dash na espera cancela o chute: o inimigo fica só com os 0,5 s.
+	alvo.position = inicio + Vector2(26, 0)
+	alvo._mudar(0)
+	await ate(func(): return alvo.estado == 1 and alvo._tempo_estado >= 0.4)
+	jogador.pedir_parry()
+	await ate(func(): return alvo.estado != 1)
+	x_antes = alvo.position.x
+	await esperar(5)
+	jogador.direcao_olhar = Vector2.UP
+	conferir("dash funciona na espera do chute", jogador.pedir_dash())
+	await ate(func(): return alvo.atordoado == 0.0, 60)
+	await esperar(5)
+	conferir("sem chute: não foi lançado e o atordoamento acabou", alvo.position.x == x_antes and alvo.atordoado == 0.0)
+	await ate(func(): return not jogador.em_dash)
+	jogador.position = inicio + Vector2(-150, 0)  # longe do alvo enquanto a stamina volta
+	await esperar(100)
+	jogador.position = inicio
 
 	# Parry cedo demais: a janela fecha antes do golpe e o gato toma o dano.
 	alvo.position = inicio + Vector2(26, 0)
@@ -46,6 +72,14 @@ func _rodar() -> void:
 	conferir("sem parry: toma o golpe (vida %d)" % jogador.vida, jogador.vida == 8)
 	conferir("dano: piscar e tremor", jogador.piscar_de_dano() > 0.0 and jogador._tremor > 0.0)
 	alvo.queue_free()
+
+	# Depois do dano, 1,5 s invulnerável.
+	conferir("invulnerável logo depois do dano", jogador.invulneravel > 1.4)
+	jogador.receber_ataque(sala, 1)
+	conferir("invulnerável: o segundo golpe não tira vida", jogador.vida == 8)
+	await ate(func(): return jogador.invulneravel == 0.0)
+	jogador.receber_ataque(sala, 1)
+	conferir("depois de 1,5 s, toma dano de novo", jogador.vida == 7)
 
 	# Parry cancela o combo e não sai durante o dash.
 	await esperar(30)

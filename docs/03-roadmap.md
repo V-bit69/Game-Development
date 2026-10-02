@@ -38,7 +38,7 @@ Documento vivo: atualizar o status a cada entrega.
 ### 2. Game design — Game Director 🔄
 Entrega: **especificação de gameplay**.
 - [x] **Floresta** → [04-game-design-demo.md](04-game-design-demo.md): Homem-gato, controles, dashes, stamina, combo, parry, sapos, Xennar, interações e mapa
-- [ ] Responder as [12 dúvidas](04-game-design-demo.md#50-dúvidas-em-aberto) da floresta e validar os [valores propostos](04-game-design-demo.md#49-valores-propostos-pelo-desenvolvimento)
+- [ ] Responder as [dúvidas em aberto](04-game-design-demo.md#50-dúvidas-em-aberto) da floresta e validar os [valores propostos](04-game-design-demo.md#49-valores-propostos-pelo-desenvolvimento)
 - [ ] **Ruína:** a KLM-99 (ataque à distância), inimigos, semi-boss e minions
 - [ ] **Boss:** líder das criaturas, padrões de ataque
 - [ ] Concept da região da demo
@@ -112,3 +112,4 @@ Personagens, cenários, inimigos, objetos, identidade visual, UI e referências 
 | 30/09/2026 | M3 concluído: combo de 3 golpes, dano do dash, knockback, hitstop e alvos de treino na sala de teste |
 | 30/09/2026 | Game Director pede o blockout antes do protótipo. M4 pausado. Blockout da floresta montado no Godot, com as 5 áreas e os 4 encontros marcados |
 | 30/09/2026 | M4 a M9 concluídos: parry, sapos comum e com língua, encontros com gatilho, interações e diálogos, escalada, morte e pausa. A floresta está jogável do início à entrada da ruína |
+| 02/10/2026 | Game design v1.3 aplicado no protótipo (dash ofensivo, rolamento contra projéteis, combo cíclico, área de ataque em arco, parry em dois tempos, invulnerabilidade, 14 + 7 sapos). Blockout: elemento tecnológico levado para longe da ruína, flor mais acima, ao lado de um lago |

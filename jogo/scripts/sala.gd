@@ -9,6 +9,7 @@ extends Node2D
 ##   G  estátua da Guardiã           t  elemento tecnológico  K  peça da KLM-99
 ##   s  sapo comum (posição)         l  sapo com língua       !  gatilho de encontro
 ##   =  entrada da ruína             D  trecho escalável      v  descida
+##   ~  água (corpo d'água, não se atravessa)
 ##   x  alvo de treino (sala de teste)   a  alvo de treino que ataca (sala de teste)
 ## O desenho também aparece no editor (aba 2D) e se atualiza ao mudar o mapa.
 ## No jogo, a sala também cuida dos encontros (gatilhos acordam os sapos),
@@ -38,6 +39,7 @@ const SOLIDOS := {
 	"T": Color(0.13, 0.27, 0.17),
 	"#": Color(0.36, 0.35, 0.4),
 	"o": Color(0.45, 0.36, 0.26),
+	"~": Color(0.2, 0.42, 0.62),
 }
 ## Marcadores do blockout: cor, tamanho da base (px) e se bloqueia a passagem.
 ## "altura" desenha um retângulo mais alto para dar noção do tamanho na tela.
@@ -414,6 +416,11 @@ func _draw() -> void:
 			var c := linha[x]
 			if SOLIDOS.has(c):
 				draw_rect(area, SOLIDOS[c])
+				if c == "~":
+					# Água: dois risquinhos de onda.
+					for i in 2:
+						var o := area.position + Vector2(6 + i * 12, 10 + i * 10)
+						draw_line(o, o + Vector2(8, 0), Color(0.6, 0.8, 1.0, 0.6), 1.0)
 			elif c == ":":
 				draw_rect(area, COR_TRILHA)
 			elif c == "D":

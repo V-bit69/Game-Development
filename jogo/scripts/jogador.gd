@@ -7,6 +7,9 @@ extends CharacterBody2D
 ## M7: pede interação com E (a sala decide com o quê) e mostra o indicador E/D.
 ## M8: escalada com o dash padrão nos trechos D da ruína.
 ## M9: vida, morte.
+## v1.3: dash ofensivo (2 de stamina), rolamento esquiva projéteis, combo cíclico,
+## área de ataque em arco, parry em dois tempos (defesa, 0,5 s, chute) e
+## 1,5 s de invulnerabilidade depois de tomar dano.
 ## A origem do nó fica nos pés, no centro do círculo de colisão.
 
 signal stamina_mudou(atual: int)
@@ -61,12 +64,14 @@ var _golpe_tempo := 0.0
 var _golpe_acertou := false
 var _intervalo := 0.0
 var _ataque_guardado := false  # A apertado durante um golpe: sai assim que puder
-var _fim_do_ultimo_golpe := -INF
 
 # Parry: janela aberta, recuperação depois de errar, e efeitos visuais.
 var parry_janela := 0.0
 var parry_recuperacao := 0.0
 var _chute := 0.0
+var _chute_espera := 0.0  # entre a defesa e o chute do parry; só o dash cancela
+var _chute_alvo: Node2D = null
+var invulneravel := 0.0  # recuperação depois de tomar dano
 var _chute_direcao := Vector2.RIGHT
 var _dano_piscar := 0.0
 var _tremor := 0.0
@@ -107,8 +112,8 @@ func _physics_process(delta: float) -> void:
 		_mover_escalada(delta)
 	elif em_dash:
 		_mover_dash(delta)
-	elif parry_janela > 0.0:
-		velocity = Vector2.ZERO  # com a janela aberta, o gato fica no lugar
+	elif parry_janela > 0.0 or _chute_espera > 0.0:
+		velocity = Vector2.ZERO  # com a janela aberta ou esperando o chute, o gato fica no lugar
 	else:
 		_atualizar_combo(delta)
 		if golpe_atual == 0:
@@ -160,7 +165,9 @@ func pedir_dash() -> bool:
 		sem_stamina.emit()
 		return false
 	if golpe_atual != 0 or _intervalo > 0.0:
-		_cancelar_combo()  # o dash cancela o ataque
+		_cancelar_combo()  # o dash interrompe o golpe, mas a sequência continua
+	if _chute_espera > 0.0:
+		_cancelar_chute()  # o dash cancela o chute do parry
 	var direcao := _ler_direcao()
 	if direcao != Vector2.ZERO:
 		direcao_olhar = direcao
@@ -168,7 +175,10 @@ func pedir_dash() -> bool:
 		_gastar_stamina(custo)
 		return true
 	if dash_equipado == Dash.ROLAMENTO:
-		_rolamentos.append(_tempo)
+		if custo > 0:
+			_rolamentos.clear()  # gastou: a contagem recomeça no próximo rolamento
+		else:
+			_rolamentos.append(_tempo)
 	_gastar_stamina(custo)
 	_dash_direcao = direcao_olhar
 	_dash_tipo = dash_equipado
@@ -180,14 +190,14 @@ func pedir_dash() -> bool:
 	return true
 
 
-## Dash padrão custa 1 unidade. Rolamento é grátis, a não ser que já tenham
-## acontecido 2 rolamentos nos últimos 4 s: aí este é o terceiro e custa 1.
+## Dash ofensivo custa 2 unidades. Rolamento é grátis, a não ser que já tenham
+## acontecido 2 rolamentos nos últimos 5 s: aí este é o terceiro e custa 1.
 func _custo_do_dash(tipo: Dash) -> int:
 	if tipo == Dash.PADRAO:
 		return Valores.GATO_DASH_CUSTO
 	while not _rolamentos.is_empty() and _tempo - _rolamentos[0] >= Valores.GATO_ROLAMENTO_JANELA:
 		_rolamentos.pop_front()
-	return 0 if _rolamentos.size() < Valores.GATO_ROLAMENTOS_GRATIS else Valores.GATO_DASH_CUSTO
+	return 0 if _rolamentos.size() < Valores.GATO_ROLAMENTOS_GRATIS else Valores.GATO_ROLAMENTO_CUSTO
 
 
 func _mover_dash(delta: float) -> void:
@@ -206,7 +216,7 @@ func _mover_dash(delta: float) -> void:
 		set_collision_mask_value(3, true)
 
 
-## O dash padrão fere cada inimigo atravessado uma vez (dano do 3º golpe), sem knockback.
+## O dash ofensivo fere cada inimigo atravessado uma vez (1 de dano), sem knockback.
 func _dano_do_dash() -> void:
 	for inimigo in _inimigos_em(global_position, Valores.GATO_RAIO_HITBOX):
 		if inimigo in _atingidos_no_dash:
@@ -255,7 +265,7 @@ func _mover_escalada(delta: float) -> void:
 
 ## A começa o próximo golpe. Se um golpe ou intervalo estiver em andamento, fica guardado.
 func pedir_ataque() -> void:
-	if em_dash or parry_janela > 0.0:
+	if em_dash or parry_janela > 0.0 or _chute_espera > 0.0:
 		return
 	if golpe_atual != 0 or _intervalo > 0.0:
 		_ataque_guardado = true
@@ -265,8 +275,6 @@ func pedir_ataque() -> void:
 
 ## "sobra" é o tempo que já passou do fim do intervalo neste quadro, para o ritmo não atrasar.
 func _comecar_golpe(sobra := 0.0) -> void:
-	if _tempo - _fim_do_ultimo_golpe > Valores.GATO_COMBO_ESQUECE:
-		_proximo_golpe = 1
 	golpe_atual = _proximo_golpe
 	_golpe_tempo = sobra
 	_golpe_acertou = false
@@ -314,7 +322,6 @@ func _terminar_golpe() -> void:
 		_: _intervalo = -sobra  # depois do golpe 3 não há intervalo
 	_proximo_golpe = golpe_atual % 3 + 1
 	golpe_atual = 0
-	_fim_do_ultimo_golpe = _tempo
 	if _intervalo <= 0.0:
 		sobra = -_intervalo
 		_intervalo = 0.0
@@ -322,20 +329,39 @@ func _terminar_golpe() -> void:
 			_comecar_golpe(sobra)
 
 
+## O combo é cíclico e nunca volta ao golpe 1: um golpe interrompido conta como dado.
 func _cancelar_combo() -> void:
+	if golpe_atual != 0:
+		_proximo_golpe = golpe_atual % 3 + 1
 	golpe_atual = 0
 	_intervalo = 0.0
 	_ataque_guardado = false
-	_proximo_golpe = 1
 
 
 func _golpe_impacto() -> void:
-	var dano := Valores.GATO_DANO_ESPADA if golpe_atual == 3 else Valores.GATO_DANO_GARRA
-	var centro := global_position + direcao_olhar * Valores.GATO_RAIO_HITBOX
-	for inimigo in _inimigos_em(centro, Valores.GATO_ALCANCE_ATAQUE / 2.0):
-		if _obstaculo_entre(inimigo):
+	var espada := golpe_atual == 3
+	var dano := Valores.GATO_DANO_ESPADA if espada else Valores.GATO_DANO_GARRA
+	var alcance := Valores.GATO_ALCANCE_GOLPE_3 if espada else Valores.GATO_ALCANCE_ATAQUE
+	var angulo := Valores.GATO_ANGULO_GOLPE_3 if espada else Valores.GATO_ANGULO_ATAQUE
+	for inimigo in _inimigos_em(global_position, alcance):
+		if not _dentro_do_angulo(inimigo, angulo) or _obstaculo_entre(inimigo):
 			continue
 		_acertar(inimigo, dano, Valores.KNOCKBACK_PADRAO)
+
+
+## A área de ataque é um arco à frente do gato. Vale o ponto do inimigo mais
+## perto da linha do golpe, para um inimigo grande não escapar pela borda.
+func _dentro_do_angulo(inimigo: Node2D, graus: float) -> bool:
+	var ponto := inimigo.global_position
+	var forma: Variant = inimigo.colisao.shape if "colisao" in inimigo else null
+	if forma is RectangleShape2D:
+		var metade: Vector2 = (forma as RectangleShape2D).size / 2.0
+		var mira := global_position + direcao_olhar * Valores.GATO_ALCANCE_ATAQUE
+		ponto = inimigo.global_position + (mira - inimigo.global_position).clamp(-metade, metade)
+	var para := ponto - global_position
+	if para.length() < 0.5:
+		return true
+	return absf(rad_to_deg(direcao_olhar.angle_to(para))) <= graus / 2.0
 
 
 ## Árvores e obstáculos bloqueiam ataques físicos.
@@ -383,7 +409,7 @@ func _atualizar_rastro() -> void:
 ## Q abre a janela de parry. Não abre durante o dash, nem na recuperação de um parry errado.
 ## Abrir o parry cancela o golpe em andamento.
 func pedir_parry() -> bool:
-	if em_dash or parry_janela > 0.0 or parry_recuperacao > 0.0:
+	if em_dash or parry_janela > 0.0 or parry_recuperacao > 0.0 or _chute_espera > 0.0:
 		return false
 	if golpe_atual != 0 or _intervalo > 0.0:
 		_cancelar_combo()
@@ -395,6 +421,11 @@ func pedir_parry() -> bool:
 func _atualizar_parry(delta: float) -> void:
 	_chute = maxf(_chute - delta, 0.0)
 	_dano_piscar = maxf(_dano_piscar - delta, 0.0)
+	invulneravel = maxf(invulneravel - delta, 0.0)
+	if _chute_espera > 0.0:
+		_chute_espera -= delta
+		if _chute_espera <= 0.0:
+			_chutar()
 	if parry_recuperacao > 0.0:
 		parry_recuperacao = maxf(parry_recuperacao - delta, 0.0)
 	if parry_janela > 0.0:
@@ -405,25 +436,35 @@ func _atualizar_parry(delta: float) -> void:
 			parry_recuperacao = Valores.GATO_PARRY_RECUPERACAO
 
 
-## Todo ataque inimigo passa por aqui. Com a janela aberta, é defendido: o gato
-## chuta e o atacante é lançado e atordoado. Sem a janela, o gato toma o dano.
-## Devolve true se o ataque foi defendido.
+## Todo ataque inimigo passa por aqui. Com a janela aberta, é defendido com a
+## espada: o atacante fica atordoado 0,5 s e só então leva o chute, que lança e
+## atordoa por mais 1,5 s. A língua é rebatida com o chute na hora.
+## Sem a janela, o gato toma o dano e fica 1,5 s invulnerável.
+## Devolve true se o ataque foi defendido (ou não fez efeito).
 func receber_ataque(atacante: Node2D, dano: int) -> bool:
 	if morto or em_escalada:
 		return false
 	var direcao := (atacante.global_position - global_position).normalized()
 	if parry_janela > 0.0:
 		parry_janela = 0.0
-		_chute = CHUTE_DURACAO
-		_chute_direcao = direcao
 		direcao_olhar = Vector2.from_angle(snappedf(direcao.angle(), PI / 4.0))
+		_chute_direcao = direcao
+		var chute_depois := true
 		if atacante.has_method("receber_parry"):
-			atacante.receber_parry(direcao)
+			chute_depois = atacante.receber_parry(direcao)
+		if chute_depois:
+			_chute_espera = Valores.GATO_PARRY_ESPERA_CHUTE
+			_chute_alvo = atacante
+		else:
+			_chute = CHUTE_DURACAO  # língua: chute imediato
 		Som.tocar("clang")
 		_hitstop()
 		parry_acertado.emit()
 		return true
+	if invulneravel > 0.0:
+		return true
 	vida = maxi(vida - dano, 0)
+	invulneravel = Valores.GATO_INVULNERAVEL
 	_dano_piscar = DANO_PISCAR
 	_tremor = TREMOR_DURACAO
 	Som.tocar("dano")
@@ -431,6 +472,28 @@ func receber_ataque(atacante: Node2D, dano: int) -> bool:
 	if vida == 0:
 		_morrer()
 	return false
+
+
+## Segunda ação do parry: o chute lança o inimigo e o deixa atordoado.
+func _chutar() -> void:
+	_chute_espera = 0.0
+	_chute = CHUTE_DURACAO
+	if is_instance_valid(_chute_alvo) and not _chute_alvo.morto and _chute_alvo.has_method("receber_chute"):
+		_chute_direcao = (_chute_alvo.global_position - global_position).normalized()
+		_chute_alvo.receber_chute(_chute_direcao)
+		Som.tocar("impacto")
+	_chute_alvo = null
+
+
+## Dash no meio da espera: o chute não sai e o inimigo fica só com os 0,5 s.
+func _cancelar_chute() -> void:
+	_chute_espera = 0.0
+	_chute_alvo = null
+
+
+## O rolamento esquiva de ataques com a tag "projétil" (a língua do sapo).
+func esquivando_projetil() -> bool:
+	return em_dash and _dash_tipo == Dash.ROLAMENTO
 
 
 ## Tempo que ainda resta do piscar de dano (a HUD usa para a borda vermelha).
@@ -443,6 +506,7 @@ func _morrer() -> void:
 	em_dash = false
 	em_escalada = false
 	parry_janela = 0.0
+	_cancelar_chute()
 	_cancelar_combo()
 	velocity = Vector2.ZERO
 	Som.tocar("morte_gato")
@@ -508,11 +572,16 @@ func _desenhar_golpe(raio: float) -> void:
 	var centro := direcao_olhar * raio
 	var alcance := Valores.GATO_ALCANCE_ATAQUE
 	if golpe_atual == 3:
-		var abertura := PI * 0.9
+		# Corte vertical: arco estreito (60°) e mais comprido (25 px).
+		var abertura := deg_to_rad(Valores.GATO_ANGULO_GOLPE_3)
 		var ini := angulo - abertura / 2.0
-		draw_arc(centro, alcance * 0.75, ini, ini + abertura * minf(p * 2.0, 1.0), 16, Color(1, 1, 1, alpha), 3.0)
-		draw_arc(centro, alcance * 0.5, ini, ini + abertura * minf(p * 2.0, 1.0), 16, Color(0.8, 0.9, 1, alpha * 0.6), 1.0)
+		var r3 := Valores.GATO_ALCANCE_GOLPE_3
+		draw_arc(Vector2.ZERO, r3, ini, ini + abertura * minf(p * 2.0, 1.0), 12, Color(1, 1, 1, alpha), 3.0)
+		draw_line(Vector2.ZERO, Vector2.from_angle(angulo) * r3 * minf(p * 2.0, 1.0), Color(0.8, 0.9, 1, alpha * 0.6), 1.0)
 		return
+	# Contorno da área (120°), bem fraco, para conferir o alcance no protótipo.
+	var meia := deg_to_rad(Valores.GATO_ANGULO_ATAQUE) / 2.0
+	draw_arc(Vector2.ZERO, alcance, angulo - meia, angulo + meia, 12, Color(1, 1, 1, alpha * 0.25), 1.0)
 	var lado := -1.0 if golpe_atual == 1 else 1.0
 	for i in 3:
 		var desvio := (i - 1) * 0.3
@@ -541,6 +610,10 @@ func _draw() -> void:
 	var cor_corpo := COR_CORPO
 	if _dano_piscar > 0.0 and int(_dano_piscar * 20.0) % 2 == 0:
 		cor_corpo = Color(1, 0.3, 0.3)
+	elif invulneravel > 0.0 and int(invulneravel * 12.0) % 2 == 0:
+		cor_corpo = Color(cor_corpo, 0.35)  # piscando enquanto está invulnerável
+	elif _chute_espera > 0.0:
+		cor_corpo = COR_CORPO.lerp(Color(0.6, 0.9, 1.0), 0.35)
 	elif parry_janela > 0.0:
 		cor_corpo = COR_CORPO.lerp(Color(0.6, 0.9, 1.0), 0.6)
 	if em_escalada:

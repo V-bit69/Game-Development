@@ -408,7 +408,7 @@ O sistema de dano é baseado em unidades.
 | Golpe 2 | 1 |
 | Golpe 3 | 2 |
 
-O dash padrão também causa **1 unidade de dano**.
+O dash ofensivo também causa **1 unidade de dano**.
 
 Após sofrer dano, o gato entra em um estado de recuperação de 1,5 segundos. Durante esse tempo ele permanece invulnerável.
 
@@ -964,7 +964,6 @@ A vegetação é densa, mas as áreas efetivamente percorridas pelo jogador perm
 | Janela de parry | 0,2 s |
 | Knockback do parry | 1 dash |
 | Stun após parry | 0,5 s + 1,5 s |
-| Largura aproximada da hitbox | 6 px |
 | Sapo comum — HP | 4 |
 | Sapo comum — salto | 0,5 dash |
 | Sapo comum — velocidade | 1 × dash padrão |
@@ -1073,9 +1072,10 @@ Definido pelo game design em 30/09: o personagem de tamanho 3 tem **50 px** de a
 | Parâmetro | Regra | Valor resultante |
 |---|---|---|
 | Caminhada | 1,3 × 100 | **130 px/s** |
-| Dash padrão — comprimento | 1,3 × 80 | **104 px** |
-| Dash padrão — velocidade | 2 × 400 | **800 px/s** |
-| Dash padrão — duração | 104 ÷ 800 | **0,13 s** |
+| Dash ofensivo — comprimento | 1,3 × 80 | **104 px** |
+| Dash ofensivo — velocidade | 2 × 400 | **800 px/s** |
+| Dash ofensivo — duração | 104 ÷ 800 | **0,13 s** |
+| Dash ofensivo — custo | seção 5 | **2 unidades** de stamina (a escalada também) |
 | Rolamento — comprimento | 0,8 × 80 | **64 px** |
 | Rolamento — velocidade | 1 × 400 | **400 px/s** |
 | Rolamento — duração | 64 ÷ 400 | **0,16 s** |
@@ -1084,6 +1084,8 @@ Definido pelo game design em 30/09: o personagem de tamanho 3 tem **50 px** de a
 | Intervalo golpe 1→2 | 0,5 × 0,308 | **0,154 s** |
 | Intervalo golpe 2→3 | 1 × 0,308 | **0,308 s** |
 | Knockback do parry | 1 dash padrão | **80 px** |
+| Atordoamento do parry | 0,5 s até o chute + 1,5 s depois | **2 s** (só 0,5 s se o chute for cancelado com dash) |
+| Invulnerabilidade depois do dano | seção 20 | **1,5 s** |
 | Distância de interação | ½ × 50 | **25 px** |
 | Hitbox do corpo | — | círculo de **raio 10 px**, nos pés |
 | Área de ataque | 2 × raio | **20 px** de alcance, em arco à frente com 120° |
@@ -1115,44 +1117,50 @@ Definido pelo game design em 30/09: o personagem de tamanho 3 tem **50 px** de a
 | Área superior | 2 | 2 |
 | **Total** | **14** | **7** |
 
+O grupo 1 do exterior é o primeiro que o jogador encontra (gatilho de baixo), e o grupo 2 fica guardando a entrada. Os sapos da área superior não têm gatilho: ficam acordados.
+
 As dimensões das áreas e o posicionamento estão em [02-level-design-demo.md](02-level-design-demo.md).
 
 ---
 
 ## 50. Dúvidas em aberto
 
-Perguntas do desenvolvimento para o game design:
+Perguntas do desenvolvimento para o game design. As respondidas ficam riscadas, com a resposta.
 
 1. ~~**Estilo da arte.**~~ *Respondida em 30/09: pixel art com os pixels visíveis. O tamanho 3 tem 50 px na arte e aparece com 150 px na tela (×3).*
-2. **Duração do golpe.** "1,3 × a duração padrão" deixa o golpe do gato mais lento que o padrão. Era essa a intenção, ou a ideia era 1,3 × mais rápido, como no dash?
-3. **Hitbox dos inimigos.** Os 6 px vieram da referência antiga de 16 px de altura. Na escala nova, a proposta é 18 × 14 px. Pode ser?
-4. **Fragmento da clareira.** A seção 35.3 e o diagrama colocam um "fragmento/peça tecnológica" na clareira. A seção 14 coloca o elemento tecnológico "próximo à ruína", e a peça de upgrade da KLM-99 fica na área superior. O fragmento da clareira é o elemento da seção 14 ou um terceiro objeto?
+2. ~~**Duração do golpe.**~~ *Respondida na v1.3: é 1,3 × a velocidade, ou seja, o golpe do gato é mais rápido. Com a duração padrão de 0,40 s, o golpe do gato dura 0,308 s.*
+3. ~~**Hitbox dos inimigos.**~~ *Respondida na v1.3: a largura de 6 px saiu da seção 24. Fica o retângulo de 18 × 14 px.*
+4. ~~**Fragmento da clareira.**~~ *Respondida em 02/10: o fragmento é o elemento tecnológico da seção 14, e fica longe da ruína. Foi para o recanto do corredor onde ficava a flor.*
 5. **Perseguição.** O que significa "todo o espaço acessível do mapa que estiver atrás de sua posição"? O inimigo só persegue voltando em direção ao início do mapa, ou em qualquer direção dentro do cenário?
-6. **Dano de contato.** O sapo causa dano só durante o salto, ou também se o jogador encostar nele parado?
+6. ~~**Dano de contato.**~~ *Respondida na v1.3: nenhum sapo tem dano de contato. Só o salto (e a língua) causam dano.*
 7. **Parry errado.** Existe algum tempo de recuperação quando o jogador erra o parry? Sem isso, apertar Q sem parar defende tudo. A proposta é 0,4 s.
 8. **Inimigo atordoado.** Ele toma dano normal ou dano extra (crítico)?
-9. **Dash por vários inimigos.** O dash causa dano em todos os inimigos atravessados?
+9. **Dash por vários inimigos.** O dash ofensivo causa dano em todos os inimigos atravessados? No protótipo, sim: 1 de dano em cada um.
 10. **Descida da área superior.** Como o jogador volta para baixo: pula, desce pelo mesmo trecho ou tem outro caminho?
-11. **Posição da flor.** A flor de lírio azul fica em qual área?
+11. ~~**Posição da flor.**~~ *Respondida em 02/10: no corredor, um pouco acima de onde estava, perto de um corpo d'água.*
 12. **Controle.** A demo terá suporte a controle (gamepad) além do teclado?
-13. **Rolamentos seguidos.** A regra diz que o terceiro rolamento dentro de 4 s custa 1 unidade. E o quarto, ainda dentro da mesma janela, também custa? No protótipo, sim: todo rolamento que acontece com 2 ou mais rolamentos nos últimos 4 s custa 1 unidade.
-14. **Dash parado.** Se o jogador aperta D sem nenhuma seta, o dash vai para onde o gato está olhando. Pode ser assim?
-15. **Combo esquecido.** Se o jogador fica 1 s sem atacar, o combo volta ao golpe 1. Sem isso, um golpe dado muito depois ainda seria o golpe 2 ou 3. Pode ser?
-16. **Passo à frente no golpe.** Cada golpe empurra o inimigo 16 px (1 tile), e o alcance do ataque é de 20 px. Sem compensação, o golpe 2 já não alcança. No protótipo, o gato dá um passo de 16 px para a frente em cada golpe. Pode ser assim, ou o combo deve mesmo afastar o inimigo?
-17. **Dash durante o combo.** O dash cancela o golpe em andamento e o combo volta ao golpe 1. Pode ser?
-18. **Knockback do dash.** O dash padrão fere o inimigo (2 de dano), mas não o empurra, porque o gato passa através dele. Pode ser?
+13. ~~**Rolamentos seguidos.**~~ *Respondida na v1.3: depois de gastar stamina, a contagem zera. O quarto rolamento conta como primeiro. A janela passou para 5 s.*
+14. ~~**Dash parado.**~~ *Respondida na v1.3: sem direção, o dash vai para onde o gato olha.*
+15. ~~**Combo esquecido.**~~ *Respondida na v1.3: o combo é cíclico e nunca volta ao golpe 1.*
+16. ~~**Passo à frente no golpe.**~~ *Respondida na v1.3: o avanço (attack lunge) compensa o knockback. Ficou 16 px por golpe.*
+17. ~~**Dash durante o combo.**~~ *Respondida na v1.3: não há cancelamento de combo. Ver a dúvida 31, sobre como isso ficou no protótipo.*
+18. **Knockback do dash.** O dash ofensivo fere o inimigo (1 de dano), mas não o empurra, porque o gato passa através dele. Pode ser?
 19. **Rolamento e inimigos.** O rolamento também atravessa inimigos (sem dano). Andando normalmente, o inimigo vivo bloqueia a passagem. Pode ser?
-20. **Parry na língua.** A seção 23 diz que "o sapo é atingido". No protótipo, ele leva 1 de dano e fica atordoado por 1 s, sem ser lançado. Esse dano está certo?
+20. **Parry na língua.** *Atordoamento respondido na v1.3: 2 s, com chute imediato.* Falta o dano: no protótipo, o sapo leva 1 de dano quando a língua é rebatida. Está certo?
 21. **Distância de interação.** Com 25 px contados da borda do objeto, é preciso quase encostar na flor ou na peça para pegar. Aumentar?
 22. **Diálogo automático de Xennar.** O primeiro diálogo começa sozinho quando o gato chega a 40 px dele. As outras conversas são com E. Pode ser?
 23. **Elemento tecnológico.** A seção 14 diz "ao encontrá-lo, o gato comenta". No protótipo, o comentário é com E, com indicador. Deveria ser automático, ao chegar perto?
-24. **Fala da flor.** A curiosidade sobre a irmã não está escrita. O protótipo usa um texto provisório, marcado em `jogo/scripts/textos.gd`. Falta o texto final.
-25. **Invulnerabilidade depois do dano.** Não existe: dois sapos podem acertar quase juntos. Quer um tempo curto de invulnerabilidade (por exemplo, 0,5 s) depois de tomar dano?
+24. ~~**Fala da flor.**~~ *Respondida na v1.3: o texto está na seção 13.*
+25. ~~**Invulnerabilidade depois do dano.**~~ *Respondida na v1.3: 1,5 s de recuperação invulnerável. No protótipo, o gato pisca nesse tempo.*
 26. **Direção do salto do sapo.** É decidida no começo do telegraph e não muda depois, então o jogador consegue desviar. Pode ser, ou o sapo deve mirar no fim do telegraph?
 27. **Direção do parry.** O parry defende ataques vindos de qualquer lado, sem precisar estar virado para o inimigo. Pode ser?
 28. **Entrada dos sapos.** Nos encontros, os sapos aparecem caindo do alto no lugar marcado, quase juntos. A ideia era saírem pulando da vegetação?
 29. **Tela de morte.** O texto é provisório ("O Homem-gato caiu" e "Pressione E para recomeçar"), com filtro cinza avermelhado. Algum texto específico?
 30. **Pausa.** Esc abre o menu com Continuar, Recomeçar a fase e Sair do jogo. Pode ser?
+31. **Dash no meio do golpe.** "Não há cancelamento de combo" foi lido assim: o dash ainda interrompe o golpe em andamento (para fugir), mas a sequência não volta ao golpe 1. Se o golpe 2 foi interrompido, o próximo A é o golpe 3. Era isso, ou o dash não deveria funcionar no meio de um golpe?
+32. **Golpe no sapo durante o salto.** A seção 25 não fala mais em interromper o pulo. No protótipo, o knockback leva o sapo para trás e o salto acaba ali. Se ele já estiver encostando no gato no mesmo instante, o dano do salto vale. Está certo, ou o sapo deveria continuar o salto mesmo levando o golpe?
+33. **Espera do chute no parry.** Nos 0,5 s entre a defesa e o chute, o gato fica parado: não anda, não ataca e não abre outro parry. Só o dash cancela. Outros inimigos podem acertar o gato nesse tempo. Pode ser?
+34. **Lago da flor.** O corpo d'água é só cenário e bloqueia a passagem, inclusive com o dash. Ele terá outra função (por exemplo, beber água, reflexo, peixes)?
 
 ---
 
@@ -1171,3 +1179,4 @@ Perguntas do desenvolvimento para o game design:
 | 1.2 | 30/09/2026 | Desenvolvimento | Dúvidas 15 a 19, que surgiram na implementação do combate melee (M3) |
 | 1.2 | 30/09/2026 | Desenvolvimento | Dúvidas 20 a 30, que surgiram na implementação do M4 ao M9 |
 | 1.3 | 02/10/2026 | Game design | Alterações em algumas regras e mecânicas |
+| 1.3 | 02/10/2026 | Desenvolvimento | Seção 49 conferida com a v1.3. Dúvidas respondidas riscadas e dúvidas 31 a 34. Correções: "dash padrão" → "dash ofensivo" na seção 20 e largura de 6 px tirada da tabela da seção 46 |

@@ -23,7 +23,7 @@ func _rodar() -> void:
 	var avisos_sem_stamina := [0]
 	_jogador.sem_stamina.connect(func() -> void: avisos_sem_stamina[0] += 1)
 
-	# Dash padrão para a direita: 104 px em ~0,13 s, gasta 1 unidade.
+	# Dash ofensivo para a direita: 104 px em ~0,13 s, gasta 2 unidades.
 	Input.action_press("mover_direita")
 	_jogador.pedir_dash()
 	var quadros := 0
@@ -34,7 +34,7 @@ func _rodar() -> void:
 	var andou := _jogador.position.x - inicio.x
 	_conferir("dash padrão anda 104 px (andou %.1f)" % andou, absf(andou - 104.0) < 1.0)
 	_conferir("dash padrão dura 0,13 s (%d quadros = %.2f s)" % [quadros, quadros / 60.0], quadros >= 7 and quadros <= 9)
-	_conferir("dash padrão gasta 1 unidade", _jogador.stamina == 3)
+	_conferir("dash ofensivo gasta 2 unidades", _jogador.stamina == 2)
 
 	# Sem direção apertada, o dash vai para onde o gato olha (direita).
 	var x_antes := _jogador.position.x
@@ -43,6 +43,7 @@ func _rodar() -> void:
 	_conferir("sem seta, dash vai para onde o gato olha", _jogador.position.x > x_antes + 100.0)
 
 	# Parede interrompe o dash no contato: borda em x = 32, raio 10.
+	_jogador.stamina = 4
 	_jogador.position = Vector2(80, inicio.y)
 	Input.action_press("mover_esquerda")
 	_jogador.pedir_dash()
@@ -50,13 +51,13 @@ func _rodar() -> void:
 	await _fim_do_dash()
 	_conferir("parede interrompe o dash (x = %.1f)" % _jogador.position.x, absf(_jogador.position.x - 42.0) < 1.0)
 
-	# Stamina acabando: 4 dashes zeram, o 5º falha e não move.
+	# Stamina acabando: 2 dashes zeram, o 3º falha e não move.
 	_jogador.stamina = 4
-	for i in 4:
+	for i in 2:
 		_jogador.position = inicio
 		_jogador.pedir_dash()
 		await _fim_do_dash()
-	_conferir("4 dashes zeram a stamina", _jogador.stamina == 0)
+	_conferir("2 dashes zeram a stamina", _jogador.stamina == 0)
 	var pos := _jogador.position
 	_conferir("sem stamina o dash falha", not _jogador.pedir_dash() and _jogador.position == pos)
 	_conferir("falha avisa a HUD", avisos_sem_stamina[0] == 1)
@@ -87,18 +88,22 @@ func _rodar() -> void:
 	_jogador.position = inicio
 	_jogador.pedir_dash()
 	await _fim_do_dash()
-	_conferir("3º rolamento em 4 s gasta 1", _jogador.stamina == 3)
+	_conferir("3º rolamento em 5 s gasta 1", _jogador.stamina == 3)
+	_jogador.position = inicio
+	_jogador.pedir_dash()
+	await _fim_do_dash()
+	_conferir("depois de gastar, a contagem recomeça (4º é grátis)", _jogador.stamina == 3)
 
-	# Depois que a janela de 4 s passa, volta a ser grátis.
-	await _esperar(250)
+	# Depois que a janela de 5 s passa, volta a ser grátis.
+	await _esperar(310)
 	var antes: int = _jogador.stamina
 	_jogador.position = inicio
 	_jogador.pedir_dash()
 	await _fim_do_dash()
-	_conferir("depois de 4 s o rolamento volta a ser grátis", _jogador.stamina == antes)
+	_conferir("depois de 5 s o rolamento volta a ser grátis", _jogador.stamina == antes)
 
 	_jogador.trocar_dash()
-	_conferir("S volta para o dash padrão", _jogador.dash_equipado == 0)
+	_conferir("S volta para o dash ofensivo", _jogador.dash_equipado == 0)
 
 	print("\n%s" % ("M2 OK: todos os testes passaram." if _falhas == 0 else "M2 FALHOU: %d teste(s)." % _falhas))
 	quit(1 if _falhas > 0 else 0)

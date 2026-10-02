@@ -13,13 +13,13 @@ Projeto Godot 4 do protótipo da demo. Feito com formas simples, sem arte final.
 | Tecla | Ação | Marco |
 |---|---|---|
 | Setas | Mover em 8 direções | M1 ✅ |
-| D | Dash | M2 ✅ |
+| D | Dash (ofensivo ou rolamento) | M2 ✅ |
 | S | Trocar o tipo de dash | M2 ✅ |
 | A | Atacar (combo de 3 golpes) | M3 ✅ |
 | Q | Parry | M4 ✅ |
 | E | Interagir, avançar diálogo, recomeçar depois de morrer | M7 ✅ |
 | F11 | Alternar tela cheia e janela | — |
-| D perto do trecho escalável | Escalar a parede da ruína | M8 ✅ |
+| D perto do trecho escalável | Escalar a parede da ruína (com o dash ofensivo) | M8 ✅ |
 | Esc | Pausa (Continuar, Recomeçar a fase, Sair) | M9 ✅ |
 | R | Recomeçar a fase (atalho de desenvolvimento) | — |
 
@@ -47,7 +47,7 @@ O jogo roda em **640 × 360** e é ampliado 3× num monitor 1920 × 1080, com os
 | `testes/teste_m1.gd` a `teste_m9.gd` | Testes automáticos de cada marco |
 | `testes/teste_blockout.gd` | Confere o mapa da floresta: tamanho, contagem de sapos e se tudo é alcançável |
 
-No mapa em texto, cada caractere vale 32 × 32 px (2 × 2 tiles). A legenda é a do [level design](../docs/02-level-design-demo.md): `T` vegetação, `#` parede da ruína, `o` obstáculo, `.` chão, `:` trilha, `@` início do jogador, `X` Xennar, `F` fogueira, `L` flor, `G` estátua, `t` elemento tecnológico, `K` peça da KLM-99, `s` sapo comum, `l` sapo com língua, `!` gatilho de encontro, `=` entrada da ruína, `D` trecho escalável, `v` descida e `x` alvo de treino e `a` alvo de treino que ataca.
+No mapa em texto, cada caractere vale 32 × 32 px (2 × 2 tiles). A legenda é a do [level design](../docs/02-level-design-demo.md): `T` vegetação, `#` parede da ruína, `o` obstáculo, `.` chão, `:` trilha, `@` início do jogador, `X` Xennar, `F` fogueira, `L` flor, `G` estátua, `t` elemento tecnológico, `K` peça da KLM-99, `s` sapo comum, `l` sapo com língua, `!` gatilho de encontro, `=` entrada da ruína, `D` trecho escalável, `v` descida, `~` água, `x` alvo de treino e `a` alvo de treino que ataca.
 
 ## Atualizar a versão do navegador
 

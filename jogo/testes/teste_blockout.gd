@@ -63,8 +63,8 @@ func _rodar() -> void:
 				if not encosta:
 					sem_acesso.append("%s em (%d, %d)" % [c, x, y])
 	_conferir("tudo alcançável a partir do início %s" % [sem_acesso], sem_acesso.is_empty())
-	_conferir("11 sapos comuns (tem %d)" % contagem.get("s", 0), contagem.get("s", 0) == 11)
-	_conferir("5 sapos com língua (tem %d)" % contagem.get("l", 0), contagem.get("l", 0) == 5)
+	_conferir("14 sapos comuns (tem %d)" % contagem.get("s", 0), contagem.get("s", 0) == 14)
+	_conferir("7 sapos com língua (tem %d)" % contagem.get("l", 0), contagem.get("l", 0) == 7)
 	for c in "XFGtLK":
 		_conferir("1 marcador %s" % c, contagem.get(c, 0) == 1)
 

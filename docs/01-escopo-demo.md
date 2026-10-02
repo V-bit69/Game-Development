@@ -1,6 +1,6 @@
 # Escopo da Demo
 
-**Versão:** 0.2 · **Status:** definido em conjunto (etapa 1), atualizado com a especificação da floresta · **Base:** [GDD](GDD.md) e [Game Design da floresta](04-game-design-floresta.md)
+**Versão:** 0.2 · **Status:** definido em conjunto (etapa 1), atualizado com a especificação da floresta · **Base:** [GDD](GDD.md) e [Game Design da floresta](04-game-design-demo.md)
 
 Este documento fecha o que a demo mostra e o que fica de fora. Qualquer item novo só entra se algo sair, ou depois da demo pronta.
 
@@ -18,7 +18,7 @@ A demo **não** tenta provar a narrativa de múltiplas perspectivas. Essa parte 
 
 ## 2. Personagem
 
-- **Homem-gato** (GDD 12.4), confirmado na [especificação da floresta](04-game-design-floresta.md). É ágil, bondoso, fala rápido e mia no fim de algumas frases.
+- **Homem-gato** (GDD 12.4), confirmado na [especificação da floresta](04-game-design-demo.md). É ágil, bondoso, fala rápido e mia no fim de algumas frases.
 - Tem **10 de HP** e **4 unidades de stamina**.
 - Começa só com as habilidades próprias: garras, espada, dois tipos de dash e parry.
 - No meio da demo, dentro da ruína, encontra a arma **KLM-99**, que libera o ataque à distância.
@@ -51,7 +51,7 @@ flowchart LR
 ```
 
 ### Área 1: Floresta
-Especificação completa em [04-game-design-floresta.md](04-game-design-floresta.md). A floresta tem cinco partes, cerca de 7,5 telas no total:
+Especificação completa em [04-game-design-demo.md](04-game-design-demo.md). A floresta tem cinco partes, cerca de 7,5 telas no total:
 - **Área segura (1 tela):** encontro com **Xennar**, o velho responsável pelo farol. Ele pede que o gato recupere o **cajado** roubado pelas criaturas. Tem a fogueira, que é só ambientação: **não é checkpoint**.
 - **Corredor (1 tela):** passagem entre árvores, sem combate.
 - **Clareira (1,5 tela):** estátua da Guardiã e o primeiro combate contra os sapos.
@@ -147,7 +147,7 @@ Tudo o que acontece precisa de um sinal visual **e** sonoro, mesmo que provisór
 
 **Do game design (etapa 2):**
 - [x] Especificação da floresta: personagem, mecânicas, sapos, Xennar, interações e mapa
-- [ ] Responder as [12 dúvidas](04-game-design-floresta.md#50-dúvidas-em-aberto) da especificação da floresta
+- [ ] Responder as [dúvidas em aberto](04-game-design-demo.md#50-dúvidas-em-aberto) da especificação da floresta
 - [ ] Especificação da ruína: a KLM-99, os inimigos, o semi-boss e os minions
 - [ ] Boss (líder das criaturas): padrões de ataque e fases
 - [ ] Concept da região da demo (floresta e ruína)

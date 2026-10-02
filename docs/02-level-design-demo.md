@@ -1,6 +1,6 @@
 # Level Design da Demo — Rascunho
 
-**Versão:** 0.5 · **Status:** floresta refeita pela [especificação de gameplay](04-game-design-floresta.md) e **montada no Godot** (`jogo/cenas/floresta.tscn`). Ruína e boss aguardam a especificação deles.
+**Versão:** 0.6 · **Status:** floresta refeita pela [especificação de gameplay](04-game-design-demo.md) (v1.3) e **montada no Godot** (`jogo/cenas/floresta.tscn`). Ruína e boss aguardam a especificação deles.
 
 Este é um blockout só com posições e funções. Não é arte. Cada elemento está marcado por **função**, e o concept decide o visual.
 
@@ -41,7 +41,7 @@ O que ainda é provisório no blockout:
 - A entrada da ruína (`=`) está fechada, porque a ruína ainda aguarda a especificação.
 - A descida da área superior (`v`) é provisória: E perto dela leva o gato para a frente da ruína (dúvida 10).
 
-Desde o M9, as marcações viraram jogo: os sapos são inimigos de verdade e dormem até o gatilho (`!`) da área, o trecho `D` só se passa escalando com o dash padrão, e Xennar, estátua, elemento, flor e peça têm interação com E.
+Desde o M9, as marcações viraram jogo: os sapos são inimigos de verdade e dormem até o gatilho (`!`) da área, o trecho `D` só se passa escalando com o dash ofensivo, e Xennar, estátua, elemento, flor e peça têm interação com E.
 
 ### Dimensões
 
@@ -67,7 +67,7 @@ L  flor de lírio azul (oculta)     G  estátua da Guardiã    t  elemento tecno
 s  sapo comum                      l  sapo com língua       !  gatilho do encontro
 o  obstáculo (bloqueia ataque e língua, não bloqueia a percepção)
 #  parede da ruína                 =  entrada da ruína      D  trecho escalável (dash)
-K  peça de upgrade da KLM-99       v  descida de volta
+K  peça de upgrade da KLM-99       v  descida de volta       ~  água (não se atravessa)
 ```
 
 Nos desenhos abaixo, cada caractere vale 32 × 32 px (2 tiles). As proporções verticais estão comprimidas.
@@ -94,16 +94,18 @@ TTTTTTTTTTTTTTTTTTTT
 TTTTT::TTTTT   <- abre na clareira
 TTTT::TTTTTT
 TTT::TTTTTTT
-TT::...TTTTT
-TTT::.L.TTTT   recanto lateral com a flor
-TTTT::TTTTTT
-TTTTT::TTTTT
+~~~...TTTTTT
+~~~L..TTTTTT   flor de lírio azul, na beira de um lago
+~~...TTTTTTT
+TTT::TTTTTTT
+TTTT::.t.TTT   recanto lateral com o elemento tecnológico
 TTTT::TTTTTT   <- vem da área segura
 ```
 
 - Passagem de 3 a 4 tiles de largura, sem árvore isolada no meio.
 - O caminho faz uma curva em S, que esconde a clareira até o fim.
-- **Flor de lírio azul** num recanto fora da trilha, sem indicador de E. É a primeira interação oculta, e recompensa quem olha para os lados. *(Posição a confirmar, dúvida 11.)*
+- **Elemento tecnológico** num recanto lateral, na metade de baixo do corredor. É um fragmento da ruína que foi parar longe dela, e o gato estranha (definido pelo game design em 02/10).
+- **Flor de lírio azul** mais acima, na beira de um **lago** (corpo d'água) do lado esquerdo do caminho, sem indicador de E. É a interação oculta, e combina com a fala da irmã ("nasce onde a água é limpa"). O lago bloqueia a passagem.
 - Sem combate. É o lugar para o jogador testar o dash e a troca para o rolamento.
 
 ### 3. Clareira (1,5 tela)
@@ -123,20 +125,20 @@ TTTTTTTT::::TTTTTTTT   <- vem do corredor
 - **Primeiro combate:** 3 sapos comuns + 1 com língua. Eles entram pulando da vegetação, espalhados e a pelo menos 120 px do jogador.
 - Dois obstáculos baixos dão cobertura contra a língua, e ensinam que obstáculo bloqueia ataque.
 - A **estátua da Guardiã** fica no caminho, mais perto da saída. O jogador lê depois do combate, no momento de calma.
-- O "fragmento" que o game design cita na clareira ainda depende da dúvida 4.
 
 ### 4. Exterior da ruína (2,5 telas)
 
 ```
 ####D#########==#############   fachada: D = escalada, == = entrada da ruína
-T...D.........::..........t.T   t = elemento tecnológico, encostado na parede
+T...D.........::.............T
 T.......o.....::....o.......T
-T..s.....l....::......l..s..T   grupo 2: 3 comuns + 2 com língua, guardando a entrada
+T..s.....l....::......l..s..T   grupo 2: 5 comuns + 2 com língua, guardando a entrada
 T.............::...s........T
-T....o........::........o...T
+T....o...s....::.......s.o..T
 T.............!.............T   ! = gatilho do grupo 2
-T...s....o....::.....s......T   grupo 1: 3 comuns + 1 com língua
+T...s....o....::.....s......T   grupo 1: 4 comuns + 2 com língua
 T.......l.....::...s........T
+T.....s.......::........l...T
 TTTTTTTTTTTT::::TTTTTTTTTTTTT   <- vem da clareira
 ```
 
@@ -144,7 +146,6 @@ TTTTTTTTTTTT::::TTTTTTTTTTTTT   <- vem da clareira
 - **Grupo 1** aparece na entrada. **Grupo 2** só aparece quando o jogador passa da metade, para os dois grupos não se somarem.
 - Obstáculos espalhados quebram a linha da língua e obrigam os sapos a contornar.
 - **Trecho escalável** no canto esquerdo da fachada, com o indicador **D**. Fica longe da entrada para ser uma escolha de exploração.
-- **Elemento tecnológico** no canto direito, encostado na ruína, com as duas falas do gato.
 - A **entrada da ruína** fica no centro, no fim da trilha. É a saída do cenário.
 
 ### 5. Área superior (1,5 tela, opcional)
@@ -152,7 +153,7 @@ TTTTTTTTTTTT::::TTTTTTTTTTTTT   <- vem da clareira
 ```
 TTTTTTTTTTTTTTTTTTTTTTTTTTTTT
 TT.K....o.......s........o.TT   K = peça de upgrade, no fundo
-TT....o......l........s....TT   2 comuns + 1 com língua
+TT....o......l........s....TT   2 comuns + 2 com língua
 TT........................vTT   v = descida de volta
 ####D#########==#############   (mesma fachada do exterior)
 ```
@@ -230,7 +231,8 @@ TT........................vTT   v = descida de volta
 
 ## Próximos passos
 
-- [ ] Respostas das dúvidas 4, 10 e 11 da especificação (fragmento, descida e flor)
+- [x] Respostas das dúvidas 4 e 11 (fragmento e flor), em 02/10
+- [ ] Resposta da dúvida 10 (descida da área superior)
 - [x] Montar o blockout da floresta no Godot com formas simples
 - [ ] Ajustar os tamanhos depois de testar a velocidade e o dash no protótipo
 - [ ] Receber o concept da região e trocar funções por elementos reais

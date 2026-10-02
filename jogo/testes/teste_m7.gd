@@ -46,16 +46,16 @@ func _rodar() -> void:
 	dialogo.fechar()
 
 	# Flor: interação oculta (sem indicador), coleta e some.
-	jogador.position = _celula(18, 58) + Vector2(-16, 0)
+	jogador.position = _celula(10, 50) + Vector2(16, 0)
 	await esperar(2)
 	conferir("perto da flor, sem indicador (oculta)", jogador.indicador == "")
 	sala._interagir()
 	conferir("E na flor: coleta e fala do gato", dialogo.ativo and dialogo._texto.text == T.FLOR[0][1])
 	dialogo.fechar()
-	conferir("flor some do mapa", sala._linhas[58][18] == "." and sala._interativo_por_id("flor").is_empty())
+	conferir("flor some do mapa", sala._linhas[50][10] == "." and sala._interativo_por_id("flor").is_empty())
 
 	# Elemento tecnológico.
-	jogador.position = _celula(26, 14)
+	jogador.position = _celula(17, 58)  # fragmento longe da ruína, no corredor
 	await esperar(2)
 	sala._interagir()
 	conferir("elemento tecnológico: falas do gato", dialogo.ativo and dialogo._texto.text == T.ELEMENTO[0][1])

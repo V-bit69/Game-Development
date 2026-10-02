@@ -34,6 +34,7 @@ func _rodar() -> void:
 	conferir("borda vermelha de dano", jogador.piscar_de_dano() > 0.0)
 
 	# Morte: vida em 0, filtro, aviso, e o jogo para.
+	jogador.invulneravel = 0.0  # pula os 1,5 s de invulnerabilidade
 	jogador.receber_ataque(atacante, 7)
 	conferir("vida 0: morte", jogador.vida == 0 and jogador.morto)
 	conferir("tela de morte aparece", tela.na_morte and tela._camada_morte.visible)

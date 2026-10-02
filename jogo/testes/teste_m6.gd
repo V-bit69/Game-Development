@@ -75,6 +75,8 @@ func _rodar() -> void:
 	conferir("sapo atingido (vida %d) e atordoado" % sapo.vida, sapo.vida == 2 and sapo.atordoado > 0.0)
 	conferir("fica onde está, sem ser lançado", sapo.position == pos)
 	conferir("língua interrompida", not sapo.lingua_ativa)
+	conferir("atordoado por 2 s (%.2f)" % sapo.atordoado, absf(sapo.atordoado - 2.0) < 0.05)
+	conferir("chute imediato, sem espera", jogador._chute > 0.0 and jogador._chute_espera == 0.0)
 
 	# Golpe que pega só a língua não faz nada; golpe no corpo recolhe a língua.
 	await ate(func(): return sapo.atordoado == 0.0)
@@ -83,6 +85,21 @@ func _rodar() -> void:
 	sapo._mudar(E.LINGUA)
 	sapo.receber_dano(1, Vector2.RIGHT, 16.0)
 	conferir("golpe no corpo recolhe a língua", not sapo.lingua_ativa)
+
+	# Rolamento esquiva da língua (projétil): sem dano, e ela não fere mais depois.
+	jogador.vida = 10
+	jogador.invulneravel = 0.0
+	sapo.position = inicio + Vector2(30, 0)
+	sapo.atordoado = 0.0
+	sapo._mudar(E.LINGUA)
+	jogador.trocar_dash()
+	jogador.direcao_olhar = Vector2.UP
+	jogador.pedir_dash()
+	sapo._lancar_lingua(jogador)
+	await ate(func(): return not sapo.lingua_ativa, 60)
+	conferir("rolamento esquiva da língua (vida %d)" % jogador.vida, jogador.vida == 10)
+	jogador.trocar_dash()
+	jogador.position = inicio
 
 	# Obstáculo entre o sapo e o gato: não usa a língua, contorna.
 	sapo.queue_free()

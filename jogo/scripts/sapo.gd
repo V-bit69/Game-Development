@@ -4,7 +4,9 @@ extends Inimigo
 ## Ciclo: decisão → telegraph (0,5 s) → salto (40 px) → possível contato →
 ## aterrissagem → espera (1 s) → nova decisão.
 ## Fica aguardando até o jogador entrar na zona de percepção. Depois, persegue.
-## Se levar um golpe no meio do salto, o salto é cancelado e ele não causa dano.
+## Se levar um golpe no meio do salto, leva o knockback (o salto acaba ali), mas
+## ainda causa dano se encostar no gato antes ou ao mesmo tempo que o golpe.
+## Nenhum sapo tem dano de contato fora do salto.
 
 enum Estado { AGUARDANDO, TELEGRAPH, SALTO, LINGUA, ESPERA }
 
@@ -16,6 +18,11 @@ var _t := 0.0
 var _salto_direcao := Vector2.ZERO
 var _salto_restante := 0.0
 var _salto_acertou := false
+
+
+func _ready() -> void:
+	vida_maxima = Valores.SAPO_VIDA
+	super()
 
 
 func _jogador() -> Node2D:
@@ -109,9 +116,15 @@ func _linha_livre(j: Node2D) -> bool:
 	return get_world_2d().direct_space_state.intersect_ray(consulta).is_empty()
 
 
-## Golpe no meio do salto: cancela o salto (sem dano no jogador) e o knockback vale.
+## Golpe no meio do salto: o knockback vale e o salto acaba, mas se o sapo já
+## está encostando no gato, o dano do salto acontece junto.
 ## Golpe no corpo com a língua para fora também recolhe a língua.
 func receber_dano(dano: int, direcao := Vector2.ZERO, empurrao := 0.0) -> void:
+	if estado == Estado.SALTO:
+		var j := _jogador()
+		if j != null and not _salto_acertou and _encosta_no_jogador(j):
+			_salto_acertou = true
+			j.receber_ataque(self, Valores.SAPO_DANO)
 	if estado == Estado.SALTO or estado == Estado.LINGUA:
 		_interromper()
 	alertar()

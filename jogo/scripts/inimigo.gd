@@ -1,7 +1,8 @@
 class_name Inimigo
 extends CharacterBody2D
 ## Base de todos os inimigos: vida em unidades, dano, knockback, piscar branco,
-## quadradinhos de vida embaixo do sprite, parry (empurrão + atordoamento),
+## quadradinhos de vida embaixo do sprite, parry (atordoa 0,5 s; depois o chute
+## empurra e atordoa por mais 1,5 s),
 ## entrada pulando nos encontros e morte (o corpo fica no chão, a não ser
 ## em cima de um ponto de interesse). A origem fica nos pés, no centro da hitbox.
 
@@ -73,13 +74,24 @@ func receber_dano(dano: int, direcao := Vector2.ZERO, empurrao := 0.0) -> void:
 	queue_redraw()
 
 
-## Parry do jogador: interrompe a ação, lança o inimigo para trás e, no fim do
-## empurrão, deixa ele atordoado. Vale mesmo no meio de um avanço.
-func receber_parry(direcao: Vector2) -> void:
+## Parry do jogador, primeira ação: a defesa com a espada interrompe o ataque e
+## deixa o inimigo atordoado até o chute (0,5 s). Vale mesmo no meio de um avanço.
+## Devolve true: o chute vem depois (a língua do sapo muda isso).
+func receber_parry(_direcao: Vector2) -> bool:
 	if morto:
-		return
+		return false
 	_interromper()
 	em_avanco = false
+	atordoado = Valores.GATO_PARRY_ESPERA_CHUTE
+	return true
+
+
+## Parry, segunda ação: o chute lança o inimigo para trás (1 dash padrão) e, no
+## fim do empurrão, deixa ele atordoado por mais 1,5 s.
+func receber_chute(direcao: Vector2) -> void:
+	if morto:
+		return
+	atordoado = 0.0
 	_empurrar(direcao, Valores.GATO_PARRY_KNOCKBACK, Valores.PARRY_KNOCKBACK_VELOCIDADE)
 	_atordoar_depois = true
 

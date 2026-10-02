@@ -5,7 +5,8 @@ extends Sapo
 ##   zona intermediária (até 80 px) → telegraph, pula e usa a língua
 ##   zona externa                   → telegraph, salto de perseguição
 ## A língua vai em linha reta e volta pelo mesmo caminho. Obstáculos a seguram.
-## Com parry, a língua é rebatida: o sapo é atingido e fica atordoado onde está.
+## Com parry, a língua é rebatida na hora: o sapo é atingido e fica 2 s atordoado onde está.
+## A língua é um projétil: o rolamento esquiva dela, e a língua esquivada não fere mais.
 
 const COR_LINGUA := Color(0.95, 0.45, 0.6)
 
@@ -85,8 +86,9 @@ func _atualizar_lingua(delta: float, j: Node2D) -> void:
 			lingua_ativa = false
 			return
 	if not _lingua_acertou and _lingua_toca(j):
-		_lingua_acertou = true
-		j.receber_ataque(self, Valores.SAPO_LINGUA_DANO)
+		_lingua_acertou = true  # esquivada ou não, esta língua não fere mais
+		if not j.esquivando_projetil():
+			j.receber_ataque(self, Valores.SAPO_LINGUA_DANO)
 
 
 func ponta_da_lingua() -> Vector2:
@@ -98,17 +100,18 @@ func _lingua_toca(j: Node2D) -> bool:
 	return perto.distance_to(j.global_position) <= Valores.GATO_RAIO_HITBOX
 
 
-## Parry: se a língua estiver para fora, ela é rebatida. O sapo é atingido e
-## fica atordoado onde está, sem ser lançado. Sem língua, vale o parry normal.
-func receber_parry(direcao: Vector2) -> void:
+## Parry: se a língua estiver para fora, o gato chuta ela de volta na hora. O sapo
+## é atingido e fica 2 s atordoado onde está, sem ser lançado. Devolve false
+## (não tem chute depois). Sem língua, vale o parry normal.
+func receber_parry(direcao: Vector2) -> bool:
 	if not lingua_ativa:
-		super(direcao)
-		return
+		return super(direcao)
 	lingua_ativa = false
 	_interromper()
 	receber_dano(Valores.SAPO_LINGUA_PARRY_DANO)
 	if not morto:
-		atordoado = Valores.GATO_PARRY_ATORDOAMENTO
+		atordoado = Valores.SAPO_LINGUA_PARRY_ATORDOAMENTO
+	return false
 
 
 func _interromper() -> void:

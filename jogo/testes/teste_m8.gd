@@ -31,7 +31,7 @@ func _rodar() -> void:
 	conferir("rolamento não escala", jogador.position.y >= BASE_FACHADA + 9.0 and not jogador.em_escalada)
 	jogador.trocar_dash()
 
-	# Dash padrão para cima: escala, com a duração do dash, e gasta stamina.
+	# Dash ofensivo para cima: escala, com a duração do dash, e gasta stamina.
 	jogador.stamina = 4
 	Input.action_press("mover_cima")
 	jogador.pedir_dash()
@@ -44,7 +44,7 @@ func _rodar() -> void:
 	conferir("escalada dura o mesmo que o dash (%d quadros)" % quadros, quadros >= 7 and quadros <= 9)
 	conferir("chega em cima da ruína (y = %.1f)" % jogador.position.y, jogador.position.y < TOPO_FACHADA)
 	conferir("área superior", sala.area_em(jogador.position) == "Área superior")
-	conferir("escalada gasta 1 de stamina", jogador.stamina == 3)
+	conferir("escalada gasta 2 de stamina (dash ofensivo)", jogador.stamina == 2)
 
 	# Longe do trecho D, o dash para cima é um dash normal (bate na parede).
 	jogador.position = Vector2(8.5 * 32, BASE_FACHADA + 14)

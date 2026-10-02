@@ -23,7 +23,7 @@ func _rodar() -> void:
 	_jogador = _sala.get_node("Jogador")
 	_inicio = _jogador.position
 
-	# Ritmo do combo, sem alvo: golpes começam em 0 s, 0,39 s e 0,91 s; o 4º volta a ser o golpe 1.
+	# Ritmo do combo, sem alvo: golpes começam em 0 s, 0,46 s e 1,08 s; o 4º volta a ser o golpe 1.
 	var inicios: Array = []
 	_jogador.golpe_iniciado.connect(func(n: int) -> void: inicios.append([n, _jogador._tempo]))
 	var t0: float = _jogador._tempo
@@ -34,13 +34,13 @@ func _rodar() -> void:
 	var sequencia := inicios.map(func(i): return i[0])
 	_conferir("sequência 1 → 2 → 3 → 1 (%s)" % [sequencia], sequencia == [1, 2, 3, 1])
 	var tempos := inicios.map(func(i): return i[1] - t0)
-	var esperado := [0.0, 0.39, 0.91, 1.17]
+	var esperado := [0.0, 0.46, 1.08, 1.38]
 	var ok := true
 	for i in 4:
 		ok = ok and absf(tempos[i] - esperado[i]) <= QUADRO * 1.5
-	_conferir("tempos do combo 0 / 0,39 / 0,91 / 1,17 s (%s)" % [tempos.map(func(t): return snappedf(t, 0.01))], ok)
+	_conferir("tempos do combo 0 / 0,46 / 1,08 / 1,38 s (%s)" % [tempos.map(func(t): return snappedf(t, 0.01))], ok)
 	await _fim_do_combo()
-	await _esperar(70)  # combo esquecido: o próximo é o golpe 1
+	_jogador._proximo_golpe = 1  # o combo é cíclico; o teste de dano começa do golpe 1
 
 	# Dano 1 + 1 + 2 mata o alvo de 3 de vida; o passo à frente mantém o alcance.
 	var alvo := await _novo_alvo(_inicio + Vector2(24, 0))
@@ -69,14 +69,14 @@ func _rodar() -> void:
 	await _andar("mover_direita", 60)
 	_conferir("alvo vivo bloqueia a passagem (x = %.1f)" % _jogador.position.x, _jogador.position.x < alvo.position.x - 15.0)
 
-	# Dash padrão atravessa, tira 2 e não empurra.
+	# Dash ofensivo atravessa, tira 1 e não empurra.
 	_jogador.position = _inicio
 	await _esperar(1)
 	x_alvo = alvo.position.x
 	_jogador.direcao_olhar = Vector2.RIGHT
 	_jogador.pedir_dash()
 	await _fim_do_dash()
-	_conferir("dash padrão tira 2 de vida", alvo.vida == 1)
+	_conferir("dash ofensivo tira 1 de vida", alvo.vida == 2)
 	_conferir("dash atravessa o alvo (x = %.1f)" % _jogador.position.x, absf(_jogador.position.x - (_inicio.x + 104.0)) < 1.0)
 	_conferir("dash não empurra", alvo.position.x == x_alvo)
 
@@ -87,33 +87,44 @@ func _rodar() -> void:
 	_jogador.direcao_olhar = Vector2.RIGHT
 	_jogador.pedir_dash()
 	await _fim_do_dash()
-	_conferir("rolamento não causa dano", alvo.vida == 1)
+	_conferir("rolamento não causa dano", alvo.vida == 2)
 	_jogador.trocar_dash()
 
-	# Dash cancela o ataque.
+	# Dash interrompe o golpe, mas a sequência continua (combo cíclico).
 	await _esperar(130)  # stamina volta
 	_jogador.position = _inicio
 	_jogador.direcao_olhar = Vector2.LEFT
-	_jogador.pedir_ataque()
-	await _esperar(3)
-	_jogador.pedir_dash()
-	_conferir("dash cancela o golpe", _jogador.em_dash and _jogador.golpe_atual == 0)
-	await _fim_do_dash()
-
-	# Parado por mais de 1 s, o combo volta ao golpe 1.
 	inicios.clear()
 	_jogador.pedir_ataque()
-	await _fim_do_combo()
-	await _esperar(20)
+	await _esperar(3)
+	var interrompido: int = inicios.back()[0]
+	_jogador.pedir_dash()
+	_conferir("dash interrompe o golpe", _jogador.em_dash and _jogador.golpe_atual == 0)
+	await _fim_do_dash()
 	_jogador.pedir_ataque()
 	await _esperar(1)
-	_conferir("logo depois, vem o golpe 2", inicios.back()[0] == 2)
+	_conferir("depois do dash, vem o golpe seguinte", inicios.back()[0] == interrompido % 3 + 1)
 	await _fim_do_combo()
-	await _esperar(70)
+
+	# Parado por bastante tempo, o combo não volta ao golpe 1.
+	var antes: int = inicios.back()[0]
+	await _esperar(120)
 	_jogador.pedir_ataque()
 	await _esperar(1)
-	_conferir("parado por 1 s, volta ao golpe 1", inicios.back()[0] == 1)
+	_conferir("parado por 2 s, continua a sequência", inicios.back()[0] == antes % 3 + 1)
 	await _fim_do_combo()
+
+	# Área de ataque: arco de 120° (golpes 1 e 2) e de 60° com 25 px (golpe 3).
+	var lado := await _novo_alvo(Vector2(400, 400))
+	_jogador.position = Vector2(400, 400) - Vector2(10, 20)
+	_jogador.direcao_olhar = Vector2.RIGHT
+	await _esperar(1)
+	_conferir("alvo a 34° da frente: dentro de 120°", _jogador._dentro_do_angulo(lado, 120.0))
+	_conferir("alvo a 34° da frente: fora de 60° (golpe 3)", not _jogador._dentro_do_angulo(lado, 60.0))
+	_jogador.position = Vector2(400, 400) - Vector2(0, 30)
+	await _esperar(1)
+	_conferir("alvo do lado (90°): fora da área", not _jogador._dentro_do_angulo(lado, 120.0))
+	lado.queue_free()
 
 	# Obstáculo entre o gato e o inimigo bloqueia o golpe (obstáculo 'o' na célula 7, 12).
 	var atras := await _novo_alvo(Vector2(7.5 * 32, 13.5 * 32))

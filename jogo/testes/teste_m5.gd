@@ -41,21 +41,32 @@ func _rodar() -> void:
 	await ate(func(): return sapo.estado != E.SALTO)
 	conferir("salto encosta no gato: 1 de dano (vida %d)" % jogador.vida, jogador.vida == 9)
 
-	# Golpe no meio do salto: cancela, knockback, e não causa dano.
+	# Golpe no meio do salto, longe do gato: knockback, o salto acaba e não há dano.
 	jogador.vida = 10
+	jogador.invulneravel = 0.0
 	sapo.position = jogador.position + Vector2(50, 0)
 	sapo._mudar(E.ESPERA)
 	await ate(func(): return sapo.estado == E.SALTO)
 	await esperar(1)
 	var x_sapo: float = sapo.position.x
 	sapo.receber_dano(1, Vector2.RIGHT, 16.0)
-	conferir("golpe no salto cancela o salto", sapo.estado == E.ESPERA)
+	conferir("golpe no salto: o salto acaba", sapo.estado == E.ESPERA)
 	await esperar(10)
 	conferir("e aplica o knockback (%.1f)" % (sapo.position.x - x_sapo), sapo.position.x - x_sapo > 14.0)
-	conferir("sapo cancelado não causa dano", jogador.vida == 10)
+	conferir("sem encostar, não causa dano", jogador.vida == 10)
+
+	# Golpe no salto ao mesmo tempo que encosta no gato: o dano do salto vale.
+	sapo.position = jogador.position + Vector2(18, 0)
+	sapo._comecar_salto(Vector2.LEFT)
+	sapo.receber_dano(1, Vector2.RIGHT, 16.0)
+	conferir("encostou junto com o golpe: 1 de dano (vida %d)" % jogador.vida, jogador.vida == 9)
+	jogador.vida = 10
+	jogador.invulneravel = 0.0
+	await esperar(10)
 
 	# Parry no salto: sem dano, o sapo é lançado e atordoado.
 	sapo.vida = 3
+	sapo.atordoado = 0.0
 	sapo.position = jogador.position + Vector2(45, 0)
 	sapo._mudar(E.ESPERA)
 	await ate(func(): return sapo.estado == E.SALTO)
@@ -63,7 +74,7 @@ func _rodar() -> void:
 	await ate(func(): return sapo.atordoado > 0.0, 120)
 	conferir("parry no salto: sem dano e sapo atordoado", jogador.vida == 10 and sapo.atordoado > 0.0)
 
-	# Morte: 3 de vida, corpo fica no chão.
+	# Morte: corpo fica no chão (o sapo comum tem 4 de vida).
 	sapo.receber_dano(3)
 	await esperar(2)
 	conferir("3 de dano mata e o corpo fica", sapo.morto and is_instance_valid(sapo) and sapo.visible)
@@ -74,7 +85,8 @@ func _rodar() -> void:
 	ponto.add_to_group("interesse")
 	sala.add_child(ponto)
 	var outro := await criar(SAPO, inicio + Vector2(0, 60))
-	outro.receber_dano(3)
+	conferir("sapo comum tem 4 de vida", outro.vida == 4)
+	outro.receber_dano(4)
 	await esperar(40)
 	conferir("morto em ponto de interesse, o corpo some", not is_instance_valid(outro))
 
@@ -99,13 +111,13 @@ func _rodar() -> void:
 	await carregar("res://cenas/floresta.tscn", false)
 	var clareira := get_nodes_in_group("inimigos").filter(func(s): return sala.area_em(s.position) == "Clareira")
 	var superior := get_nodes_in_group("inimigos").filter(func(s): return sala.area_em(s.position) == "Área superior")
-	conferir("16 sapos na floresta (%d)" % get_nodes_in_group("inimigos").size(), get_nodes_in_group("inimigos").size() == 16)
+	conferir("21 sapos na floresta (%d)" % get_nodes_in_group("inimigos").size(), get_nodes_in_group("inimigos").size() == 21)
 	conferir("sapos da clareira dormem antes do gatilho", clareira.size() == 4 and clareira.all(func(s): return s.dormindo and not s.visible))
-	conferir("área superior sem gatilho: sapos acordados", superior.size() == 3 and superior.all(func(s): return not s.dormindo))
+	conferir("área superior sem gatilho: sapos acordados", superior.size() == 4 and superior.all(func(s): return not s.dormindo))
 	jogador.position = Vector2(15.5 * 32, 36.8 * 32)  # clareira, logo depois de cruzar o gatilho (linha 37)
 	await esperar(3)
 	await ate(func(): return clareira.all(func(s): return not s.dormindo), 60)
 	conferir("cruzou o gatilho: os 4 sapos entram quase juntos", clareira.all(func(s): return s.visible and s.alerta))
 	var exterior := get_nodes_in_group("inimigos").filter(func(s): return sala.area_em(s.position) == "Exterior da ruína")
-	conferir("exterior continua dormindo", exterior.size() == 9 and exterior.all(func(s): return s.dormindo))
+	conferir("exterior continua dormindo", exterior.size() == 13 and exterior.all(func(s): return s.dormindo))
 	terminar()
