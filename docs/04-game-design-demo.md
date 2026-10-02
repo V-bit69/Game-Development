@@ -479,8 +479,6 @@ A área de ataque do personagem possui **2 × o raio da hitbox do personagem**.
 
 As hitboxes dos inimigos são retangulares.
 
-A largura atualmente estabelecida é de aproximadamente **6 px**.
-
 ---
 
 ## 25. Área e ângulo de ataque
