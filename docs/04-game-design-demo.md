@@ -5,7 +5,7 @@
 
 | | |
 |---|---|
-| **Versão** | 1.2 |
+| **Versão** | 1.0 |
 | **Status** | Especificação de gameplay em desenvolvimento |
 | **Engine** | Godot 4 |
 | **Resolução base** | 640 × 360 px, ampliada 3× na tela Full HD |
