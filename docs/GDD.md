@@ -5,7 +5,7 @@
 
 | | |
 |---|---|
-| **Versão** | 0.1 |
+| **Versão** | 1.0 |
 | **Status** | Conceito / Pré-produção |
 | **Gênero** | Action-Adventure / RPG |
 | **Perspectiva** | Top-down |
