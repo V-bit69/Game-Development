@@ -37,8 +37,8 @@ Documento vivo: atualizar o status a cada entrega.
 
 ### 2. Game design — Game Director 🔄
 Entrega: **especificação de gameplay**.
-- [x] **Floresta** → [04-game-design-floresta.md](04-game-design-floresta.md): Homem-gato, controles, dashes, stamina, combo, parry, sapos, Xennar, interações e mapa
-- [ ] Responder as [12 dúvidas](04-game-design-floresta.md#50-dúvidas-em-aberto) da floresta e validar os [valores propostos](04-game-design-floresta.md#49-valores-propostos-pelo-desenvolvimento)
+- [x] **Floresta** → [04-game-design-demo.md](04-game-design-demo.md): Homem-gato, controles, dashes, stamina, combo, parry, sapos, Xennar, interações e mapa
+- [ ] Responder as [12 dúvidas](04-game-design-demo.md#50-dúvidas-em-aberto) da floresta e validar os [valores propostos](04-game-design-demo.md#49-valores-propostos-pelo-desenvolvimento)
 - [ ] **Ruína:** a KLM-99 (ataque à distância), inimigos, semi-boss e minions
 - [ ] **Boss:** líder das criaturas, padrões de ataque
 - [ ] Concept da região da demo
