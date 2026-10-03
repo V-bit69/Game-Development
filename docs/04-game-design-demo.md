@@ -114,7 +114,7 @@ Existe colisão padrão com:
 
 ## 5. Dash Ofensivo
 
-O Homem-gato possui uma variação do dash padrão, chamado Dash Ofensivo Isso é uma característica conferido como um traço racial, assim como sua agilidade natural de movimentação.
+O Homem-gato possui uma variação do dash padrão, chamado Dash Ofensivo. Isso é uma característica conferido como um traço racial, assim como sua agilidade natural de movimentação.
 
 **Parâmetros**
 
