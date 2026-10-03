@@ -5,7 +5,7 @@
 
 | | |
 |---|---|
-| **Versão** | 1.4 |
+| **Versão** | 1.4.1 |
 | **Status** | Especificação de gameplay em desenvolvimento |
 | **Engine** | Godot 4 |
 | **Resolução base** | 640 × 360 px, ampliada 3× na tela Full HD |
@@ -108,13 +108,14 @@ Existe colisão padrão com:
 
 - paredes;
 - objetos;
-- obstáculos.
+- obstáculos;
+- mobs.
 
 ---
 
 ## 5. Dash Ofensivo
 
-O Homem-gato possui uma variação do dash padrão, chamado Dash Ofensivo Isso é uma característica conferido como um traço racial, assim como sua agilidade natural de movimentação.
+O Homem-gato possui uma variação do dash padrão, chamado dash ofensivo. Isso é uma característica conferido como um traço racial, assim como sua agilidade natural de movimentação.
 
 **Parâmetros**
 
@@ -122,6 +123,7 @@ O Homem-gato possui uma variação do dash padrão, chamado Dash Ofensivo Isso �
 - Velocidade: **2 × velocidade padrão do dash**.
 - Não possui cooldown.
 - É controlado exclusivamente pela stamina e consome 2 unidades.
+- É bloqueado caso não haja quantidade suficiente de stamina.
 - Não possui invulnerabilidade.
 
 O multiplicador de comprimento representa aumento da distância percorrida.
@@ -136,13 +138,13 @@ O dash ocorre na direção escolhida pelo jogador. Caso não haja uma direção,
 
 **Colisão**
 
-Qualquer dash que atingir uma parede ou obstáculo é interrompido no contato.
+Qualquer dash que atingir uma parede ou obstáculo é interrompido no contato. Sempre atravessa os inimigos/mobs.
 
 ---
 
-## 6. Dash Ofensivo contra inimigos
+## 6. Dash ofensivo contra inimigos
 
-O Homem-gato pode atravessar e dar dano a inimigos utilizando o dash ofensivo.
+O homem-gato pode atravessar e dar dano a inimigos utilizando o dash ofensivo.
 
 Ao atravessar um inimigo:
 
@@ -198,7 +200,7 @@ Cada unidade é representada visualmente como um elemento individual na cor **la
 
 ## 9. Dash de rolamento
 
-O Homem-gato possui um segundo tipo de dash.
+O Homem-gato possui um segundo tipo de dash, chamado de dash de rolamento.
 
 O jogador alterna entre os tipos utilizando **S**.
 
@@ -211,10 +213,17 @@ O comando de execução continua sendo **D**.
 - Comprimento: **0,8 × dash padrão**.
 - Velocidade: **velocidade padrão do dash**.
 - Não causa dano.
-- Não pode atravessar paredes ou obstáculos para fins de escalada.
 - Não realiza escalada.
 - Esse rolamento é capaz de desviar de ataques que possuem a tag de "projétil".
 - Ao desviar de um ataque projétil, esse ataque se torna incapaz de conferir dano mesmo que o rolamento acabe e a hitbox do ataque ainda esteja por cima da hitbox do gato.
+
+**Direção**
+
+O dash ocorre na direção escolhida pelo jogador. Caso não haja uma direção, o dash é efetuado na direção que o personagem olha.
+
+**Colisão**
+
+Qualquer dash de rolamento que atingir uma parede ou obstáculo e mobs/inimigos é interrompido no contato.
 
 **Regra especial de consumo de stamina no rolamento**
 
@@ -241,13 +250,16 @@ Em outras palavras, sempre que ocorrerem **3 rolamentos dentro de uma janela de 
 
 Não deve haver consumo no rolamento seguinte a um consumo, é importante que haja o reset.
 
+- O 3º rolamento é bloqueado sem stamina.
+- Um rolamento bloqueado não conta e a contagem permanece até o mais antigo sair da janela.
+
 ---
 
 ## 10. Troca de dash
 
 O jogador utiliza **S** para alternar entre:
 
-- dash padrão;
+- dash ofensivo;
 - dash de rolamento.
 
 A HUD apresenta qual tipo está atualmente equipado.
@@ -336,7 +348,7 @@ A fala continua fazendo sentido caso o jogador já tenha encontrado a peça ante
 
 ## 16. Escalada e área superior
 
-Um trecho da parede da ruína permite que o Homem-gato utilize seu dash padrão para subir.
+Um trecho da parede da ruína permite que o homem-gato utilize seu dash ofensivo para subir.
 
 Ao alcançar a parte superior:
 
@@ -374,8 +386,6 @@ O gato possui três golpes.
 **Golpe 1:** ataque rápido utilizando uma das garras.
 
 **Golpe 2:** ataque rápido utilizando a outra garra.
-
-Os dois primeiros golpes são ligeiramente mais rápidos.
 
 **Golpe 3:** o Homem-gato retira uma espada média da capa e executa um corte vertical. Depois, guarda a espada.
 
@@ -423,9 +433,9 @@ Após sofrer dano, o gato entra em um estado de recuperação de **1 segundo**. 
 
 ## 21. Knockback e passo à frente
 
-O knockback do golpe é de **24 px** (antes, 16 px) e empurra o inimigo na direção do golpe, no frame do acerto. Além disso, a cada golpe o gato dá um passo de 24 px à frente na direção do ataque, no início do impacto, mesmo que não haja inimigo. O passo para ao encostar no corpo do inimigo ou em obstáculo.
+O knockback do golpe é de **24 px** e empurra o inimigo na direção do golpe, no frame do acerto. Além disso, a cada golpe o gato dá um passo de 24 px à frente na direção do ataque, no início do impacto, mesmo que não haja inimigo. O passo para ao encostar no corpo do inimigo ou em obstáculo.
 
-Os dois valores são iguais para manter a distância entre o gato e o inimigo: o inimigo é empurrado 24 px e o gato avança 24 px, então o próximo golpe do ciclo ainda alcança. Em três golpes o duelo se desloca cerca de 72 px, o que dá o movimento que você queria. O knockback do parry (80 px) continua sendo o empurrão maior.
+Os dois valores são iguais para manter a distância entre o gato e o inimigo: o inimigo é empurrado 24 px e o gato avança 24 px, então o próximo golpe do ciclo ainda alcança. Em três golpes o duelo se desloca cerca de 72 px. O knockback do parry (80 px) continua sendo o empurrão maior.
 
 ---
 
@@ -485,10 +495,9 @@ O golpe 3 é o mais longo e o mais estreito. Como é o de maior dano (2) e o cic
 
 Se um sapo estiver realizando um pulo e for atingido por um ataque do Homem-gato antes de alcançar a hitbox do jogador:
 
-- o sapo recebe o knockback correspondente;
-- o sapo ainda pode causar dano normalmente se atingir o jogador antes ou ao mesmo tempo que for atingido.
-
-Isso vale tanto para o sapo comum quanto para o sapo com língua.
+- o sapo recebe o knockback correspondente. Isso vale tanto para o sapo comum quanto para o sapo com língua.
+- o sapo comum ainda pode causar dano normalmente se atingir a hitbox do jogador.
+- a língua do sapo com língua também pode causar seu dano caso atinja o jogador.
 
 Existe uma exceção importante para a língua.
 
@@ -543,6 +552,10 @@ Os inimigos devem ser capazes de reconhecer que um obstáculo está bloqueando s
 ### Perseguição
 
 Um inimigo pode seguir o jogador por todo o espaço acessível do mapa que estiver atrás de sua posição, permanecendo sempre dentro do mesmo cenário.
+
+### Tags
+
+Os ataques dos inimigos podem possuir diferentes tags. Uma tag confere uma propriedade especial para o ataque. Exemplo: a tag "projétil" confere ao ataque a possibilidade de ser desviado pelo rolamento do gato.
 
 ---
 
@@ -607,7 +620,9 @@ A decisão da ação ocorre no início do ciclo.
 
 O sapo não altera sua ação no meio de um salto.
 
-O ataque com língua desse sapo possui a tag de projétil e, portanto, pode ser desviada com o rolamento.
+O ataque com língua desse sapo possui a tag de **projétil** e, portanto, pode ser desviada com o rolamento.
+
+Todo o dano do sapo com língua vem somente dos seus ataques com a língua.
 
 ---
 
@@ -632,7 +647,7 @@ Os tamanhos exatos dessas zonas ainda serão definidos.
 
 A língua possui uma trajetória simples.
 
-Quando erra, **retorna até o sapo normalmente da forma como saiu**.
+Quando erra, **retorna até o sapo normalmente**.
 
 Quando o jogador atinge a língua com parry, **ela é interrompida e rebatida em direção ao sapo**.
 
@@ -1107,7 +1122,7 @@ Definido pelo game design em 30/09: o personagem de tamanho 3 tem **50 px** de a
 | Recuperação golpe 1→2 | 0,5 × 0,308 | **0,154 s** |
 | Recuperação golpe 2→3 | 1 × 0,308 | **0,308 s** |
 | Recuperação após golpe 3 | — | **0,4 s** |
-| Ciclo completo dos golpes | 0,308 + 0,154 + 0,308 + 0,308 + 0,4 | **≈ 1,78 s** |
+| Ciclo completo dos golpes | 3 × 0,308 + 0,154 + 0,308 + 0,4 | **≈ 1,78 s** |
 | Knockback dos golpes | seção 21 | **24 px** |
 | Passo à frente por golpe | seção 21 | **24 px** |
 | Alcance golpes 1 e 2 | seção 24 | **30 px** |
@@ -1118,17 +1133,13 @@ Definido pelo game design em 30/09: o personagem de tamanho 3 tem **50 px** de a
 | Alcance efetivo golpe 3 | 40 + 24 | **64 px** |
 | Cone do magnetismo de mira | seção 18 | **±45°** |
 | Margem do magnetismo | seção 18 | **≈ 10 px** |
-| Intervalo golpe 1→2 | 0,5 × 0,308 | **0,154 s** |
-| Intervalo golpe 2→3 | 1 × 0,308 | **0,308 s** |
 | Knockback do parry | 1 dash padrão | **80 px** |
 | Atordoamento do parry | 0,5 s até o chute + 1,5 s depois | **2 s** (só 0,5 s se o chute for cancelado com dash) |
 | Invulnerabilidade depois do dano | seção 20 | **1 s** |
 | Distância de interação | ½ × 50 | **25 px** |
 | Hitbox do corpo | — | círculo de **raio 10 px**, nos pés |
-| Hitbox do corpo | — | círculo de **raio 10 px**, nos pés |
 | Área de ataque golpes 1 e 2 | seção 24 | **30 px** de alcance, em arco de 120° |
 | Área de ataque golpe 3 | seção 24 | **40 px** de alcance, em arco de 90° |
-
 | Recuperação do parry errado | seção 22 | **0,4 s** sem poder repetir |
 
 ### 49.4 Sapos
@@ -1171,10 +1182,10 @@ Perguntas do desenvolvimento para o game design. As respondidas ficam riscadas, 
 3. ~~**Hitbox dos inimigos.**~~ *Respondida na v1.3: a largura de 6 px saiu da seção 24. Fica o retângulo de 18 × 14 px.*
 4. ~~**Fragmento da clareira.**~~ *Respondida em 02/10: o fragmento é o elemento tecnológico da seção 14, e fica longe da ruína. Foi para o recanto do corredor onde ficava a flor.*
 5. **Perseguição.** O que significa "todo o espaço acessível do mapa que estiver atrás de sua posição"? O inimigo só persegue voltando em direção ao início do mapa, ou em qualquer direção dentro do cenário?
-6. ~~**Dano de contato.**~~ *Respondida na v1.3: nenhum sapo tem dano de contato. Só o salto (e a língua) causam dano.*
+6. ~~**Dano de contato.**~~ *Respondida na v1.3: nenhum sapo tem dano de contato. Só o salto do sapo comum e a língua do sapo com língua causam dano.*
 7. ~~**Parry errado.**~~ *Respondida na v1.4: se não houver ataque para defender, o gato fica 0,4 s sem poder repetir o parry. O dash cancela a animação, mas os 0,4 s continuam contando.*
 8. **Inimigo atordoado.** Ele toma dano normal ou dano extra (crítico)?
-9. **Dash por vários inimigos.** O dash ofensivo causa dano em todos os inimigos atravessados? No protótipo, sim: 1 de dano em cada um.
+9. ~~**Dash por vários inimigos.** O dash ofensivo causa dano em todos os inimigos atravessados? No protótipo, sim: 1 de dano em cada um.~~
 10. **Descida da área superior.** Como o jogador volta para baixo: pula, desce pelo mesmo trecho ou tem outro caminho?
 11. ~~**Posição da flor.**~~ *Respondida em 02/10: no corredor, um pouco acima de onde estava, perto de um corpo d'água.*
 12. **Controle.** A demo terá suporte a controle (gamepad) além do teclado?
@@ -1183,8 +1194,8 @@ Perguntas do desenvolvimento para o game design. As respondidas ficam riscadas, 
 15. ~~**Combo esquecido.**~~ *Respondida na v1.4: o ciclo é 1 → 2 → 3 → 1... e nunca reseta.*
 16. ~~**Passo à frente no golpe.**~~ *Respondida na v1.4: o passo à frente é de 24 px por golpe, igual ao knockback de 24 px.*
 17. ~~**Dash durante o combo.**~~ *Respondida na v1.4: o dash cancela o golpe apenas durante a antecipação. Durante a execução ele é ignorado; durante a recuperação ele funciona, mas não encurta a recuperação. Um golpe cancelado não conta e o ciclo não avança.*
-18. **Knockback do dash.** O dash ofensivo fere o inimigo (1 de dano), mas não o empurra, porque o gato passa através dele. Pode ser?
-19. **Rolamento e inimigos.** O rolamento também atravessa inimigos (sem dano). Andando normalmente, o inimigo vivo bloqueia a passagem. Pode ser?
+18.~~**Knockback do dash.** O dash ofensivo fere o inimigo (1 de dano), mas não o empurra, porque o gato passa através dele. Pode ser?~~
+19. ~~**Rolamento e inimigos.** O rolamento também atravessa inimigos (sem dano). Andando normalmente, o inimigo vivo bloqueia a passagem. Pode ser?~~
 20. **Parry na língua.** *Atordoamento respondido na v1.3: 2 s, com chute imediato.* Falta o dano: no protótipo, o sapo leva 1 de dano quando a língua é rebatida. Está certo?
 21. ~~**Distância de interação.**~~ *Respondida na v1.4: a distância permanece em 25 px.*
 22. **Diálogo automático de Xennar.** O primeiro diálogo começa sozinho quando o gato chega a 40 px dele. As outras conversas são com E. Pode ser?
@@ -1196,7 +1207,7 @@ Perguntas do desenvolvimento para o game design. As respondidas ficam riscadas, 
 28. **Entrada dos sapos.** Nos encontros, os sapos aparecem caindo do alto no lugar marcado, quase juntos. A ideia era saírem pulando da vegetação?
 29. **Tela de morte.** O texto é provisório ("O Homem-gato caiu" e "Pressione E para recomeçar"), com filtro cinza avermelhado. Algum texto específico?
 30. **Pausa.** Esc abre o menu com Continuar, Recomeçar a fase e Sair do jogo. Pode ser?
-31. **Dash no meio do golpe.** "Não há cancelamento de combo" foi lido assim: o dash ainda interrompe o golpe em andamento (para fugir), mas a sequência não volta ao golpe 1. Se o golpe 2 foi interrompido, o próximo A é o golpe 3. Era isso, ou o dash não deveria funcionar no meio de um golpe?
+31. ~~**Dash no meio do golpe.** "Não há cancelamento de combo" foi lido assim: o dash ainda interrompe o golpe em andamento (para fugir), mas a sequência não volta ao golpe 1. Se o golpe 2 foi interrompido, o próximo A é o golpe 3. Era isso, ou o dash não deveria funcionar no meio de um golpe?~~
 32. **Golpe no sapo durante o salto.** A seção 25 não fala mais em interromper o pulo. No protótipo, o knockback leva o sapo para trás e o salto acaba ali. Se ele já estiver encostando no gato no mesmo instante, o dano do salto vale. Está certo, ou o sapo deveria continuar o salto mesmo levando o golpe?
 33. **Espera do chute no parry.** Nos 0,5 s entre a defesa e o chute, o gato fica parado: não anda, não ataca e não abre outro parry. Só o dash cancela. Outros inimigos podem acertar o gato nesse tempo. Pode ser?
 34. **Lago da flor.** O corpo d'água é só cenário e bloqueia a passagem, inclusive com o dash. Ele terá outra função (por exemplo, beber água, reflexo, peixes)?
@@ -1219,4 +1230,5 @@ Perguntas do desenvolvimento para o game design. As respondidas ficam riscadas, 
 | 1.2 | 30/09/2026 | Desenvolvimento | Dúvidas 20 a 30, que surgiram na implementação do M4 ao M9 |
 | 1.3 | 02/10/2026 | Game design | Alterações em algumas regras e mecânicas |
 | 1.3 | 02/10/2026 | Desenvolvimento | Seção 49 conferida com a v1.3. Dúvidas respondidas riscadas e dúvidas 31 a 34. Correções: "dash padrão" → "dash ofensivo" na seção 20 e largura de 6 px tirada da tabela da seção 46 |
-| 1.4 | 03/10/2026 | Game design | Novo magnetismo de mira; tempos e fases dos golpes definidos, com cancelamento na antecipação; knockback e passo dos golpes passam para 24 px; área, ângulos e alcances dos ataques redefinidos; recuperação do parry sem defesa definida em 0,4 s; HP do sapo com língua passa para 4; invulnerabilidade após dano passa para 1 s, mantendo ataque e dash durante a janela |
+| 1.4 | 03/10/2026 | Game design | Novo magnetismo de mira; tempos e fases dos golpes definidos, com cancelamento na antecipação; knockback e passo dos golpes passam para 24 px; área, ângulos e alcances dos ataques redefinidos; recuperação do parry sem defesa definida em 0,4 s; HP de ambos os sapos passa para 4; invulnerabilidade após dano passa para 1 s, mantendo ataque e dash durante a janela |
+| 1.4.1 | 03/10/2026 | Game design | Ajustes na versão 1.4 |
