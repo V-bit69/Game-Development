@@ -10,6 +10,9 @@ extends CharacterBody2D
 ## v1.3: dash ofensivo (2 de stamina), rolamento esquiva projéteis, combo cíclico,
 ## área de ataque em arco, parry em dois tempos (defesa, 0,5 s, chute) e
 ## 1,5 s de invulnerabilidade depois de tomar dano.
+## v1.4: magnetismo de mira, golpe em fases (antecipação, execução com impacto,
+## recuperação), dash cancela o golpe só na antecipação, leque de ataque, passo de
+## 24 px, rolamento para nos inimigos, dash cancela o parry e 1 s de invulnerabilidade.
 ## A origem do nó fica nos pés, no centro do círculo de colisão.
 
 signal stamina_mudou(atual: int)
@@ -61,8 +64,11 @@ var _atingidos_no_dash: Array[Node] = []
 var golpe_atual := 0
 var _proximo_golpe := 1
 var _golpe_tempo := 0.0
-var _golpe_acertou := false
-var _intervalo := 0.0
+var _mira := Vector2.DOWN  # direção real do golpe em andamento (ângulo contínuo, com o magnetismo)
+var _alvo_golpe: Node2D = null  # alvo do magnetismo; tem preferência no golpe seguinte
+var _golpe_atingidos: Array[Node] = []  # cada inimigo leva no máximo 1 vez por golpe
+var _passo_restante := 0.0
+var _intervalo := 0.0  # recuperação depois do golpe; corre mesmo durante o dash
 var _ataque_guardado := false  # A apertado durante um golpe: sai assim que puder
 
 # Parry: janela aberta, recuperação depois de errar, e efeitos visuais.
@@ -108,18 +114,17 @@ func _physics_process(delta: float) -> void:
 		return
 	_recuperar_stamina(delta)
 	_atualizar_parry(delta)
+	_atualizar_recuperacao(delta)
 	if em_escalada:
 		_mover_escalada(delta)
 	elif em_dash:
 		_mover_dash(delta)
 	elif parry_janela > 0.0 or _chute_espera > 0.0:
 		velocity = Vector2.ZERO  # com a janela aberta ou esperando o chute, o gato fica no lugar
+	elif golpe_atual != 0:
+		_atualizar_golpe(delta)
 	else:
-		_atualizar_combo(delta)
-		if golpe_atual == 0:
-			_andar()
-		else:
-			_avancar_no_golpe()
+		_andar()
 	_atualizar_rastro()
 	queue_redraw()
 
@@ -156,16 +161,24 @@ func trocar_dash() -> void:
 
 
 ## Começa o dash equipado, se houver stamina. Sem direção apertada, vai para onde o gato olha.
+## Na antecipação do golpe, o dash cancela o golpe (que não conta). Na execução, é
+## ignorado e não fica guardado. Na recuperação funciona, mas não a encurta.
+## Com a janela do parry aberta, o dash cancela o parry.
 func pedir_dash() -> bool:
-	if em_dash or em_escalada or parry_janela > 0.0:
+	if em_dash or em_escalada:
+		return false
+	if _golpe_em_execucao():
 		return false
 	var custo := _custo_do_dash(dash_equipado)
 	if custo > stamina:
 		Som.tocar("falha")
 		sem_stamina.emit()
 		return false
-	if golpe_atual != 0 or _intervalo > 0.0:
-		_cancelar_combo()  # o dash interrompe o golpe, mas a sequência continua
+	if golpe_atual != 0:
+		_cancelar_golpe()
+	_ataque_guardado = false
+	if parry_janela > 0.0:
+		_cancelar_parry()
 	if _chute_espera > 0.0:
 		_cancelar_chute()  # o dash cancela o chute do parry
 	var direcao := _ler_direcao()
@@ -185,7 +198,8 @@ func pedir_dash() -> bool:
 	_dash_restante = Valores.GATO_DASH_COMPRIMENTO if _dash_tipo == Dash.PADRAO else Valores.GATO_ROLAMENTO_COMPRIMENTO
 	em_dash = true
 	_atingidos_no_dash.clear()
-	set_collision_mask_value(3, false)  # no dash, atravessa inimigos
+	# O dash ofensivo atravessa inimigos; o rolamento não: para no contato.
+	set_collision_mask_value(3, _dash_tipo == Dash.ROLAMENTO)
 	Som.tocar("dash" if _dash_tipo == Dash.PADRAO else "rolamento")
 	return true
 
@@ -209,7 +223,7 @@ func _mover_dash(delta: float) -> void:
 	_dash_restante -= passo
 	if _dash_tipo == Dash.PADRAO:
 		_dano_do_dash()
-	# Parede ou obstáculo interrompe o dash no contato.
+	# Parede ou obstáculo interrompe o dash no contato; o rolamento também para no inimigo.
 	if batida != null or _dash_restante <= 0.001:
 		em_dash = false
 		velocity = Vector2.ZERO
@@ -263,7 +277,7 @@ func _mover_escalada(delta: float) -> void:
 
 # --- Combo --------------------------------------------------------------
 
-## A começa o próximo golpe. Se um golpe ou intervalo estiver em andamento, fica guardado.
+## A começa o próximo golpe. Se um golpe ou a recuperação estiver em andamento, fica guardado.
 func pedir_ataque() -> void:
 	if em_dash or parry_janela > 0.0 or _chute_espera > 0.0:
 		return
@@ -273,95 +287,194 @@ func pedir_ataque() -> void:
 	_comecar_golpe()
 
 
-## "sobra" é o tempo que já passou do fim do intervalo neste quadro, para o ritmo não atrasar.
+## "sobra" é o tempo que já passou do fim da recuperação neste quadro, para o ritmo não atrasar.
 func _comecar_golpe(sobra := 0.0) -> void:
 	golpe_atual = _proximo_golpe
 	_golpe_tempo = sobra
-	_golpe_acertou = false
+	_golpe_atingidos.clear()
+	_passo_restante = Valores.GATO_GOLPE_AVANCO
 	_ataque_guardado = false
 	var direcao := _ler_direcao()
 	if direcao != Vector2.ZERO:
 		direcao_olhar = direcao
+	_apontar_golpe()
 	Som.tocar("espada" if golpe_atual == 3 else "garra")
 	golpe_iniciado.emit(golpe_atual)
 
 
-func _atualizar_combo(delta: float) -> void:
-	if golpe_atual != 0:
-		_golpe_tempo += delta
-		if not _golpe_acertou and _golpe_tempo >= Valores.GATO_GOLPE_DURACAO * Valores.GATO_GOLPE_IMPACTO:
-			_golpe_acertou = true
+## Depois da antecipação o golpe está na execução: não cancela mais.
+func _golpe_em_execucao() -> bool:
+	return golpe_atual != 0 and _golpe_tempo >= Valores.GATO_GOLPE_ANTECIPACAO
+
+
+## A hitbox só fica ativa no impacto: início da execução.
+func _golpe_no_impacto() -> bool:
+	var ini := Valores.GATO_GOLPE_ANTECIPACAO
+	return golpe_atual != 0 and _golpe_tempo >= ini and _golpe_tempo < ini + Valores.GATO_GOLPE_IMPACTO
+
+
+func _alcance_golpe(numero: int) -> float:
+	return Valores.GATO_ALCANCE_GOLPE_3 if numero == 3 else Valores.GATO_ALCANCE_ATAQUE
+
+
+func _angulo_golpe(numero: int) -> float:
+	return Valores.GATO_ANGULO_GOLPE_3 if numero == 3 else Valores.GATO_ANGULO_ATAQUE
+
+
+func _recuperacao_golpe(numero: int) -> float:
+	match numero:
+		1: return Valores.GATO_RECUPERACAO_GOLPE_1
+		2: return Valores.GATO_RECUPERACAO_GOLPE_2
+	return Valores.GATO_RECUPERACAO_GOLPE_3
+
+
+func _atualizar_golpe(delta: float) -> void:
+	_golpe_tempo += delta
+	velocity = Vector2.ZERO
+	if _golpe_tempo >= Valores.GATO_GOLPE_ANTECIPACAO:
+		_dar_passo(delta)
+		if _golpe_no_impacto():
 			_golpe_impacto()
-		if _golpe_tempo >= Valores.GATO_GOLPE_DURACAO:
-			_terminar_golpe()
-	elif _intervalo > 0.0:
-		_intervalo -= delta
-		if _intervalo <= 0.0:
-			var sobra := -_intervalo
-			_intervalo = 0.0
-			if _ataque_guardado:
-				_comecar_golpe(sobra)
+	if _golpe_tempo >= Valores.GATO_GOLPE_DURACAO:
+		_terminar_golpe()
 
 
-## Cada golpe dá um passo curto para a frente até o impacto e depois fica parado.
-## O passo compensa o knockback, para o combo continuar alcançando o inimigo.
-func _avancar_no_golpe() -> void:
-	var tempo_ate_impacto := Valores.GATO_GOLPE_DURACAO * Valores.GATO_GOLPE_IMPACTO
-	if _golpe_tempo < tempo_ate_impacto:
-		velocity = direcao_olhar * (Valores.GATO_GOLPE_AVANCO / tempo_ate_impacto)
+## No início do impacto o gato dá um passo à frente, na direção do golpe, mesmo sem
+## inimigo. O passo para ao encostar no corpo de um inimigo ou em obstáculo.
+func _dar_passo(delta: float) -> void:
+	if _passo_restante <= 0.0:
+		return
+	var passo := minf(Valores.GATO_GOLPE_AVANCO_VELOCIDADE * delta, _passo_restante)
+	velocity = _mira * Valores.GATO_GOLPE_AVANCO_VELOCIDADE
+	if move_and_collide(_mira * passo) != null:
+		_passo_restante = 0.0
 	else:
-		velocity = Vector2.ZERO
-	move_and_slide()
+		_passo_restante -= passo
 
 
+## Depois do golpe vem a recuperação, que só termina quando o gato pode atacar de novo.
 func _terminar_golpe() -> void:
 	var sobra := _golpe_tempo - Valores.GATO_GOLPE_DURACAO
-	match golpe_atual:
-		1: _intervalo = Valores.GATO_INTERVALO_GOLPE_1_2 - sobra
-		2: _intervalo = Valores.GATO_INTERVALO_GOLPE_2_3 - sobra
-		_: _intervalo = -sobra  # depois do golpe 3 não há intervalo
+	_intervalo = _recuperacao_golpe(golpe_atual) - sobra
 	_proximo_golpe = golpe_atual % 3 + 1
 	golpe_atual = 0
+	_passo_restante = 0.0
+	velocity = Vector2.ZERO
+
+
+## A recuperação corre sempre, até durante o dash: o dash não a encurta.
+func _atualizar_recuperacao(delta: float) -> void:
 	if _intervalo <= 0.0:
-		sobra = -_intervalo
-		_intervalo = 0.0
-		if _ataque_guardado:
-			_comecar_golpe(sobra)
-
-
-## O combo é cíclico e nunca volta ao golpe 1: um golpe interrompido conta como dado.
-func _cancelar_combo() -> void:
-	if golpe_atual != 0:
-		_proximo_golpe = golpe_atual % 3 + 1
-	golpe_atual = 0
+		return
+	_intervalo -= delta
+	if _intervalo > 0.0:
+		return
+	var sobra := -_intervalo
 	_intervalo = 0.0
+	var livre := not (em_dash or em_escalada or parry_janela > 0.0 or _chute_espera > 0.0)
+	if _ataque_guardado and livre:
+		_comecar_golpe(sobra)
 	_ataque_guardado = false
 
 
-func _golpe_impacto() -> void:
-	var espada := golpe_atual == 3
-	var dano := Valores.GATO_DANO_ESPADA if espada else Valores.GATO_DANO_GARRA
-	var alcance := Valores.GATO_ALCANCE_GOLPE_3 if espada else Valores.GATO_ALCANCE_ATAQUE
-	var angulo := Valores.GATO_ANGULO_GOLPE_3 if espada else Valores.GATO_ANGULO_ATAQUE
-	for inimigo in _inimigos_em(global_position, alcance):
-		if not _dentro_do_angulo(inimigo, angulo) or _obstaculo_entre(inimigo):
+## Desfaz o golpe em andamento. Só vale na antecipação (ver pedir_dash e pedir_parry):
+## um golpe cancelado não conta, então o ciclo não avança.
+func _cancelar_golpe() -> void:
+	golpe_atual = 0
+	_golpe_tempo = 0.0
+	_passo_restante = 0.0
+	_ataque_guardado = false
+	velocity = Vector2.ZERO
+
+
+# --- Magnetismo de mira -------------------------------------------------
+
+## Define a direção real do golpe. Procura o inimigo vivo mais perto num cone de ±45°
+## em volta de direcao_olhar, até o alcance efetivo + margem. Achando, o golpe, o passo
+## e o leque apontam para ele, em ângulo contínuo, e o sprite usa a direção de 8 mais
+## próxima. O alvo do golpe anterior tem preferência enquanto estiver no cone.
+func _apontar_golpe() -> void:
+	var alvo := _achar_alvo_magnetismo()
+	_alvo_golpe = alvo
+	if alvo == null:
+		_mira = direcao_olhar
+		return
+	var para := alvo.global_position - global_position
+	_mira = para.normalized() if para.length() >= 0.5 else direcao_olhar
+	direcao_olhar = Vector2.from_angle(snappedf(_mira.angle(), PI / 4.0))
+
+
+func _achar_alvo_magnetismo() -> Node2D:
+	var efetivo := Valores.GATO_ALCANCE_EFETIVO_3 if golpe_atual == 3 else Valores.GATO_ALCANCE_EFETIVO_1_2
+	var alcance := efetivo + Valores.GATO_MAGNETISMO_MARGEM
+	if _alvo_valido(_alvo_golpe, alcance):
+		return _alvo_golpe
+	var melhor: Node2D = null
+	var menor := INF
+	for inimigo in get_tree().get_nodes_in_group("inimigos"):
+		if not _alvo_valido(inimigo, alcance):
 			continue
-		_acertar(inimigo, dano, Valores.KNOCKBACK_PADRAO)
+		var d := _distancia_ate(inimigo)
+		if d < menor:
+			menor = d
+			melhor = inimigo
+	return melhor
 
 
-## A área de ataque é um arco à frente do gato. Vale o ponto do inimigo mais
-## perto da linha do golpe, para um inimigo grande não escapar pela borda.
-func _dentro_do_angulo(inimigo: Node2D, graus: float) -> bool:
-	var ponto := inimigo.global_position
+## Vivo, acordado, no cone, dentro do alcance (medido até a borda do retângulo) e sem
+## obstáculo no meio (um golpe virado para trás de uma árvore não acertaria nada).
+func _alvo_valido(inimigo: Variant, alcance: float) -> bool:
+	if inimigo == null or not is_instance_valid(inimigo) or inimigo.morto or inimigo.dormindo:
+		return false
+	if inimigo.colisao.disabled or _distancia_ate(inimigo) > alcance:
+		return false
+	var para: Vector2 = inimigo.global_position - global_position
+	var no_cone: bool = para.length() < 0.5 or absf(rad_to_deg(direcao_olhar.angle_to(para))) <= Valores.GATO_MAGNETISMO_CONE
+	return no_cone and not _obstaculo_entre(inimigo)
+
+
+## Distância do centro do gato até a borda do retângulo do inimigo.
+func _distancia_ate(inimigo: Node2D) -> float:
 	var forma: Variant = inimigo.colisao.shape if "colisao" in inimigo else null
 	if forma is RectangleShape2D:
 		var metade: Vector2 = (forma as RectangleShape2D).size / 2.0
-		var mira := global_position + direcao_olhar * Valores.GATO_ALCANCE_ATAQUE
-		ponto = inimigo.global_position + (mira - inimigo.global_position).clamp(-metade, metade)
-	var para := ponto - global_position
-	if para.length() < 0.5:
-		return true
-	return absf(rad_to_deg(direcao_olhar.angle_to(para))) <= graus / 2.0
+		var local := global_position - inimigo.global_position
+		return local.distance_to(local.clamp(-metade, metade))
+	return global_position.distance_to(inimigo.global_position)
+
+
+## Impacto: a cada quadro da janela confere o leque (da posição atual do gato) e fere
+## quem entrou, uma vez só por golpe.
+func _golpe_impacto() -> void:
+	var dano := Valores.GATO_DANO_ESPADA if golpe_atual == 3 else Valores.GATO_DANO_GARRA
+	var alcance := _alcance_golpe(golpe_atual)
+	var angulo := _angulo_golpe(golpe_atual)
+	for inimigo in _inimigos_em(global_position, alcance):
+		if inimigo in _golpe_atingidos:
+			continue
+		if not _no_leque(inimigo, _mira, angulo, alcance) or _obstaculo_entre(inimigo):
+			continue
+		_golpe_atingidos.append(inimigo)
+		_acertar(inimigo, dano, Valores.KNOCKBACK_PADRAO, _mira)
+
+
+## A área de ataque é um leque que sai do gato. Vale o retângulo do inimigo, não só o
+## centro: basta um ponto dele dentro do alcance e da abertura.
+func _no_leque(inimigo: Node2D, direcao: Vector2, graus: float, alcance: float) -> bool:
+	var pontos: Array[Vector2] = [inimigo.global_position]
+	var forma: Variant = inimigo.colisao.shape if "colisao" in inimigo else null
+	if forma is RectangleShape2D:
+		var metade: Vector2 = (forma as RectangleShape2D).size / 2.0
+		for ix in 9:
+			for iy in 7:
+				pontos.append(inimigo.global_position + Vector2(lerpf(-metade.x, metade.x, ix / 8.0), lerpf(-metade.y, metade.y, iy / 6.0)))
+	for ponto in pontos:
+		var para := ponto - global_position
+		if para.length() > alcance:
+			continue
+		if para.length() < 0.5 or absf(rad_to_deg(direcao.angle_to(para))) <= graus / 2.0:
+			return true
+	return false
 
 
 ## Árvores e obstáculos bloqueiam ataques físicos.
@@ -385,8 +498,10 @@ func _inimigos_em(centro: Vector2, raio: float) -> Array[Node]:
 	return achados
 
 
-func _acertar(inimigo: Node, dano: int, empurrao: float) -> void:
-	inimigo.receber_dano(dano, inimigo.global_position - global_position, empurrao)
+func _acertar(inimigo: Node, dano: int, empurrao: float, direcao := Vector2.ZERO) -> void:
+	if direcao == Vector2.ZERO:
+		direcao = inimigo.global_position - global_position
+	inimigo.receber_dano(dano, direcao, empurrao)
 	Som.tocar("impacto")
 	_hitstop()
 
@@ -407,12 +522,16 @@ func _atualizar_rastro() -> void:
 # --- Parry --------------------------------------------------------------
 
 ## Q abre a janela de parry. Não abre durante o dash, nem na recuperação de um parry errado.
-## Abrir o parry cancela o golpe em andamento.
+## Em relação ao golpe, vale a mesma regra do dash: cancela na antecipação, é ignorado
+## na execução e funciona na recuperação (que continua correndo).
 func pedir_parry() -> bool:
 	if em_dash or parry_janela > 0.0 or parry_recuperacao > 0.0 or _chute_espera > 0.0:
 		return false
-	if golpe_atual != 0 or _intervalo > 0.0:
-		_cancelar_combo()
+	if _golpe_em_execucao():
+		return false
+	if golpe_atual != 0:
+		_cancelar_golpe()
+	_ataque_guardado = false
 	parry_janela = Valores.GATO_PARRY_JANELA
 	Som.tocar("parry")
 	return true
@@ -485,6 +604,14 @@ func _chutar() -> void:
 	_chute_alvo = null
 
 
+## O dash cancela a animação do parry (a janela). A recuperação não encurta: o que
+## faltava da janela entra na conta, e o gato só repete o parry quando o parry original
+## teria terminado (0,2 s + 0,4 s depois do Q).
+func _cancelar_parry() -> void:
+	parry_recuperacao = parry_janela + Valores.GATO_PARRY_RECUPERACAO
+	parry_janela = 0.0
+
+
 ## Dash no meio da espera: o chute não sai e o inimigo fica só com os 0,5 s.
 func _cancelar_chute() -> void:
 	_chute_espera = 0.0
@@ -507,7 +634,8 @@ func _morrer() -> void:
 	em_escalada = false
 	parry_janela = 0.0
 	_cancelar_chute()
-	_cancelar_combo()
+	_cancelar_golpe()
+	_intervalo = 0.0
 	velocity = Vector2.ZERO
 	Som.tocar("morte_gato")
 	morreu.emit()
@@ -564,31 +692,36 @@ func _desenhar_indicador(topo: float) -> void:
 	var fonte := ThemeDB.fallback_font
 	draw_string(fonte, centro + Vector2(-3.5, 4), indicador, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color.BLACK)
 
-## Golpes 1 e 2: três riscos de garra, um de cada lado. Golpe 3: corte largo da espada.
-func _desenhar_golpe(raio: float) -> void:
-	var p := clampf(_golpe_tempo / Valores.GATO_GOLPE_DURACAO, 0.0, 1.0)
-	var alpha := 1.0 - p * 0.7
-	var angulo := direcao_olhar.angle()
-	var centro := direcao_olhar * raio
-	var alcance := Valores.GATO_ALCANCE_ATAQUE
-	if golpe_atual == 3:
-		# Corte vertical: arco estreito (60°) e mais comprido (25 px).
-		var abertura := deg_to_rad(Valores.GATO_ANGULO_GOLPE_3)
-		var ini := angulo - abertura / 2.0
-		var r3 := Valores.GATO_ALCANCE_GOLPE_3
-		draw_arc(Vector2.ZERO, r3, ini, ini + abertura * minf(p * 2.0, 1.0), 12, Color(1, 1, 1, alpha), 3.0)
-		draw_line(Vector2.ZERO, Vector2.from_angle(angulo) * r3 * minf(p * 2.0, 1.0), Color(0.8, 0.9, 1, alpha * 0.6), 1.0)
+## Leque do golpe (contorno fraco, para conferir alcance e abertura) e o risco do golpe.
+## Antecipação: só a mira se armando. Impacto: o risco corre pelo leque.
+## Golpes 1 e 2: três riscos de garra. Golpe 3: corte largo da espada.
+func _desenhar_golpe() -> void:
+	var espada := golpe_atual == 3
+	var alcance := _alcance_golpe(golpe_atual)
+	var abertura := deg_to_rad(_angulo_golpe(golpe_atual))
+	var angulo := _mira.angle()
+	var ini := angulo - abertura / 2.0
+	var antecipando := _golpe_tempo < Valores.GATO_GOLPE_ANTECIPACAO
+	var impacto := _golpe_no_impacto()
+	var alpha := 1.0 - clampf(_golpe_tempo / Valores.GATO_GOLPE_DURACAO, 0.0, 1.0) * 0.7
+	var contorno := Color(1, 1, 1, 0.5 if impacto else 0.18)
+	draw_arc(Vector2.ZERO, alcance, ini, ini + abertura, 16, contorno, 1.0)
+	draw_line(Vector2.ZERO, Vector2.from_angle(ini) * alcance, contorno, 1.0)
+	draw_line(Vector2.ZERO, Vector2.from_angle(ini + abertura) * alcance, contorno, 1.0)
+	if antecipando:
+		var armar := _golpe_tempo / Valores.GATO_GOLPE_ANTECIPACAO
+		draw_line(Vector2.ZERO, Vector2.from_angle(angulo) * alcance * armar, Color(1, 0.95, 0.6, 0.6), 1.0)
 		return
-	# Contorno da área (120°), bem fraco, para conferir o alcance no protótipo.
-	var meia := deg_to_rad(Valores.GATO_ANGULO_ATAQUE) / 2.0
-	draw_arc(Vector2.ZERO, alcance, angulo - meia, angulo + meia, 12, Color(1, 1, 1, alpha * 0.25), 1.0)
-	var lado := -1.0 if golpe_atual == 1 else 1.0
+	var q := clampf((_golpe_tempo - Valores.GATO_GOLPE_ANTECIPACAO) / Valores.GATO_GOLPE_IMPACTO, 0.0, 1.0)
+	if espada:
+		draw_arc(Vector2.ZERO, alcance, ini, ini + abertura * q, 16, Color(1, 1, 1, alpha), 3.0)
+		draw_line(Vector2.ZERO, Vector2.from_angle(ini + abertura * q) * alcance, Color(0.8, 0.9, 1, alpha * 0.6), 1.0)
+		return
+	var lado := 1.0 if golpe_atual == 1 else -1.0
+	var de := ini if lado > 0.0 else ini + abertura
 	for i in 3:
-		var desvio := (i - 1) * 0.3
-		var a := angulo + lado * 0.5 + desvio
-		var b := angulo - lado * 0.5 + desvio
-		var r := alcance * (0.55 + i * 0.1)
-		draw_line(centro + Vector2.from_angle(a) * r * 0.4, centro + Vector2.from_angle(lerpf(a, b, minf(p * 2.0, 1.0))) * r, Color(1, 1, 1, alpha), 1.0)
+		var r := alcance * (0.55 + i * 0.2)
+		draw_arc(Vector2.ZERO, r, de, de + lado * abertura * q, 12, Color(1, 1, 1, alpha), 1.0)
 
 func _draw() -> void:
 	var raio := Valores.GATO_RAIO_HITBOX
@@ -635,7 +768,7 @@ func _draw() -> void:
 	if indicador != "":
 		_desenhar_indicador(topo)
 	if golpe_atual != 0:
-		_desenhar_golpe(raio)
+		_desenhar_golpe()
 	var ponta := direcao_olhar * (raio + 7.0)
 	var lado := direcao_olhar.orthogonal() * 3.0
 	var base := direcao_olhar * (raio + 2.0)

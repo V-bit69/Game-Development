@@ -6,7 +6,8 @@ extends Inimigo
 ## Fica aguardando até o jogador entrar na zona de percepção. Depois, persegue.
 ## Se levar um golpe no meio do salto, leva o knockback (o salto acaba ali), mas
 ## ainda causa dano se encostar no gato antes ou ao mesmo tempo que o golpe.
-## Nenhum sapo tem dano de contato fora do salto.
+## Nenhum sapo tem dano de contato fora do salto. O sapo com língua nem fere com o
+## salto (salto_fere() é false): todo o dano dele vem da língua.
 
 enum Estado { AGUARDANDO, TELEGRAPH, SALTO, LINGUA, ESPERA }
 
@@ -80,13 +81,18 @@ func _mover_salto(delta: float, j: Node2D) -> void:
 	var passo := minf(Valores.SAPO_SALTO_VELOCIDADE * delta, _salto_restante)
 	var batida := move_and_collide(_salto_direcao * passo)
 	_salto_restante -= passo
-	if not _salto_acertou and _encosta_no_jogador(j):
+	if salto_fere() and not _salto_acertou and _encosta_no_jogador(j):
 		_salto_acertou = true
 		j.receber_ataque(self, Valores.SAPO_DANO)
 		if estado != Estado.SALTO:
 			return  # o parry interrompeu o salto
 	if batida != null or _salto_restante <= 0.001:
 		_mudar(Estado.ESPERA)
+
+
+## O salto machuca o gato? O sapo comum sim; o sapo com língua não.
+func salto_fere() -> bool:
+	return true
 
 
 ## A hitbox retangular do sapo encosta no círculo do jogador?
@@ -122,7 +128,7 @@ func _linha_livre(j: Node2D) -> bool:
 func receber_dano(dano: int, direcao := Vector2.ZERO, empurrao := 0.0) -> void:
 	if estado == Estado.SALTO:
 		var j := _jogador()
-		if j != null and not _salto_acertou and _encosta_no_jogador(j):
+		if j != null and salto_fere() and not _salto_acertou and _encosta_no_jogador(j):
 			_salto_acertou = true
 			j.receber_ataque(self, Valores.SAPO_DANO)
 	if estado == Estado.SALTO or estado == Estado.LINGUA:

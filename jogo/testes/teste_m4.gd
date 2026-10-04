@@ -1,5 +1,5 @@
 extends "res://testes/base_teste.gd"
-## Teste automático do M4 (parry em dois tempos e invulnerabilidade, v1.3). Rodar na pasta jogo/:
+## Teste automático do M4 (parry em dois tempos, invulnerabilidade de 1 s e dash/golpe x parry, v1.4.1). Rodar na pasta jogo/:
 ##   godot --headless --path . -s res://testes/teste_m4.gd
 
 const ATACANTE := "res://cenas/alvo_atacante.tscn"
@@ -73,25 +73,62 @@ func _rodar() -> void:
 	conferir("dano: piscar e tremor", jogador.piscar_de_dano() > 0.0 and jogador._tremor > 0.0)
 	alvo.queue_free()
 
-	# Depois do dano, 1,5 s invulnerável.
-	conferir("invulnerável logo depois do dano", jogador.invulneravel > 1.4)
+	# Depois do dano, 1 s invulnerável (pode atacar e dar dash).
+	conferir("invulnerável logo depois do dano (%.2f s)" % jogador.invulneravel, jogador.invulneravel > 0.95 and jogador.invulneravel <= 1.0)
 	jogador.receber_ataque(sala, 1)
 	conferir("invulnerável: o segundo golpe não tira vida", jogador.vida == 8)
+	jogador.direcao_olhar = Vector2.UP
+	jogador.pedir_ataque()
+	conferir("invulnerável, o gato pode atacar", jogador.golpe_atual != 0)
+	await esperar(2)
+	conferir("invulnerável, o gato pode dar dash", jogador.pedir_dash() and jogador.em_dash)
+	await ate(func(): return not jogador.em_dash)
 	await ate(func(): return jogador.invulneravel == 0.0)
 	jogador.receber_ataque(sala, 1)
-	conferir("depois de 1,5 s, toma dano de novo", jogador.vida == 7)
+	conferir("depois de 1 s, toma dano de novo", jogador.vida == 7)
+	await ate(func(): return jogador.invulneravel == 0.0)
+	jogador.position = inicio
 
-	# Parry cancela o combo e não sai durante o dash.
+	# Parry x golpe: a mesma regra do dash (antecipação cancela, execução ignora, recuperação funciona).
+	jogador.stamina = 4
 	await esperar(30)
+	jogador.position = inicio
+	jogador._proximo_golpe = 1
 	jogador.pedir_ataque()
 	await esperar(2)
 	jogador.pedir_parry()
-	conferir("Q cancela o golpe", jogador.golpe_atual == 0 and jogador.parry_janela > 0.0)
+	conferir("Q na antecipação cancela o golpe, que não conta", jogador.golpe_atual == 0 and jogador.parry_janela > 0.0 and jogador._proximo_golpe == 1)
 	Input.action_press("mover_direita")
 	await esperar(3)
 	conferir("com a janela aberta, o gato fica parado", jogador.velocity == Vector2.ZERO)
 	Input.action_release("mover_direita")
 	await ate(func(): return jogador.parry_recuperacao == 0.0 and jogador.parry_janela == 0.0)
+	jogador.pedir_ataque()
+	await esperar(8)  # 0,133 s: execução
+	conferir("Q na execução é ignorado", not jogador.pedir_parry() and jogador.golpe_atual != 0 and jogador.parry_janela == 0.0)
+	await ate(func(): return jogador.golpe_atual == 0 and jogador._intervalo > 0.0)
+	var recuperacao_antes: float = jogador._intervalo
+	conferir("Q na recuperação funciona", jogador.pedir_parry() and jogador.parry_janela > 0.0)
+	await esperar(3)
+	conferir("e a recuperação do golpe continua correndo", jogador._intervalo < recuperacao_antes - 0.04)
+	await ate(func(): return jogador.parry_recuperacao == 0.0 and jogador.parry_janela == 0.0 and jogador._intervalo == 0.0)
+
+	# O dash cancela o parry, mas a recuperação de 0,4 s não encurta.
+	jogador.position = inicio
+	jogador.pedir_parry()
+	await esperar(3)
+	var resta: float = jogador.parry_janela
+	jogador.direcao_olhar = Vector2.UP
+	conferir("dash cancela a janela do parry", jogador.pedir_dash() and jogador.parry_janela == 0.0 and jogador.em_dash)
+	conferir("os 0,4 s de recuperação continuam contando (%.2f s)" % jogador.parry_recuperacao, absf(jogador.parry_recuperacao - (resta + 0.4)) < 0.02)
+	await ate(func(): return not jogador.em_dash)
+	conferir("depois do dash, Q ainda não funciona", not jogador.pedir_parry())
+	await ate(func(): return jogador.parry_recuperacao == 0.0)
+	conferir("passada a recuperação, Q volta a funcionar", jogador.pedir_parry())
+	await ate(func(): return jogador.parry_recuperacao == 0.0 and jogador.parry_janela == 0.0)
+
+	# Durante o dash, Q não funciona.
+	jogador.stamina = 4
 	jogador.pedir_dash()
 	conferir("durante o dash, Q não funciona", not jogador.pedir_parry())
 	terminar()

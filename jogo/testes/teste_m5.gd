@@ -49,16 +49,16 @@ func _rodar() -> void:
 	await ate(func(): return sapo.estado == E.SALTO)
 	await esperar(1)
 	var x_sapo: float = sapo.position.x
-	sapo.receber_dano(1, Vector2.RIGHT, 16.0)
+	sapo.receber_dano(1, Vector2.RIGHT, 24.0)
 	conferir("golpe no salto: o salto acaba", sapo.estado == E.ESPERA)
 	await esperar(10)
-	conferir("e aplica o knockback (%.1f)" % (sapo.position.x - x_sapo), sapo.position.x - x_sapo > 14.0)
+	conferir("e aplica o knockback (%.1f)" % (sapo.position.x - x_sapo), sapo.position.x - x_sapo > 22.0)
 	conferir("sem encostar, não causa dano", jogador.vida == 10)
 
 	# Golpe no salto ao mesmo tempo que encosta no gato: o dano do salto vale.
 	sapo.position = jogador.position + Vector2(18, 0)
 	sapo._comecar_salto(Vector2.LEFT)
-	sapo.receber_dano(1, Vector2.RIGHT, 16.0)
+	sapo.receber_dano(1, Vector2.RIGHT, 24.0)
 	conferir("encostou junto com o golpe: 1 de dano (vida %d)" % jogador.vida, jogador.vida == 9)
 	jogador.vida = 10
 	jogador.invulneravel = 0.0

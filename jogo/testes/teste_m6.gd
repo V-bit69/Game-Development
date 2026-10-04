@@ -83,7 +83,7 @@ func _rodar() -> void:
 	sapo._mudar(E.ESPERA)
 	sapo._lancar_lingua(jogador)
 	sapo._mudar(E.LINGUA)
-	sapo.receber_dano(1, Vector2.RIGHT, 16.0)
+	sapo.receber_dano(1, Vector2.RIGHT, 24.0)
 	conferir("golpe no corpo recolhe a língua", not sapo.lingua_ativa)
 
 	# Rolamento esquiva da língua (projétil): sem dano, e ela não fere mais depois.
@@ -100,6 +100,27 @@ func _rodar() -> void:
 	conferir("rolamento esquiva da língua (vida %d)" % jogador.vida, jogador.vida == 10)
 	jogador.trocar_dash()
 	jogador.position = inicio
+
+	# O salto do sapo com língua não causa dano (seção 30): todo o dano vem da língua.
+	conferir("sapo com língua tem 4 de vida", sapo.vida_maxima == 4)
+	conferir("salto_fere() é false no sapo com língua e true no comum", not sapo.salto_fere() and load("res://cenas/sapo.tscn").instantiate().salto_fere())
+	jogador.vida = 10
+	jogador.invulneravel = 0.0
+	sapo.atordoado = 0.0
+	sapo.vida = 4
+	sapo.position = jogador.position + Vector2(25, 0)
+	sapo._comecar_salto(Vector2.LEFT)  # salto puro (sem língua) por cima do gato
+	var encostou := false
+	while sapo.estado == E.SALTO:
+		encostou = encostou or sapo._encosta_no_jogador(jogador)
+		await esperar(1)
+	conferir("o salto passou encostando no gato", encostou)
+	conferir("mas o salto não causa dano (vida %d)" % jogador.vida, jogador.vida == 10)
+	# Golpe simultâneo com o salto encostando: também sem dano.
+	sapo.position = jogador.position + Vector2(18, 0)
+	sapo._comecar_salto(Vector2.LEFT)
+	sapo.receber_dano(1, Vector2.RIGHT, 24.0)
+	conferir("golpe no salto encostando: sem dano para o gato (vida %d)" % jogador.vida, jogador.vida == 10)
 
 	# Obstáculo entre o sapo e o gato: não usa a língua, contorna.
 	sapo.queue_free()

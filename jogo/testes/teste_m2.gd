@@ -102,6 +102,42 @@ func _rodar() -> void:
 	await _fim_do_dash()
 	_conferir("depois de 5 s o rolamento volta a ser grátis", _jogador.stamina == antes)
 
+	# O rolamento não atravessa inimigo: é interrompido no contato (seção 9).
+	var alvo: Node2D = load("res://cenas/alvo.tscn").instantiate()
+	alvo.position = inicio + Vector2(40, 0)
+	sala.add_child(alvo)
+	await _esperar(2)
+	_jogador.stamina = 4
+	_jogador.position = inicio
+	_jogador.direcao_olhar = Vector2.RIGHT
+	_jogador.pedir_dash()
+	await _fim_do_dash()
+	_conferir("rolamento para no contato com o inimigo (x = %.1f)" % _jogador.position.x, _jogador.position.x > inicio.x + 5.0 and _jogador.position.x < alvo.position.x - 18.0)
+	_conferir("e não causa dano nele", alvo.vida == alvo.vida_maxima)
+
+	# O dash ofensivo, ao contrário, sempre atravessa.
+	_jogador.trocar_dash()
+	_jogador.position = inicio
+	await _esperar(1)
+	_jogador.pedir_dash()
+	await _fim_do_dash()
+	_conferir("dash ofensivo atravessa o mesmo inimigo (x = %.1f)" % _jogador.position.x, _jogador.position.x > alvo.position.x + 20.0)
+	alvo.queue_free()
+	await _esperar(2)
+
+	# Sem stamina, o 3º rolamento é bloqueado e um rolamento bloqueado não conta na janela.
+	_jogador.trocar_dash()
+	_jogador.stamina = 0
+	_jogador._rolamentos.clear()
+	for i in 2:
+		_jogador.position = inicio
+		_jogador.pedir_dash()
+		await _fim_do_dash()
+	_conferir("2 rolamentos grátis sem stamina", _jogador._rolamentos.size() == 2 and _jogador.stamina == 0)
+	_jogador.position = inicio
+	_conferir("3º rolamento sem stamina é bloqueado", not _jogador.pedir_dash() and not _jogador.em_dash)
+	_conferir("e não conta na janela", _jogador._rolamentos.size() == 2)
+
 	_jogador.trocar_dash()
 	_conferir("S volta para o dash ofensivo", _jogador.dash_equipado == 0)
 

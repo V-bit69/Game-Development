@@ -6,6 +6,7 @@ extends Sapo
 ##   zona externa                   → telegraph, salto de perseguição
 ## A língua vai em linha reta e volta pelo mesmo caminho. Obstáculos a seguram.
 ## Com parry, a língua é rebatida na hora: o sapo é atingido e fica 2 s atordoado onde está.
+## O salto dele não causa dano (salto_fere() é false): todo o dano vem da língua.
 ## A língua é um projétil: o rolamento esquiva dela, e a língua esquivada não fere mais.
 
 const COR_LINGUA := Color(0.95, 0.45, 0.6)
@@ -53,6 +54,10 @@ func _executar(j: Node2D) -> void:
 			_lancar_lingua(j)
 		Acao.PERSEGUIR:
 			_comecar_salto(_salto_direcao)
+
+
+func salto_fere() -> bool:
+	return false
 
 
 func _origem_lingua() -> Vector2:
