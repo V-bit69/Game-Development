@@ -5,7 +5,7 @@
 
 | | |
 |---|---|
-| **Versão** | 1.4.1 |
+| **Versão** | 1.4.2 |
 | **Status** | Especificação de gameplay em desenvolvimento |
 | **Engine** | Godot 4 |
 | **Resolução base** | 640 × 360 px, ampliada 3× na tela Full HD |
@@ -1135,6 +1135,7 @@ Definido pelo game design em 30/09: o personagem de tamanho 3 tem **50 px** de a
 | Cone do magnetismo de mira | seção 18 | **±45°** |
 | Margem do magnetismo | seção 18 | **≈ 10 px** |
 | Preferência pelo alvo anterior | resposta do game design, 04/10 | **2 s** |
+| Hitstop | seção 44 | **0,05 s**, um por golpe (ou por dash), mesmo que ele acerte vários inimigos |
 | Desempate do magnetismo | resposta do game design, 04/10 | alvo anterior (no cone e no prazo) → mais próximo → menor ângulo em relação ao olhar. Distâncias com menos de 1 px de diferença contam como empate (proposta do desenvolvimento) |
 | Knockback do parry | 1 dash padrão | **80 px** |
 | Atordoamento do parry | 0,5 s até o chute + 1,5 s depois | **2 s** (só 0,5 s se o chute for cancelado com dash) |
@@ -1245,3 +1246,4 @@ Seguem em aberto, sem mudança, as dúvidas 33 (espera do chute do parry) e 34 (
 | 1.4.1 | 03/10/2026 | Game design | Ajustes na versão 1.4 |
 | 1.4.1 | 04/10/2026 | Desenvolvimento | Game design v1.4.1 aplicado no protótipo (magnetismo, fases e cancelamento do golpe, leque, passo de 24 px, rolamento parando em inimigo, dash cancelando o parry, 1 s de invulnerabilidade, sapo com língua sem dano no salto). Dúvidas 35 a 40. Correção de formatação na dúvida 18 (espaço antes do tachado) e nota na dúvida 32 |
 | 1.4.1 | 04/10/2026 | Desenvolvimento | Respostas do game design às dúvidas 35 a 40 aplicadas: passo em ease-out (480 px/s a zero em 0,1 s), preferência de 2 s pelo alvo anterior com desempate por distância e ângulo, fim do ataque guardado. Cabeçalho: "floresta" trocado por "demo". Versão do game design (1.4.1) passa a aparecer na tela. Seção 49.3 atualizada |
+| 1.4.2 | 05/10/2026 | Desenvolvimento | Correções pedidas pelo game design antes da v1.5: um hitstop só por golpe (o lag nos acertos vinha de um congelamento por sapo atingido), sapos contornam obstáculos seguindo um caminho a pé pelo mapa (antes ficavam presos atrás deles) e corredor da floresta alargado. Hitstop incluído na seção 49.3 |

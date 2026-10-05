@@ -91,18 +91,18 @@ TTTTTTTTTTTTTTTTTTTT
 ### 2. Corredor (1 tela)
 
 ```
-TTTTT::TTTTT   <- abre na clareira
-TTTT::TTTTTT
-TTT::TTTTTTT
-~~~...TTTTTT
-~~~L..TTTTTT   flor de lírio azul, na beira de um lago
-~~...TTTTTTT
-TTT::TTTTTTT
-TTTT::.t.TTT   recanto lateral com o elemento tecnológico
-TTTT::TTTTTT   <- vem da área segura
+TTTT:::TTTTT   <- abre na clareira
+TTT:::TTTTTT
+TT:::TTTTTTT
+~~~....TTTTT
+~~~L...TTTTT   flor de lírio azul, na beira de um lago
+~~....TTTTTT
+TTT:::TTTTTT
+TTTT:::.t.TT   recanto lateral com o elemento tecnológico
+TTTT:::TTTTT   <- vem da área segura
 ```
 
-- Passagem de 3 a 4 tiles de largura, sem árvore isolada no meio.
+- Passagem de 4 a 5 células de largura (128 a 160 px, 8 a 10 tiles), sem árvore isolada no meio. Alargada em 05/10 a pedido do game design: antes tinha 3 células (96 px) e apertava para 2 (64 px) perto do elemento tecnológico.
 - O caminho faz uma curva em S, que esconde a clareira até o fim.
 - **Elemento tecnológico** num recanto lateral, na metade de baixo do corredor. É um fragmento da ruína que foi parar longe dela, e o gato estranha (definido pelo game design em 02/10).
 - **Flor de lírio azul** mais acima, na beira de um **lago** (corpo d'água) do lado esquerdo do caminho, sem indicador de E. É a interação oculta, e combina com a fala da irmã ("nasce onde a água é limpa"). O lago bloqueia a passagem.

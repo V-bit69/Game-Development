@@ -63,6 +63,15 @@ func _rodar() -> void:
 				if not encosta:
 					sem_acesso.append("%s em (%d, %d)" % [c, x, y])
 	_conferir("tudo alcançável a partir do início %s" % [sem_acesso], sem_acesso.is_empty())
+	# Corredor (linhas 46 a 64) alargado na v1.4.2: passagem de pelo menos 4 células (128 px).
+	var estreito := 99
+	for y in range(46, 65):
+		var abertas := 0
+		for x in linhas[y].length():
+			if livre.call(x, y) or linhas[y][x] == "L":
+				abertas += 1
+		estreito = mini(estreito, abertas)
+	_conferir("corredor com pelo menos 4 células de largura (mínimo %d)" % estreito, estreito >= 4)
 	_conferir("14 sapos comuns (tem %d)" % contagem.get("s", 0), contagem.get("s", 0) == 14)
 	_conferir("7 sapos com língua (tem %d)" % contagem.get("l", 0), contagem.get("l", 0) == 7)
 	for c in "XFGtLK":

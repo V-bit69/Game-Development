@@ -40,7 +40,7 @@ func _decidir(j: Node2D) -> void:
 		_acao = Acao.SALTO_LINGUA
 	else:
 		_acao = Acao.PERSEGUIR  # também quando um obstáculo bloqueia a língua
-	_salto_direcao = _direcao_livre(j.global_position - global_position)
+	_salto_direcao = _direcao_de_perseguicao(j)
 	_mudar(Estado.TELEGRAPH)
 
 

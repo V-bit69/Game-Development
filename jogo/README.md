@@ -33,7 +33,8 @@ Projeto Godot 4 do protótipo da demo. Feito com formas simples, sem arte final.
 - **Magnetismo de mira**: o golpe procura o inimigo vivo mais próximo num cone de ±45° em volta do olhar, até o alcance efetivo + 10 px (64 px nos golpes 1 e 2, 74 px no golpe 3), e aponta para ele com ângulo contínuo. O alvo anterior tem preferência por 2 s; depois vai o mais próximo e, em empate, o de menor ângulo. Obstáculo no meio não é alvo. Não vale para dash nem rolamento.
 - **Dash e rolamento**: o dash ofensivo atravessa inimigos e fere (1 de dano). O rolamento para no contato com parede, obstáculo ou inimigo. Sem stamina, o 3º rolamento é bloqueado e não conta na janela. O dash também cancela a janela do parry (a recuperação de 0,4 s continua contando).
 - **Dano no gato**: 1 s de invulnerabilidade, piscando. Nela ele pode atacar e dar dash.
-- **Sapos**: os dois têm 4 de vida. O sapo comum fere com o salto; o sapo com língua não (`salto_fere()`): todo o dano dele vem da língua.
+- **Hitstop**: 0,05 s, um só por golpe (ou dash), mesmo acertando vários sapos.
+- **Sapos**: com um obstáculo entre eles e o gato, seguem o caminho a pé da sala (`sala.caminho()`, AStar no grid de 32 px) e contornam. Os dois têm 4 de vida. O sapo comum fere com o salto; o sapo com língua não (`salto_fere()`): todo o dano dele vem da língua.
 
 ## Versão do game design na tela
 

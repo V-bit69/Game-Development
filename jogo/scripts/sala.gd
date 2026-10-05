@@ -76,6 +76,7 @@ var falou_com_xennar := false
 var _linhas: Array[String] = []
 var _gatilhos := {}  # linha do gatilho -> sapos que ele acorda
 var _interativos: Array[Dictionary] = []  # {id, celula, centro, base, indicador, some}
+var _grade: AStarGrid2D  # mapa de caminhos a pé, para os inimigos contornarem obstáculos
 
 @onready var jogador: CharacterBody2D = $Jogador
 @onready var info: Label = $HUD/Info
@@ -88,6 +89,7 @@ func _ready() -> void:
 		return
 	add_to_group("sala")
 	_criar_colisoes()
+	_criar_grade()
 	_criar_entidades()
 	_criar_interativos()
 	_posicionar_jogador()
@@ -369,6 +371,39 @@ func _criar_colisoes() -> void:
 				x += 1
 			var largura := Vector2(x - inicio, 1) * celula
 			_adicionar_caixa(paredes, Vector2(inicio, y) * celula + largura / 2.0, largura)
+
+
+## Grade de caminhos: uma célula do mapa por ponto. Paredes, obstáculos, água, o trecho
+## escalável e os marcadores sólidos (Xennar, fogueira, estátua...) bloqueiam. Na diagonal,
+## só passa se as duas células vizinhas estiverem livres (não corta quina).
+func _criar_grade() -> void:
+	var largura := 0
+	for linha in _linhas:
+		largura = maxi(largura, linha.length())
+	_grade = AStarGrid2D.new()
+	_grade.region = Rect2i(0, 0, largura, _linhas.size())
+	_grade.cell_size = Vector2(celula, celula)
+	_grade.offset = Vector2(celula, celula) / 2.0
+	_grade.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_ONLY_IF_NO_OBSTACLES
+	_grade.update()
+	for y in _linhas.size():
+		for x in largura:
+			var c := _linhas[y][x] if x < _linhas[y].length() else "T"
+			if _bloqueia(c) or (MARCADORES.has(c) and MARCADORES[c].solido):
+				_grade.set_point_solid(Vector2i(x, y))
+
+
+## Caminho a pé de um ponto até outro, em pontos do mundo (centros das células),
+## contornando paredes e obstáculos. Se o destino não for alcançável (por exemplo, o gato
+## na área superior), vai até o ponto mais perto dele. Vazio se não há caminho.
+func caminho(de: Vector2, para: Vector2) -> PackedVector2Array:
+	if _grade == null:
+		return PackedVector2Array()
+	var a := Vector2i((de / celula).floor())
+	var b := Vector2i((para / celula).floor())
+	if not _grade.is_in_boundsv(a) or not _grade.is_in_boundsv(b) or _grade.is_point_solid(a):
+		return PackedVector2Array()
+	return _grade.get_point_path(a, b, true)
 
 
 ## Paredes: vegetação, ruína, obstáculos e o trecho escalável (que só se passa escalando).

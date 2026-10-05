@@ -129,6 +129,25 @@ func _rodar() -> void:
 	alvo.queue_free()
 	await _esperar(1)
 
+	# --- Vários inimigos no mesmo golpe: um hitstop só (v1.4.2) ---
+	# Desde a v1.4 a hitbox é conferida a cada quadro do impacto. Com um hitstop por acerto,
+	# sapos atingidos em quadros diferentes viravam uma série de travadas.
+	_jogador.position = _inicio
+	_jogador._proximo_golpe = 1
+	_jogador.direcao_olhar = Vector2.RIGHT
+	var grupo: Array = []
+	for p in [Vector2(28, 0), Vector2(40, 10), Vector2(50, -8)]:
+		grupo.append(await _novo_alvo(_inicio + p))
+	var congelamentos_antes: int = _jogador.hitstops
+	_jogador.pedir_ataque()
+	await _fim_do_combo()
+	_conferir("golpe acerta os 3 (vidas %s)" % [grupo.map(func(a): return a.vida)], grupo.all(func(a): return a.vida == 2))
+	_conferir("e congela uma vez só (%d)" % (_jogador.hitstops - congelamentos_antes), _jogador.hitstops - congelamentos_antes == 1)
+	for a in grupo:
+		a.queue_free()
+	await _esperar(1)
+	_jogador.position = _inicio
+
 	# --- Janela do impacto: ~0,1 s no início da execução ---
 	_jogador.position = _inicio
 	_jogador._proximo_golpe = 1

@@ -58,10 +58,10 @@ func alertar() -> void:
 	Som.tocar("alerta")
 
 
-## Início do ciclo: o sapo comum sempre salta na direção do jogador.
-## A direção é decidida aqui, no começo do telegraph, e não muda depois.
+## Início do ciclo: o sapo comum sempre salta na direção do jogador (contornando
+## obstáculos). A direção é decidida aqui, no começo do telegraph, e não muda depois.
 func _decidir(j: Node2D) -> void:
-	_salto_direcao = _direcao_livre(j.global_position - global_position)
+	_salto_direcao = _direcao_de_perseguicao(j)
 	_mudar(Estado.TELEGRAPH)
 
 
@@ -103,17 +103,48 @@ func _encosta_no_jogador(j: Node2D) -> bool:
 	return local.distance_to(mais_perto) <= Valores.GATO_RAIO_HITBOX
 
 
-## Obstáculos bloqueiam o caminho: tenta a direção do jogador e, se estiver
-## bloqueada, desvios de 45° e 90° para contornar.
+## Para onde pular para chegar no jogador. Com a reta livre, vai direto. Com um obstáculo
+## no meio, segue o caminho a pé da sala (contorna paredes e obstáculos), mirando no ponto
+## mais adiantado do caminho que o sapo alcança em linha reta, com o corpo inteiro.
+func _direcao_de_perseguicao(j: Node2D) -> Vector2:
+	var destino := j.global_position
+	if not _reta_livre(destino):
+		var sala := get_tree().get_first_node_in_group("sala")
+		if sala != null and sala.has_method("caminho"):
+			var pontos: PackedVector2Array = sala.caminho(global_position, destino)
+			if pontos.size() > 1:
+				destino = pontos[1]
+				for i in range(pontos.size() - 1, 1, -1):
+					if _reta_livre(pontos[i]):
+						destino = pontos[i]
+						break
+	return _direcao_livre(destino - global_position)
+
+
+## O corpo do sapo (retângulo inteiro, não só o centro) passa em linha reta até o ponto?
+func _reta_livre(ponto: Vector2) -> bool:
+	var para := ponto - global_position
+	return para.length() < 0.5 or not test_move(global_transform, para)
+
+
+## Ajuste fino na hora do salto: se o salto inteiro na direção desejada bate em algo,
+## tenta desvios de 45° e 90° para cada lado, testando o corpo do sapo. Se nenhum passa,
+## fica o que anda mais antes de bater.
 func _direcao_livre(desejada: Vector2) -> Vector2:
-	var base := desejada.normalized()
-	var espaco := get_world_2d().direct_space_state
+	var base := desejada.normalized() if desejada.length() > 0.5 else Vector2.DOWN
+	var melhor := base
+	var maior := -1.0
 	for graus in [0.0, 45.0, -45.0, 90.0, -90.0]:
 		var d := base.rotated(deg_to_rad(graus))
-		var consulta := PhysicsRayQueryParameters2D.create(global_position, global_position + d * (Valores.SAPO_SALTO_COMPRIMENTO + 10.0), 1)
-		if espaco.intersect_ray(consulta).is_empty():
+		var movimento := d * Valores.SAPO_SALTO_COMPRIMENTO
+		var batida := move_and_collide(movimento, true)
+		if batida == null:
 			return d
-	return base
+		var andou := batida.get_travel().length()
+		if andou > maior + 0.5:
+			maior = andou
+			melhor = d
+	return melhor
 
 
 ## Linha reta até o jogador sem obstáculo no meio?

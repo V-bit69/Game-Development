@@ -6,7 +6,7 @@ extends Node
 ## em px/s, tempos em segundos.
 
 # Versão do game design que o protótipo implementa (aparece na tela). Atualize junto com o doc.
-const VERSAO_GAME_DESIGN := "1.4.1"
+const VERSAO_GAME_DESIGN := "1.4.2"
 
 # --- Escala ---
 const TILE := 16.0
@@ -48,7 +48,7 @@ const GATO_MAGNETISMO_CONE := 45.0  # graus para cada lado da direção do olhar
 const GATO_MAGNETISMO_MARGEM := 10.0  # px além do alcance efetivo
 const GATO_MAGNETISMO_PREFERENCIA := 2.0  # s: por quanto tempo o alvo anterior tem preferência
 const GATO_MAGNETISMO_EMPATE := 1.0  # px: distâncias dentro dessa folga empatam; desempata o menor ângulo
-const HITSTOP := 0.05  # congelamento curto a cada acerto
+const HITSTOP := 0.05  # congelamento curto no acerto: um por golpe (ou dash), mesmo acertando vários
 const GATO_DANO_GARRA := 1
 const GATO_DANO_ESPADA := 2
 const GATO_DANO_DASH := 1

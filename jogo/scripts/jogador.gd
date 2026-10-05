@@ -79,6 +79,8 @@ var _chute := 0.0
 var _chute_espera := 0.0  # entre a defesa e o chute do parry; só o dash cancela
 var _chute_alvo: Node2D = null
 var invulneravel := 0.0  # recuperação depois de tomar dano
+var hitstops := 0  # quantos congelamentos já aconteceram (para os testes)
+var _em_hitstop := false
 var _chute_direcao := Vector2.RIGHT
 var _dano_piscar := 0.0
 var _tremor := 0.0
@@ -235,8 +237,9 @@ func _dano_do_dash() -> void:
 	for inimigo in _inimigos_em(global_position, Valores.GATO_RAIO_HITBOX):
 		if inimigo in _atingidos_no_dash:
 			continue
+		var primeiro := _atingidos_no_dash.is_empty()
 		_atingidos_no_dash.append(inimigo)
-		_acertar(inimigo, Valores.GATO_DANO_DASH, 0.0)
+		_acertar(inimigo, Valores.GATO_DANO_DASH, 0.0, Vector2.ZERO, primeiro)
 
 
 # --- Escalada -----------------------------------------------------------
@@ -451,8 +454,9 @@ func _golpe_impacto() -> void:
 			continue
 		if not _no_leque(inimigo, _mira, angulo, alcance) or _obstaculo_entre(inimigo):
 			continue
+		var primeiro := _golpe_atingidos.is_empty()
 		_golpe_atingidos.append(inimigo)
-		_acertar(inimigo, dano, Valores.KNOCKBACK_PADRAO, _mira)
+		_acertar(inimigo, dano, Valores.KNOCKBACK_PADRAO, _mira, primeiro)
 
 
 ## A área de ataque é um leque que sai do gato. Vale o retângulo do inimigo, não só o
@@ -495,20 +499,28 @@ func _inimigos_em(centro: Vector2, raio: float) -> Array[Node]:
 	return achados
 
 
-func _acertar(inimigo: Node, dano: int, empurrao: float, direcao := Vector2.ZERO) -> void:
+## "congelar": só o primeiro acerto de cada golpe (ou dash) faz hitstop. Desde a v1.4 a
+## hitbox é conferida a cada quadro do impacto, então vários sapos podem ser atingidos em
+## quadros diferentes do mesmo golpe; um hitstop por sapo virava uma série de travadas.
+func _acertar(inimigo: Node, dano: int, empurrao: float, direcao := Vector2.ZERO, congelar := true) -> void:
 	if direcao == Vector2.ZERO:
 		direcao = inimigo.global_position - global_position
 	inimigo.receber_dano(dano, direcao, empurrao)
-	Som.tocar("impacto")
-	_hitstop()
+	if congelar:
+		Som.tocar("impacto")
+		_hitstop()
 
 
+## Congela o jogo por um instante. Um hitstop novo não começa enquanto outro está rodando.
 func _hitstop() -> void:
-	if Valores.HITSTOP <= 0.0:
+	if Valores.HITSTOP <= 0.0 or _em_hitstop:
 		return
+	_em_hitstop = true
+	hitstops += 1
 	Engine.time_scale = 0.0
 	await get_tree().create_timer(Valores.HITSTOP, true, false, true).timeout
 	Engine.time_scale = 1.0
+	_em_hitstop = false
 
 
 func _atualizar_rastro() -> void:

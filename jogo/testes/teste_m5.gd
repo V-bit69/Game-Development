@@ -102,6 +102,22 @@ func _rodar() -> void:
 	var d: Vector2 = c._direcao_livre(Vector2.UP)
 	conferir("obstáculo no caminho: desvia (%s)" % d, d != Vector2.UP and d.y <= 0.01)
 
+	# Sapo atrás de uma parede comprida (linha 12, colunas 21 a 25): segue o caminho a pé
+	# da sala e contorna, em vez de ficar pulando de um lado para o outro (v1.4.2).
+	jogador.position = Vector2(23.5 * 32, 10.5 * 32)
+	jogador.set_physics_process(false)
+	var preso := await criar(SAPO, Vector2(23.5 * 32, 13.5 * 32))
+	preso.alerta = true
+	var contornou := false
+	for i in 12 * 90:  # até ~12 ciclos
+		await esperar(1)
+		if preso.position.y < 12.0 * 32 and preso.position.distance_to(jogador.position) < 60.0:
+			contornou = true
+			break
+	conferir("sapo atrás da parede contorna e chega no gato (%s)" % (preso.position / 32.0).floor(), contornou)
+	preso.queue_free()
+	jogador.set_physics_process(true)
+
 	# Encontros na floresta: sapos dormem até o gatilho.
 	a.queue_free()
 	b.queue_free()
