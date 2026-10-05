@@ -50,8 +50,8 @@ Versão feia, mas jogável, no Godot. A floresta já pode ser feita inteira. Mar
 
 **Floresta (liberada)**
 - [x] **M1** Projeto Godot em 640×360 (×3 na tela), movimento em 8 direções (setas), colisão e câmera seguindo
-- [x] **M2** Dash padrão, dash de rolamento (2 grátis em 4 s), troca com S, stamina em 4 unidades e HUD
-- [x] **M3** Combo de 3 golpes (garra, garra, espada), dano do dash, knockback e feedback (hitstop, flash, tremida, sons provisórios)
+- [x] **M2** Dash ofensivo, dash de rolamento (2 grátis em 5 s), troca com S, stamina em 4 unidades e HUD
+- [x] **M3** Combo cíclico de 3 golpes (garra, garra, espada), dano do dash, knockback e feedback (hitstop, flash, tremida, sons provisórios)
 - [x] **M4** Parry com Q: janela de 0,2 s, chute, knockback de 1 dash e atordoamento de 0,5 s + 1,5 s
 - [x] **M5** Sapo comum: ciclo com telegraph, salto, cancelamento do pulo, HP em quadradinhos e morte
 - [x] **M6** Sapo com língua: três zonas, língua que volta e parry da língua
@@ -69,7 +69,7 @@ Versão feia, mas jogável, no Godot. A floresta já pode ser feita inteira. Mar
 ### 4. Blockout da fase — Development Director (Level Designer) 🔄
 - [x] Floresta no papel, já pela especificação → [02-level-design-demo.md](02-level-design-demo.md)
 - [x] Floresta no Godot com formas simples: área segura, corredor, clareira, exterior e área superior
-- [x] Posicionar os 4 encontros (11 sapos comuns e 5 com língua) e os gatilhos
+- [x] Posicionar os 4 encontros (14 sapos comuns e 7 com língua) e os gatilhos
 - [ ] Ruína *(aguardando especificação)*
 - [ ] Sala do boss *(aguardando especificação)*
 
@@ -114,3 +114,4 @@ Personagens, cenários, inimigos, objetos, identidade visual, UI e referências 
 | 30/09/2026 | M4 a M9 concluídos: parry, sapos comum e com língua, encontros com gatilho, interações e diálogos, escalada, morte e pausa. A floresta está jogável do início à entrada da ruína |
 | 02/10/2026 | Game design v1.3 aplicado no protótipo (dash ofensivo, rolamento contra projéteis, combo cíclico, área de ataque em arco, parry em dois tempos, invulnerabilidade, 14 + 7 sapos). Blockout: elemento tecnológico levado para longe da ruína, flor mais acima, ao lado de um lago |
 | 04/10/2026 | Game design v1.4.1 aplicado no protótipo: magnetismo de mira, golpe em fases (antecipação, impacto, recuperação) com cancelamento, leque de 120°/90°, passo e knockback de 24 px, rolamento que para nos inimigos, dash que cancela o parry, 1 s de invulnerabilidade e sapo com língua sem dano no salto |
+| 04/10/2026 | Docs conferidos depois da v1.4.1: escopo ([01-escopo-demo.md](01-escopo-demo.md)) atualizado (dash ofensivo com 2 de stamina e 1 de dano, rolamento que para em inimigo e janela de 5 s, combo cíclico com fases, parry com 0,5 s + 1,5 s e 0,4 s sem defesa, invulnerabilidade de 1 s) e marcos M2, M3 e blockout do roadmap corrigidos (14 + 7 sapos) |

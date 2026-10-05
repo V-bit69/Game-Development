@@ -19,7 +19,7 @@ A demo **não** tenta provar a narrativa de múltiplas perspectivas. Essa parte 
 ## 2. Personagem
 
 - **Homem-gato** (GDD 12.4), confirmado na [especificação da floresta](04-game-design-demo.md). É ágil, bondoso, fala rápido e mia no fim de algumas frases.
-- Tem **10 de HP** e **4 unidades de stamina**.
+- Tem **10 de HP** e **4 unidades de stamina**. Depois de tomar dano, fica 1 s invulnerável (pode atacar e dar dash).
 - Começa só com as habilidades próprias: garras, espada, dois tipos de dash e parry.
 - No meio da demo, dentro da ruína, encontra a arma **KLM-99**, que libera o ataque à distância.
 
@@ -28,12 +28,12 @@ A demo **não** tenta provar a narrativa de múltiplas perspectivas. Essa parte 
 | Mecânica | Na demo | Como funciona |
 |---|---|---|
 | Movimento em 8 direções | ✅ | Setas. 1,3 × a velocidade padrão |
-| Dash padrão | ✅ | Tecla D. Gasta 1 de stamina, atravessa inimigos causando 2 de dano, não dá invulnerabilidade |
-| Dash de rolamento | ✅ | Tecla S alterna o tipo. Mais curto, sem dano. Os 2 primeiros em 4 s são grátis, o terceiro gasta stamina |
-| Escalada | ✅ | Dash padrão contra trechos marcados da parede da ruína leva à área superior |
+| Dash ofensivo | ✅ | Tecla D. Gasta 2 de stamina, atravessa inimigos causando 1 de dano em cada um, sem empurrão e sem invulnerabilidade. Para no contato com parede ou obstáculo |
+| Dash de rolamento | ✅ | Tecla S alterna o tipo. Mais curto, sem dano. Não atravessa inimigos: para no contato com parede, obstáculo ou inimigo. Esquiva de projéteis (a língua). Os 2 primeiros em 5 s são grátis, o terceiro gasta 1 de stamina (e é bloqueado sem stamina) |
+| Escalada | ✅ | Dash ofensivo (2 de stamina) contra trechos marcados da parede da ruína leva à área superior |
 | Stamina | ✅ | 4 unidades. Só os dashes gastam |
-| Ataque corpo a corpo | ✅ | Tecla A. Combo fixo de 3 golpes: garra, garra, espada (dano 1, 1, 2) |
-| Parry | ✅ | Tecla Q, janela de 0,2 s. Se acertar, o gato chuta, o inimigo é lançado e fica 1 s atordoado |
+| Ataque corpo a corpo | ✅ | Tecla A. Combo cíclico de 3 golpes (1 → 2 → 3 → 1…, nunca reseta): garra, garra, espada (dano 1, 1, 2). Cada golpe dura 0,308 s, com antecipação (o dash cancela), execução e recuperação. Mira com magnetismo (cone de ±45°) |
+| Parry | ✅ | Tecla Q, janela de 0,2 s. Se acertar, o inimigo fica 0,5 s atordoado, o gato chuta, o inimigo é lançado e fica mais 1,5 s atordoado. Se errar, 0,4 s sem poder repetir. O dash cancela a animação |
 | Escudo / defesa contínua | ❌ | Não existe. A defesa é só o parry no tempo certo |
 | Interação | ✅ | Tecla E. Algumas interações são sinalizadas, outras são ocultas |
 | Ataque à distância | ✅ | Só depois de pegar a KLM-99, na ruína. Especificação pendente |
