@@ -5,6 +5,9 @@ extends Node
 ## Distâncias em px da arte (base 640 × 360, ampliada 3× na tela), velocidades
 ## em px/s, tempos em segundos.
 
+# Versão do game design que o protótipo implementa (aparece na tela). Atualize junto com o doc.
+const VERSAO_GAME_DESIGN := "1.4.1"
+
 # --- Escala ---
 const TILE := 16.0
 const ALTURA_TAMANHO_3 := 50.0
@@ -40,9 +43,11 @@ const GATO_ALCANCE_GOLPE_3 := GATO_RAIO_HITBOX * 4.0  # 40 px
 const GATO_ANGULO_GOLPE_3 := 90.0  # corte vertical
 const GATO_GOLPE_IMPACTO := 0.1  # janela em que a hitbox fica ativa, no início da execução (s)
 const GATO_GOLPE_AVANCO := KNOCKBACK_PADRAO  # passo à frente em cada golpe: 24 px (igual ao knockback)
-const GATO_GOLPE_AVANCO_VELOCIDADE := GATO_GOLPE_AVANCO / GATO_GOLPE_IMPACTO  # 240 px/s: o passo dura o impacto (dúvida)
+const GATO_GOLPE_AVANCO_VELOCIDADE := 2.0 * GATO_GOLPE_AVANCO / GATO_GOLPE_IMPACTO  # 480 px/s no começo, caindo linearmente a zero em 0,1 s (ease-out): anda os 24 px
 const GATO_MAGNETISMO_CONE := 45.0  # graus para cada lado da direção do olhar (seção 18)
 const GATO_MAGNETISMO_MARGEM := 10.0  # px além do alcance efetivo
+const GATO_MAGNETISMO_PREFERENCIA := 2.0  # s: por quanto tempo o alvo anterior tem preferência
+const GATO_MAGNETISMO_EMPATE := 1.0  # px: distâncias dentro dessa folga empatam; desempata o menor ângulo
 const HITSTOP := 0.05  # congelamento curto a cada acerto
 const GATO_DANO_GARRA := 1
 const GATO_DANO_ESPADA := 2

@@ -1,6 +1,6 @@
 # Game Design — Demo
 
-> **Documento vivo.** Versão editável da especificação de gameplay da floresta. O PDF original está em [referencias/game-design-demo-v1.0.pdf](referencias/game-design-demo-v1.0.pdf).
+> **Documento vivo.** Versão editável da especificação de gameplay da demo. O PDF original está em [referencias/game-design-demo-v1.0.pdf](referencias/game-design-demo-v1.0.pdf).
 > As seções 1 a 48 são do game design. A seção 49 traz os valores propostos pelo desenvolvimento para o que estava "a definir", e a seção 50 lista as dúvidas em aberto. Registre mudanças no [Histórico](#histórico-de-versões).
 
 | | |
@@ -1125,6 +1125,7 @@ Definido pelo game design em 30/09: o personagem de tamanho 3 tem **50 px** de a
 | Ciclo completo dos golpes | 3 × 0,308 + 0,154 + 0,308 + 0,4 | **≈ 1,78 s** |
 | Knockback dos golpes | seção 21 | **24 px** |
 | Passo à frente por golpe | seção 21 | **24 px** |
+| Velocidade do passo | resposta do game design, 04/10 | **480 px/s caindo linearmente a zero em 0,1 s** (ease-out), na mesma linha do tempo da animação do golpe |
 | Alcance golpes 1 e 2 | seção 24 | **30 px** |
 | Alcance golpe 3 | seção 24 | **40 px** |
 | Abertura golpes 1 e 2 | seção 24 | **120°** |
@@ -1133,6 +1134,8 @@ Definido pelo game design em 30/09: o personagem de tamanho 3 tem **50 px** de a
 | Alcance efetivo golpe 3 | 40 + 24 | **64 px** |
 | Cone do magnetismo de mira | seção 18 | **±45°** |
 | Margem do magnetismo | seção 18 | **≈ 10 px** |
+| Preferência pelo alvo anterior | resposta do game design, 04/10 | **2 s** |
+| Desempate do magnetismo | resposta do game design, 04/10 | alvo anterior (no cone e no prazo) → mais próximo → menor ângulo em relação ao olhar. Distâncias com menos de 1 px de diferença contam como empate (proposta do desenvolvimento) |
 | Knockback do parry | 1 dash padrão | **80 px** |
 | Atordoamento do parry | 0,5 s até o chute + 1,5 s depois | **2 s** (só 0,5 s se o chute for cancelado com dash) |
 | Invulnerabilidade depois do dano | seção 20 | **1 s** |
@@ -1211,12 +1214,12 @@ Perguntas do desenvolvimento para o game design. As respondidas ficam riscadas, 
 32. **Golpe no sapo durante o salto.** A seção 25 não fala mais em interromper o pulo. No protótipo, o knockback leva o sapo para trás e o salto acaba ali. Se ele já estiver encostando no gato no mesmo instante, o dano do salto vale (só no sapo comum: o sapo com língua não fere com o salto, ver seção 30). Está certo, ou o sapo deveria continuar o salto mesmo levando o golpe?
 33. **Espera do chute no parry.** Nos 0,5 s entre a defesa e o chute, o gato fica parado: não anda, não ataca e não abre outro parry. Só o dash cancela. Outros inimigos podem acertar o gato nesse tempo. Pode ser?
 34. **Lago da flor.** O corpo d'água é só cenário e bloqueia a passagem, inclusive com o dash. Ele terá outra função (por exemplo, beber água, reflexo, peixes)?
-35. **Velocidade do passo à frente.** A seção 21 diz 24 px por golpe, no início do impacto, mas não diz a velocidade. No protótipo o passo dura o impacto de 0,1 s: **240 px/s**. O passo para ao encostar no inimigo ou em obstáculo (então anda menos de 24 px). Pode ser?
-36. **Parry (Q) durante as fases do golpe.** Não está escrito. Proposta, igual à do dash: na antecipação o Q cancela o golpe (que não conta); na execução é ignorado; na recuperação funciona e a recuperação do golpe continua correndo. Pode ser?
-37. **Dash que cancela o parry: quando começa a recuperação.** O dash cancela a animação do parry (seção 22). No protótipo a recuperação não encurta: o que faltava dos 0,2 s da janela entra na conta e o gato só repete o parry 0,6 s depois do Q (0,2 + 0,4), como se não tivesse cancelado. A outra leitura seria contar os 0,4 s a partir do cancelamento (parry mais cedo). Qual vale?
-38. **Magnetismo de mira, o que a seção 18 não diz.** O protótipo faz assim: (a) a distância até o inimigo é medida até a borda do retângulo dele, e o ângulo do cone até o centro; (b) inimigo atrás de árvore ou obstáculo não é escolhido como alvo (o golpe não acertaria); (c) a preferência pelo alvo anterior não tem limite de tempo. Pode ser?
-39. **Ataque apertado antes do dash.** Apertar A na recuperação (o golpe fica guardado) e depois dar dash: o protótipo descarta o ataque guardado, e o gato só ataca de novo apertando A outra vez depois do dash. Pode ser?
-40. **Cabeçalho do documento.** O cabeçalho ainda diz "especificação de gameplay da floresta" e "seções 1 a 48", mas o documento tem 50 seções e a v1.4.1 mexeu em várias. Atualizar?
+35. ~~**Velocidade do passo à frente.** A seção 21 diz 24 px por golpe, mas não diz a velocidade.~~ *Respondida em 04/10: ease-out de 480 px/s, caindo linearmente a zero em 0,1 s e avançando os 24 px. O passo faz parte da mesma linha do tempo da animação, para que o hitstop (seção 44) pause o passo junto, sem dessincronizar.*
+36. ~~**Parry (Q) durante as fases do golpe.**~~ *Respondida em 04/10: sim, igual ao dash (cancela na antecipação, ignorado na execução, funciona na recuperação). Um golpe cancelado pelo parry também não avança o ciclo.*
+37. ~~**Dash que cancela o parry: quando começa a recuperação.**~~ *Respondida em 04/10: vale como está no protótipo (a recuperação não encurta: o parry só repete 0,2 + 0,4 s depois do Q). Se o parry der certo, o dash também pode cancelar o chute (seção 22).*
+38. ~~**Magnetismo de mira, o que a seção 18 não diz.**~~ *Respondida em 04/10: distância até a borda do retângulo e ângulo até o centro, de acordo. Obstáculo no meio não é alvo. A preferência pelo alvo anterior vale por uns 2 s, depois vai no mais próximo. Desempate: alvo anterior (se ainda no cone e dentro do prazo), depois o mais próximo e, por fim, o de menor ângulo em relação à direção do gato.*
+39. ~~**Ataque apertado antes do dash.**~~ *Respondida em 04/10: não existe ataque guardado. Qualquer ataque segue a regra de cancelamento por dash das regras, e um comando de ataque durante a recuperação não faz nada.*
+40. ~~**Cabeçalho do documento.**~~ *Respondida em 04/10: o nome correto é DEMO somente. As seções ficam como estão.*
 
 Seguem em aberto, sem mudança, as dúvidas 33 (espera do chute do parry) e 34 (lago só cenário).
 
@@ -1241,3 +1244,4 @@ Seguem em aberto, sem mudança, as dúvidas 33 (espera do chute do parry) e 34 (
 | 1.4 | 03/10/2026 | Game design | Novo magnetismo de mira; tempos e fases dos golpes definidos, com cancelamento na antecipação; knockback e passo dos golpes passam para 24 px; área, ângulos e alcances dos ataques redefinidos; recuperação do parry sem defesa definida em 0,4 s; HP de ambos os sapos passa para 4; invulnerabilidade após dano passa para 1 s, mantendo ataque e dash durante a janela |
 | 1.4.1 | 03/10/2026 | Game design | Ajustes na versão 1.4 |
 | 1.4.1 | 04/10/2026 | Desenvolvimento | Game design v1.4.1 aplicado no protótipo (magnetismo, fases e cancelamento do golpe, leque, passo de 24 px, rolamento parando em inimigo, dash cancelando o parry, 1 s de invulnerabilidade, sapo com língua sem dano no salto). Dúvidas 35 a 40. Correção de formatação na dúvida 18 (espaço antes do tachado) e nota na dúvida 32 |
+| 1.4.1 | 04/10/2026 | Desenvolvimento | Respostas do game design às dúvidas 35 a 40 aplicadas: passo em ease-out (480 px/s a zero em 0,1 s), preferência de 2 s pelo alvo anterior com desempate por distância e ângulo, fim do ataque guardado. Cabeçalho: "floresta" trocado por "demo". Versão do game design (1.4.1) passa a aparecer na tela. Seção 49.3 atualizada |

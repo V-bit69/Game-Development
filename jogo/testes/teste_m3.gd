@@ -1,6 +1,7 @@
 extends SceneTree
 ## Teste automático do M3 (combo, dano do dash, knockback) já com o game design v1.4.1:
-## fases do golpe, cancelamento, leque, passo de 24 px e magnetismo de mira.
+## fases do golpe, cancelamento, leque, passo de 24 px (ease-out), magnetismo de mira e
+## sem ataque guardado (respostas do game design de 04/10).
 ## Rodar na pasta jogo/:
 ##   godot --headless --path . -s res://testes/teste_m3.gd
 
@@ -34,6 +35,7 @@ func _rodar() -> void:
 	_conferir("duração 0,308 = antecipação 0,077 + execução 0,231", absf(_v.GATO_GOLPE_DURACAO - 0.3077) < 0.001 and absf(_v.GATO_GOLPE_ANTECIPACAO - 0.0769) < 0.001 and absf(_v.GATO_GOLPE_EXECUCAO - 0.2308) < 0.001)
 	_conferir("recuperações 0,154 / 0,308 / 0,4", absf(_v.GATO_RECUPERACAO_GOLPE_1 - 0.1538) < 0.001 and absf(_v.GATO_RECUPERACAO_GOLPE_2 - 0.3077) < 0.001 and _v.GATO_RECUPERACAO_GOLPE_3 == 0.4)
 	_conferir("alcances 30 / 40 e aberturas 120° / 90°", _v.GATO_ALCANCE_ATAQUE == 30.0 and _v.GATO_ALCANCE_GOLPE_3 == 40.0 and _v.GATO_ANGULO_ATAQUE == 120.0 and _v.GATO_ANGULO_GOLPE_3 == 90.0)
+	_conferir("passo: 480 px/s caindo a zero em 0,1 s anda 24 px", _v.GATO_GOLPE_AVANCO_VELOCIDADE == 480.0 and absf(_v.GATO_GOLPE_AVANCO_VELOCIDADE * _v.GATO_GOLPE_IMPACTO / 2.0 - 24.0) < 0.001)
 	_conferir("alcance efetivo 54 / 64, knockback e passo 24", _v.GATO_ALCANCE_EFETIVO_1_2 == 54.0 and _v.GATO_ALCANCE_EFETIVO_3 == 64.0 and _v.KNOCKBACK_PADRAO == 24.0 and _v.GATO_GOLPE_AVANCO == 24.0)
 
 	# --- Ritmo do combo, sem alvo: golpes em 0 / 0,462 / 1,077 / 1,785 s (ciclo ≈ 1,78 s) ---
@@ -50,7 +52,7 @@ func _rodar() -> void:
 	var esperado := [0.0, 0.4615, 1.0769, 1.7846]
 	var ok := true
 	for i in 4:
-		ok = ok and absf(tempos[i] - esperado[i]) <= QUADRO * 1.5
+		ok = ok and absf(tempos[i] - esperado[i]) <= QUADRO * (1.5 + i)  # sem ataque guardado, cada golpe espera o próximo quadro
 	_conferir("tempos do combo 0 / 0,46 / 1,08 / 1,78 s (%s)" % [tempos.map(func(t): return snappedf(t, 0.01))], ok)
 	await _fim_do_combo()
 	_jogador.position = _inicio
@@ -61,6 +63,30 @@ func _rodar() -> void:
 	_jogador.pedir_ataque()
 	await _fim_do_combo()
 	_conferir("passo de 24 px sem inimigo (andou %.1f)" % (_jogador.position.x - _inicio.x), absf(_jogador.position.x - _inicio.x - 24.0) < 1.0)
+	_jogador.position = _inicio
+
+	# Ease-out: o passo anda mais nos primeiros quadros do impacto, acompanha a curva e acaba em 24 px.
+	_jogador._proximo_golpe = 1
+	_jogador.pedir_ataque()
+	var passos: Array[float] = []
+	var desvio := 0.0
+	var x_ant := _jogador.position.x
+	while _jogador.golpe_atual != 0:
+		await _esperar(1)
+		passos.append(_jogador.position.x - x_ant)
+		x_ant = _jogador.position.x
+		var t := clampf(_jogador._golpe_tempo - _v.GATO_GOLPE_ANTECIPACAO, 0.0, _v.GATO_GOLPE_IMPACTO)
+		var esperado_x: float = _v.GATO_GOLPE_AVANCO_VELOCIDADE * (t - t * t / (2.0 * _v.GATO_GOLPE_IMPACTO))
+		if _jogador.golpe_atual != 0:
+			desvio = maxf(desvio, absf(_jogador.position.x - _inicio.x - esperado_x))
+	var andando := passos.filter(func(d): return d > 0.001).slice(1)  # o 1º quadro pega só uma fração da janela
+	var decrescente := true
+	for i in range(1, andando.size()):
+		decrescente = decrescente and andando[i] <= andando[i - 1] + 0.001
+	_conferir("passo em ease-out: cada quadro anda menos que o anterior (%s)" % [andando.map(func(d): return snappedf(d, 0.1))], andando.size() >= 5 and decrescente)
+	_conferir("e segue a curva da linha do tempo do golpe (desvio %.2f px)" % desvio, desvio < 0.01)
+	await _fim_do_combo()
+	_conferir("termina nos 24 px (andou %.1f)" % (_jogador.position.x - _inicio.x), absf(_jogador.position.x - _inicio.x - 24.0) < 0.1)
 	_jogador.position = _inicio
 
 	# --- O passo para ao encostar no corpo do inimigo (sem knockback, ele não sai do lugar) ---
@@ -93,6 +119,7 @@ func _rodar() -> void:
 	_jogador.pedir_ataque()
 	await _ate(func(): return alvo.vida < 2)
 	_conferir("golpe 2 alcança e tira 1 (vida %d, dist %.1f)" % [alvo.vida, alvo.position.x - _jogador.position.x], alvo.vida == 1)
+	await _fim_do_combo()
 	_jogador.pedir_ataque()
 	await _ate(func(): return alvo.morto or _jogador.golpe_atual == 0 and _jogador._intervalo == 0.0 and _jogador._proximo_golpe == 1)
 	_conferir("golpe 3 (espada) tira 2 e mata", alvo.morto and alvo.vida == 0)
@@ -200,10 +227,25 @@ func _rodar() -> void:
 	await _esperar(2)
 	_conferir("dash na recuperação funciona", _jogador.pedir_dash() and _jogador.em_dash)
 	await _fim_do_dash()
-	_jogador.pedir_ataque()
-	await _ate(func(): return inicios.back()[0] == 3, 120)
+	while inicios.back()[0] != 3:
+		_jogador.pedir_ataque()
+		await _esperar(1)
 	var espera: float = inicios.back()[1] - fim_golpe_2
 	_conferir("e a recuperação do golpe 2 continua 0,308 s (%.3f)" % espera, absf(espera - 0.3077) <= QUADRO * 1.5)
+	await _fim_do_combo()
+	_jogador.position = _inicio
+
+	# --- Não existe ataque guardado: A durante o golpe ou a recuperação não faz nada ---
+	await _fim_do_combo()
+	_jogador._proximo_golpe = 1
+	inicios.clear()
+	_jogador.pedir_ataque()
+	await _esperar(5)
+	_jogador.pedir_ataque()  # no meio do golpe 1
+	await _ate(func(): return _jogador.golpe_atual == 0 and _jogador._intervalo > 0.0)
+	_jogador.pedir_ataque()  # na recuperação
+	await _esperar(40)
+	_conferir("A no golpe ou na recuperação é ignorado: só o golpe 1 saiu (%s)" % [inicios.map(func(i): return i[0])], inicios.size() == 1 and _jogador.golpe_atual == 0)
 	await _fim_do_combo()
 	_jogador.position = _inicio
 
@@ -265,9 +307,22 @@ func _rodar() -> void:
 	var longe := await _novo_alvo(centro + Vector2.from_angle(deg_to_rad(-20.0)) * 50.0)
 	_conferir("dois no cone: o mais próximo é o alvo", _achar(1) == perto)
 	_jogador._alvo_golpe = longe
+	_jogador._alvo_golpe_t = _jogador._tempo
 	_conferir("o alvo anterior tem preferência enquanto está no cone", _achar(1) == longe)
+	_jogador._alvo_golpe_t = _jogador._tempo - 1.9
+	_conferir("a preferência vale por 2 s (1,9 s: ainda vale)", _achar(1) == longe)
+	_jogador._alvo_golpe_t = _jogador._tempo - 2.1
+	_conferir("passados 2 s, vai no mais próximo (2,1 s)", _achar(1) == perto)
+	_jogador._alvo_golpe_t = _jogador._tempo
 	longe.position = centro + Vector2.from_angle(deg_to_rad(-80.0)) * 50.0
 	_conferir("saiu do cone: volta ao mais próximo", _achar(1) == perto)
+	# Desempate: distâncias dentro de 1 px empatam e vale o de menor ângulo; fora disso, o mais próximo.
+	_jogador._alvo_golpe = null
+	perto.position = centro + Vector2(40, 0)  # 0°, borda a 31 px
+	longe.position = centro + Vector2.from_angle(deg_to_rad(20.0)) * 41.0  # 20°, borda a ~30,3 px (empate)
+	_conferir("empate de distância (0,7 px): vale o menor ângulo", _achar(1) == perto)
+	longe.position = centro + Vector2.from_angle(deg_to_rad(20.0)) * 38.0  # borda a ~27,4 px (3 px mais perto)
+	_conferir("sem empate: vale o mais próximo, mesmo com ângulo maior", _achar(1) == longe)
 	longe.queue_free()
 	perto.queue_free()
 	await _esperar(1)

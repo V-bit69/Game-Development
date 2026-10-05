@@ -87,6 +87,10 @@ func _draw() -> void:
 		var largura := size.x - 16.0
 		draw_string_outline(fonte, Vector2(8, 16), sala.objetivo, HORIZONTAL_ALIGNMENT_RIGHT, largura, 10, 3, Color.BLACK)
 		draw_string(fonte, Vector2(8, 16), sala.objetivo, HORIZONTAL_ALIGNMENT_RIGHT, largura, 10, Color(1, 0.92, 0.7))
+	# Versão do game design que esta demo implementa, no canto inferior direito.
+	var versao := "Demo · game design v%s" % Valores.VERSAO_GAME_DESIGN
+	draw_string_outline(fonte, Vector2(8, size.y - 6), versao, HORIZONTAL_ALIGNMENT_RIGHT, size.x - 16.0, 8, 3, Color.BLACK)
+	draw_string(fonte, Vector2(8, size.y - 6), versao, HORIZONTAL_ALIGNMENT_RIGHT, size.x - 16.0, 8, Color(1, 1, 1, 0.75))
 	# Aviso central (coleta, objetivo novo).
 	if _aviso_tempo > 0.0:
 		var alfa := minf(_aviso_tempo / 0.4, 1.0)

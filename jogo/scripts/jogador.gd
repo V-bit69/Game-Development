@@ -67,9 +67,10 @@ var _golpe_tempo := 0.0
 var _mira := Vector2.DOWN  # direção real do golpe em andamento (ângulo contínuo, com o magnetismo)
 var _alvo_golpe: Node2D = null  # alvo do magnetismo; tem preferência no golpe seguinte
 var _golpe_atingidos: Array[Node] = []  # cada inimigo leva no máximo 1 vez por golpe
-var _passo_restante := 0.0
+var _passo_feito := 0.0  # distância já andada no passo à frente
+var _passo_parado := false  # o passo encostou em algo e parou
+var _alvo_golpe_t := -100.0  # quando o alvo do magnetismo foi mirado (relógio próprio)
 var _intervalo := 0.0  # recuperação depois do golpe; corre mesmo durante o dash
-var _ataque_guardado := false  # A apertado durante um golpe: sai assim que puder
 
 # Parry: janela aberta, recuperação depois de errar, e efeitos visuais.
 var parry_janela := 0.0
@@ -176,7 +177,6 @@ func pedir_dash() -> bool:
 		return false
 	if golpe_atual != 0:
 		_cancelar_golpe()
-	_ataque_guardado = false
 	if parry_janela > 0.0:
 		_cancelar_parry()
 	if _chute_espera > 0.0:
@@ -277,23 +277,22 @@ func _mover_escalada(delta: float) -> void:
 
 # --- Combo --------------------------------------------------------------
 
-## A começa o próximo golpe. Se um golpe ou a recuperação estiver em andamento, fica guardado.
+## A começa o próximo golpe. Durante um golpe ou a recuperação, A não faz nada (não há
+## ataque guardado).
 func pedir_ataque() -> void:
 	if em_dash or parry_janela > 0.0 or _chute_espera > 0.0:
 		return
 	if golpe_atual != 0 or _intervalo > 0.0:
-		_ataque_guardado = true
 		return
 	_comecar_golpe()
 
 
-## "sobra" é o tempo que já passou do fim da recuperação neste quadro, para o ritmo não atrasar.
-func _comecar_golpe(sobra := 0.0) -> void:
+func _comecar_golpe() -> void:
 	golpe_atual = _proximo_golpe
-	_golpe_tempo = sobra
+	_golpe_tempo = 0.0
 	_golpe_atingidos.clear()
-	_passo_restante = Valores.GATO_GOLPE_AVANCO
-	_ataque_guardado = false
+	_passo_feito = 0.0
+	_passo_parado = false
 	var direcao := _ler_direcao()
 	if direcao != Vector2.ZERO:
 		direcao_olhar = direcao
@@ -332,7 +331,7 @@ func _atualizar_golpe(delta: float) -> void:
 	_golpe_tempo += delta
 	velocity = Vector2.ZERO
 	if _golpe_tempo >= Valores.GATO_GOLPE_ANTECIPACAO:
-		_dar_passo(delta)
+		_dar_passo()
 		if _golpe_no_impacto():
 			_golpe_impacto()
 	if _golpe_tempo >= Valores.GATO_GOLPE_DURACAO:
@@ -340,16 +339,21 @@ func _atualizar_golpe(delta: float) -> void:
 
 
 ## No início do impacto o gato dá um passo à frente, na direção do golpe, mesmo sem
-## inimigo. O passo para ao encostar no corpo de um inimigo ou em obstáculo.
-func _dar_passo(delta: float) -> void:
-	if _passo_restante <= 0.0:
+## inimigo. A velocidade começa em 480 px/s e cai linearmente a zero em 0,1 s (ease-out),
+## andando os 24 px. O passo é função do tempo do golpe (e não de um relógio à parte),
+## então o hitstop, que pausa o jogo, pausa o passo junto. Para ao encostar no corpo de
+## um inimigo ou em obstáculo.
+func _dar_passo() -> void:
+	if _passo_parado:
 		return
-	var passo := minf(Valores.GATO_GOLPE_AVANCO_VELOCIDADE * delta, _passo_restante)
-	velocity = _mira * Valores.GATO_GOLPE_AVANCO_VELOCIDADE
-	if move_and_collide(_mira * passo) != null:
-		_passo_restante = 0.0
-	else:
-		_passo_restante -= passo
+	var t := clampf(_golpe_tempo - Valores.GATO_GOLPE_ANTECIPACAO, 0.0, Valores.GATO_GOLPE_IMPACTO)
+	var v0 := Valores.GATO_GOLPE_AVANCO_VELOCIDADE
+	velocity = _mira * v0 * (1.0 - t / Valores.GATO_GOLPE_IMPACTO)
+	var ate_agora := v0 * (t - t * t / (2.0 * Valores.GATO_GOLPE_IMPACTO))
+	var falta := ate_agora - _passo_feito
+	_passo_feito = ate_agora
+	if falta > 0.0 and move_and_collide(_mira * falta) != null:
+		_passo_parado = true
 
 
 ## Depois do golpe vem a recuperação, que só termina quando o gato pode atacar de novo.
@@ -358,23 +362,12 @@ func _terminar_golpe() -> void:
 	_intervalo = _recuperacao_golpe(golpe_atual) - sobra
 	_proximo_golpe = golpe_atual % 3 + 1
 	golpe_atual = 0
-	_passo_restante = 0.0
 	velocity = Vector2.ZERO
 
 
 ## A recuperação corre sempre, até durante o dash: o dash não a encurta.
 func _atualizar_recuperacao(delta: float) -> void:
-	if _intervalo <= 0.0:
-		return
-	_intervalo -= delta
-	if _intervalo > 0.0:
-		return
-	var sobra := -_intervalo
-	_intervalo = 0.0
-	var livre := not (em_dash or em_escalada or parry_janela > 0.0 or _chute_espera > 0.0)
-	if _ataque_guardado and livre:
-		_comecar_golpe(sobra)
-	_ataque_guardado = false
+	_intervalo = maxf(_intervalo - delta, 0.0)
 
 
 ## Desfaz o golpe em andamento. Só vale na antecipação (ver pedir_dash e pedir_parry):
@@ -382,8 +375,6 @@ func _atualizar_recuperacao(delta: float) -> void:
 func _cancelar_golpe() -> void:
 	golpe_atual = 0
 	_golpe_tempo = 0.0
-	_passo_restante = 0.0
-	_ataque_guardado = false
 	velocity = Vector2.ZERO
 
 
@@ -392,10 +383,12 @@ func _cancelar_golpe() -> void:
 ## Define a direção real do golpe. Procura o inimigo vivo mais perto num cone de ±45°
 ## em volta de direcao_olhar, até o alcance efetivo + margem. Achando, o golpe, o passo
 ## e o leque apontam para ele, em ângulo contínuo, e o sprite usa a direção de 8 mais
-## próxima. O alvo do golpe anterior tem preferência enquanto estiver no cone.
+## próxima. O alvo do golpe anterior tem preferência enquanto estiver no cone e dentro
+## do prazo de 2 s. Depois vai o mais próximo; em empate, o de menor ângulo.
 func _apontar_golpe() -> void:
 	var alvo := _achar_alvo_magnetismo()
 	_alvo_golpe = alvo
+	_alvo_golpe_t = _tempo
 	if alvo == null:
 		_mira = direcao_olhar
 		return
@@ -407,16 +400,20 @@ func _apontar_golpe() -> void:
 func _achar_alvo_magnetismo() -> Node2D:
 	var efetivo := Valores.GATO_ALCANCE_EFETIVO_3 if golpe_atual == 3 else Valores.GATO_ALCANCE_EFETIVO_1_2
 	var alcance := efetivo + Valores.GATO_MAGNETISMO_MARGEM
-	if _alvo_valido(_alvo_golpe, alcance):
+	if _tempo - _alvo_golpe_t <= Valores.GATO_MAGNETISMO_PREFERENCIA and _alvo_valido(_alvo_golpe, alcance):
 		return _alvo_golpe
 	var melhor: Node2D = null
 	var menor := INF
+	var menor_angulo := INF
 	for inimigo in get_tree().get_nodes_in_group("inimigos"):
 		if not _alvo_valido(inimigo, alcance):
 			continue
 		var d := _distancia_ate(inimigo)
-		if d < menor:
-			menor = d
+		var angulo := absf(direcao_olhar.angle_to(inimigo.global_position - global_position))
+		var empate := absf(d - menor) <= Valores.GATO_MAGNETISMO_EMPATE
+		if d < menor - Valores.GATO_MAGNETISMO_EMPATE or (empate and angulo < menor_angulo):
+			menor = minf(d, menor)
+			menor_angulo = angulo
 			melhor = inimigo
 	return melhor
 
@@ -531,7 +528,6 @@ func pedir_parry() -> bool:
 		return false
 	if golpe_atual != 0:
 		_cancelar_golpe()
-	_ataque_guardado = false
 	parry_janela = Valores.GATO_PARRY_JANELA
 	Som.tocar("parry")
 	return true
